@@ -364,6 +364,9 @@ async def run_conversation():
 
 # Execute the conversation using await in an async context (like Colab/Jupyter)
 await run_conversation()
+
+# Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+# asyncio.run(run_conversation())
 ```
 
 **Expected Output:**
@@ -498,6 +501,16 @@ try:
                            user_id=USER_ID_GPT,
                            session_id=SESSION_ID_GPT)
 
+    # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+    # asyncio.run(
+    #     call_agent_async(
+    #         query = "What's the weather in Tokyo?",
+    #         runner=runner_gpt,
+    #         user_id=USER_ID_GPT,
+    #         session_id=SESSION_ID_GPT
+    #     )
+    # )
+
 except Exception as e:
     print(f"❌ Could not create or run GPT agent '{MODEL_GPT_4O}'. Check API Key and model name. Error: {e}")
 
@@ -561,8 +574,19 @@ try:
                            user_id=USER_ID_CLAUDE,
                            session_id=SESSION_ID_CLAUDE)
 
+    # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+    # asyncio.run(
+    #     call_agent_async(
+    #         query = "Weather in London please.",
+    #         runner=runner_claude,
+    #         user_id=USER_ID_CLAUDE,
+    #         session_id=SESSION_ID_CLAUDE
+    #     )
+    # )
+
 except Exception as e:
     print(f"❌ Could not create or run Claude agent '{MODEL_CLAUDE_SONNET}'. Check API Key and model name. Error: {e}")
+
 ```
 
 Observe the output carefully from both code blocks. You should see:
@@ -837,6 +861,9 @@ if root_agent_var_name in globals() and globals()[root_agent_var_name]:
     # Execute the conversation
     # Note: This may require API keys for the models used by root and sub-agents!
     await run_team_conversation()
+    
+    # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+    # asyncio.run(run_team_conversation())
 else:
     print("\n⚠️ Skipping agent team conversation as the root agent was not successfully defined in the previous step.")
 
@@ -1141,6 +1168,9 @@ if 'runner_root_stateful' in globals() and runner_root_stateful:
   # Execute the conversation
   await run_stateful_conversation()
 
+  # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+  # asyncio.run(run_stateful_conversation())
+
   # Inspect final session state after the conversation
   print("\n--- Inspecting Final Session State ---")
   final_session = session_service_stateful.get_session(app_name=APP_NAME,
@@ -1397,6 +1427,9 @@ if runner_root_model_guardrail:
   # Execute the conversation
   await run_guardrail_test_conversation()
 
+  # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+  # asyncio.run(run_guardrail_test_conversation())
+
   # Optional: Check state for the trigger flag set by the callback
   final_session = session_service_stateful.get_session(app_name=APP_NAME,
                                                        user_id=USER_ID_STATEFUL,
@@ -1646,6 +1679,9 @@ if runner_root_tool_guardrail:
 
   # Execute the conversation
   await run_tool_guardrail_test()
+
+  # Alternatively, if you are not using Jupyter/ Colab, execute the conversation using asyncio
+  # asyncio.run(run_guardrail_test())
 
   # Optional: Check state for the tool block trigger flag
   final_session = session_service_stateful.get_session(app_name=APP_NAME,
