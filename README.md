@@ -1,65 +1,51 @@
-# Agent Development Kit (ADK)
+# 谷歌 ADK 中文文档
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-<img src="docs/assets/agent-development-kit.png" alt="Agent Development Kit Logo" width="150">
+<img src="docs/assets/agent-development-kit.png" alt="智能体开发套件标志" width="150">
 
-**An open-source, code-first Python toolkit for building, evaluating, and
-deploying sophisticated AI agents with flexibility and control.**
+**一个开源的、代码优先的Python工具包，用于灵活可控地构建、评估和部署复杂AI智能体**
 
-Agent Development Kit (ADK) is designed for developers seeking fine-grained
-control and flexibility when building advanced AI agents that are tightly
-integrated with services in Google Cloud. It allows you to define agent
-behavior, orchestration, and tool use directly in code, enabling robust
-debugging, versioning, and deployment anywhere – from your laptop to the cloud.
+智能体开发套件(ADK)专为开发者设计，帮助他们在构建与Google云服务深度集成的高级AI智能体时获得精细控制和灵活性。您可以直接通过代码定义智能体行为、编排流程和工具使用，实现从本地开发到云端部署全流程的健壮调试、版本控制和部署管理。
 
 ---
 
-## ✨ Key Features
+## ✨ 核心特性
 
-- **Rich Tool Ecosystem**: Utilize pre-built tools, custom functions,
-  OpenAPI specs, or integrate existing tools to give agents diverse
-  capabilities, all for tight integration with the Google ecosystem.
+- **丰富工具生态**：使用预置工具、自定义函数、OpenAPI规范或集成现有工具，为智能体赋予多样化能力，实现与Google生态的紧密集成
 
-- **Code-First Development**: Define agent logic, tools, and orchestration
-  directly in Python for ultimate flexibility, testability, and versioning.
+- **代码优先开发**：直接在Python中定义智能体逻辑、工具和编排流程，获得终极灵活性、可测试性和版本控制能力
 
-- **Modular Multi-Agent Systems**: Design scalable applications by composing
-  multiple specialized agents into flexible hierarchies.
+- **模块化多智能体系统**：通过组合多个专业智能体构建灵活层级，设计可扩展的应用程序架构
 
-- **Deploy Anywhere**: Easily containerize and deploy agents on Cloud Run or
-  scale seamlessly with Vertex AI Agent Engine.
+- **随处部署**：轻松容器化部署至Cloud Run，或通过Vertex AI Agent Engine实现无缝扩展
 
-## 🚀 Installation
+## 🚀 安装指南
 
-You can install ADK using `pip`:
+您可以通过`pip`安装ADK：
 
 ```bash
 pip install google-adk
 ```
 
-## 📚 Documentation
+## 📚 文档资料
 
-Explore the full documentation for detailed guides on building, evaluating, and
-deploying agents:
+查阅完整文档获取构建、评估和部署智能体的详细指南：
 
-* **[Documentation](https://google.github.io/adk-docs)**
+* **[文档中心](https://google.github.io/adk-docs)**
 
-## 🤝 Contributing
+## 🤝 贡献指南
 
-We welcome contributions from the community! Whether it's bug reports, feature
-requests, documentation improvements, or code contributions, please see our
-[**Contributing Guidelines**](./CONTRIBUTING.md) to get started.
+我们欢迎社区贡献！无论是错误报告、功能请求、文档改进还是代码提交，请参阅[**贡献指南**](./CONTRIBUTING.md)开始参与。
 
-## 📄 License
+## 📄 许可协议
 
-This project is licensed under the Apache 2.0 License - see the
-[LICENSE](LICENSE) file for details.
+本项目采用Apache 2.0许可协议 - 详见[LICENSE](LICENSE)文件。
 
-## Preview
+## 预览说明
 
-This feature is subject to the "Pre-GA Offerings Terms" in the General Service Terms section of the [Service Specific Terms](https://cloud.google.com/terms/service-terms#1). Pre-GA features are available "as is" and might have limited support. For more information, see the [launch stage descriptions](https://cloud.google.com/products?hl=en#product-launch-stages).
+本功能受《服务特定条款》中"预GA产品条款"约束（参见[服务条款](https://cloud.google.com/terms/service-terms#1)）。预GA功能按"现状"提供，可能仅获有限支持。更多信息请参阅[产品发布阶段说明](https://cloud.google.com/products?hl=en#product-launch-stages)。
 
 ---
 
-*Happy Agent Building!*
+*祝您构建愉快！*

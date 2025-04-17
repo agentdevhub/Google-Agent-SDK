@@ -1,48 +1,48 @@
-# Parallel agents
+# 并行代理
 
-## The `ParallelAgent`
+## `ParallelAgent`
 
-The `ParallelAgent` is a [workflow agent](index.md) that executes its sub-agents *concurrently*. This dramatically speeds up workflows where tasks can be performed independently.
+`ParallelAgent` 是一种能够*并发*执行子代理的[工作流代理](index.md)。这可以显著加速那些任务可独立执行的工作流程。
 
-Use `ParallelAgent` when: For scenarios prioritizing speed and involving independent, resource-intensive tasks, a `ParallelAgent` facilitates efficient parallel execution. **When sub-agents operate without dependencies, their tasks can be performed concurrently**, significantly reducing overall processing time.
+适用场景：当需要优先考虑执行速度，且涉及独立、资源密集型任务时，`ParallelAgent` 能实现高效的并行执行。**当子代理之间不存在依赖关系时，它们的任务可以并发执行**，从而大幅减少总体处理时间。
 
-As with other [workflow agents](index.md), the `ParallelAgent` is not powered by an LLM, and is thus deterministic in how it executes. That being said, workflow agents are only concerned only with their execution (i.e. in parallel), and not their internal logic; the tools or sub-agents of a workflow agent may or may not utilize LLMs.
+与其他[工作流代理](index.md)相同，`ParallelAgent` 并非由大模型驱动，因此其执行过程是确定性的。需要注意的是，工作流代理仅关注执行方式（即并行），而不涉及内部逻辑——工作流代理的工具或子代理可能会使用大模型，也可能不会。
 
-### Example
+### 示例说明
 
-This approach is particularly beneficial for operations like multi-source data retrieval or heavy computations, where parallelization yields substantial performance gains. Importantly, this strategy assumes no inherent need for shared state or direct information exchange between the concurrently executing agents.
+这种方法特别适用于多源数据检索或重型计算等操作场景，通过并行化能获得显著的性能提升。需注意的是，该策略默认假设并行执行的代理之间不需要共享状态或直接进行信息交换。
 
-### How it works
+### 工作原理
 
-When the `ParallelAgent`'s `run_async()` method is called:
+当调用 `ParallelAgent` 的 `run_async()` 方法时：
 
-1. **Concurrent Execution:** It initiates the `run()` method of *each* sub-agent present in the `sub_agents` list *concurrently*.  This means all the agents start running at (approximately) the same time.
-2. **Independent Branches:**  Each sub-agent operates in its own execution branch.  There is ***no* automatic sharing of conversation history or state between these branches** during execution.
-3. **Result Collection:** The `ParallelAgent` manages the parallel execution and, typically, provides a way to access the results from each sub-agent after they have completed (e.g., through a list of results or events). The order of results may not be deterministic.
+1. **并发执行**：立即*并发*启动 `sub_agents` 列表中*每个*子代理的 `run()` 方法，这意味着所有代理会（近似）同时开始运行
+2. **独立分支**：每个子代理在独立的执行分支中运行，执行过程中分支之间***不会**自动共享对话历史或状态*
+3. **结果收集**：`ParallelAgent` 会管理并行执行过程，通常提供获取各子代理运行结果的途径（例如通过结果列表或事件）。结果的顺序可能不具备确定性
 
-### Independent Execution and State Management
+### 独立执行与状态管理
 
-It's *crucial* to understand that sub-agents within a `ParallelAgent` run independently.  If you *need* communication or data sharing between these agents, you must implement it explicitly.  Possible approaches include:
+必须明确：`ParallelAgent` 中的子代理是独立运行的。若需实现代理间通信或数据共享，必须显式实现。可选方案包括：
 
-* **Shared `InvocationContext`:** You could pass a shared `InvocationContext` object to each sub-agent.  This object could act as a shared data store.  However, you'd need to manage concurrent access to this shared context carefully (e.g., using locks) to avoid race conditions.
-* **External State Management:**  Use an external database, message queue, or other mechanism to manage shared state and facilitate communication between agents.
-* **Post-Processing:** Collect results from each branch, and then implement logic to coordinate data afterwards.
+* **共享 `InvocationContext`**：向每个子代理传递共享的 `InvocationContext` 对象作为公共数据存储。但需要谨慎管理对此共享上下文的并发访问（例如使用锁机制）以避免竞态条件
+* **外部状态管理**：使用外部数据库、消息队列等机制管理共享状态并实现代理间通信
+* **后处理协调**：先收集各分支结果，再通过逻辑实现数据协调
 
 ![Parallel Agent](../../assets/parallel-agent.png){: width="600"}
 
-### Full Example: Parallel Web Research
+### 完整示例：并行网络调研
 
-Imagine researching multiple topics simultaneously:
+假设需要同时研究多个主题：
 
-1. **Researcher Agent 1:**  An `LlmAgent` that researches "renewable energy sources."
-2. **Researcher Agent 2:**  An `LlmAgent` that researches "electric vehicle technology."
-3. **Researcher Agent 3:**  An `LlmAgent` that researches "carbon capture methods."
+1. **调研代理1**：研究"可再生能源"的 `LlmAgent`
+2. **调研代理2**：研究"电动汽车技术"的 `LlmAgent`
+3. **调研代理3**：研究"碳捕获方法"的 `LlmAgent`
 
     ```py
     ParallelAgent(sub_agents=[ResearcherAgent1, ResearcherAgent2, ResearcherAgent3])
     ```
 
-These research tasks are independent.  Using a `ParallelAgent` allows them to run concurrently, potentially reducing the total research time significantly compared to running them sequentially. The results from each agent would be collected separately after they finish.
+这些调研任务相互独立。使用 `ParallelAgent` 可实现并发执行，相比串行执行能显著减少总调研时间。每个代理的结果将在完成后被单独收集。
 
 ???+ "Code"
 

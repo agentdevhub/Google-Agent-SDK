@@ -1,76 +1,76 @@
-# State: The Session's Scratchpad
+# State：会话的临时记事板
 
-Within each `Session` (our conversation thread), the **`state`** attribute acts like the agent's dedicated scratchpad for that specific interaction. While `session.events` holds the full history, `session.state` is where the agent stores and updates dynamic details needed *during* the conversation.
+在每个 %%PH_70462ce%%（我们的对话线程）中，**`state`** 属性就像是为该特定交互设计的专属记事板。虽然 `session.events` 保存完整历史记录，但 `session.state` 是智能体存储和更新对话过程中所需动态细节的地方。
 
-## What is `session.state`?
+## 什么是 `session.state`？
 
-Conceptually, `session.state` is a dictionary holding key-value pairs. It's designed for information the agent needs to recall or track to make the current conversation effective:
+从概念上讲，`session.state` 是一个存储键值对的字典。它专为智能体需要记住或跟踪的信息而设计，以使当前对话更有效：
 
-* **Personalize Interaction:** Remember user preferences mentioned earlier (e.g., `'user_preference_theme': 'dark'`).  
-* **Track Task Progress:** Keep tabs on steps in a multi-turn process (e.g., `'booking_step': 'confirm_payment'`).  
-* **Accumulate Information:** Build lists or summaries (e.g., `'shopping_cart_items': ['book', 'pen']`).  
-* **Make Informed Decisions:** Store flags or values influencing the next response (e.g., `'user_is_authenticated': True`).
+* **个性化交互**：记住用户之前提到的偏好（例如 `'user_preference_theme': 'dark'`）  
+* **跟踪任务进度**：记录多轮流程中的步骤（例如 `'booking_step': 'confirm_payment'`）  
+* **积累信息**：构建列表或摘要（例如 `'shopping_cart_items': ['book', 'pen']`）  
+* **做出明智决策**：存储影响下个响应的标志或值（例如 `'user_is_authenticated': True`）
 
-### Key Characteristics of `State`
+### `State` 的关键特性
 
-1. **Structure: Serializable Key-Value Pairs**  
+1. **结构：可序列化的键值对**  
 
-    * Data is stored as `key: value`.  
-    * **Keys:** Always strings (`str`). Use clear names (e.g., `'departure_city'`, `'user:language_preference'`).  
-    * **Values:** Must be **serializable**. This means they can be easily saved and loaded by the `SessionService`. Stick to basic Python types like strings, numbers, booleans, and simple lists or dictionaries containing *only* these basic types. (See API documentation for precise details).  
-    * **⚠️ Avoid Complex Objects:** **Do not store non-serializable Python objects** (custom class instances, functions, connections, etc.) directly in the state. Store simple identifiers if needed, and retrieve the complex object elsewhere.
+    * 数据以 `key: value` 形式存储  
+    * **键**：始终为字符串（`str`）。使用清晰名称（例如 `'departure_city'`，`'user:language_preference'`）  
+    * **值**：必须可序列化。这意味着它们可以被 `SessionService` 轻松保存和加载。仅使用基本 Python 类型，如字符串、数字、布尔值，以及仅包含这些基本类型的简单列表或字典。（详见 API 文档）  
+    * **⚠️ 避免复杂对象**：不要直接在 state 中存储不可序列化的 Python 对象（自定义类实例、函数、连接等）。如需存储，请使用简单标识符并在其他地方检索复杂对象。
 
-2. **Mutability: It Changes**  
+2. **可变性：它会变化**  
 
-    * The contents of the `state` are expected to change as the conversation evolves.
+    * `state` 的内容会随着对话进展而变化。
 
-3. **Persistence: Depends on `SessionService`**  
+3. **持久性：取决于 `SessionService`**  
 
-    * Whether state survives application restarts depends on your chosen service:  
-      * `InMemorySessionService`: **Not Persistent.** State is lost on restart.  
-      * `DatabaseSessionService` / `VertexAiSessionService`: **Persistent.** State is saved reliably.
+    * state 是否在应用重启后保留取决于所选服务：  
+      * `InMemorySessionService`：非持久化。重启后 state 会丢失。  
+      * `DatabaseSessionService` / `VertexAiSessionService`：持久化。state 会被可靠保存。
 
-### Organizing State with Prefixes: Scope Matters
+### 使用前缀组织 State：作用域很重要
 
-Prefixes on state keys define their scope and persistence behavior, especially with persistent services:
+state 键的前缀定义了它们的作用域和持久化行为，特别是在持久化服务中：
 
-* **No Prefix (Session State):**  
+* **无前缀（会话状态）**  
 
-    * **Scope:** Specific to the *current* session (`id`).  
-    * **Persistence:** Only persists if the `SessionService` is persistent (`Database`, `VertexAI`).  
-    * **Use Cases:** Tracking progress within the current task (e.g., `'current_booking_step'`), temporary flags for this interaction (e.g., `'needs_clarification'`).  
-    * **Example:** `session.state['current_intent'] = 'book_flight'`
+    * **作用域**：特定于当前会话（`id`）  
+    * **持久性**：仅当 `SessionService` 是持久化（`Database`，`VertexAI`）时才保留  
+    * **用例**：跟踪当前任务进度（例如 `'current_booking_step'`），本次交互的临时标志（例如 `'needs_clarification'`）  
+    * **示例**：`session.state['current_intent'] = 'book_flight'`
 
-* **`user:` Prefix (User State):**  
+* **`user:` 前缀（用户状态）**  
 
-    * **Scope:** Tied to the `user_id`, shared across *all* sessions for that user (within the same `app_name`).  
-    * **Persistence:** Persistent with `Database` or `VertexAI`. (Stored by `InMemory` but lost on restart).  
-    * **Use Cases:** User preferences (e.g., `'user:theme'`), profile details (e.g., `'user:name'`).  
-    * **Example:** `session.state['user:preferred_language'] = 'fr'`
+    * **作用域**：绑定到 `user_id`，在该用户的所有会话中共享（同一 `app_name` 内）  
+    * **持久性**：使用 `Database` 或 `VertexAI` 时持久化。（由 `InMemory` 存储，但重启后丢失）  
+    * **用例**：用户偏好（例如 `'user:theme'`），个人资料详情（例如 `'user:name'`）  
+    * **示例**：`session.state['user:preferred_language'] = 'fr'`
 
-* **`app:` Prefix (App State):**  
+* **`app:` 前缀（应用状态）**  
 
-    * **Scope:** Tied to the `app_name`, shared across *all* users and sessions for that application.  
-    * **Persistence:** Persistent with `Database` or `VertexAI`. (Stored by `InMemory` but lost on restart).  
-    * **Use Cases:** Global settings (e.g., `'app:api_endpoint'`), shared templates.  
-    * **Example:** `session.state['app:global_discount_code'] = 'SAVE10'`
+    * **作用域**：绑定到 `app_name`，在该应用的所有用户和会话中共享  
+    * **持久性**：使用 `Database` 或 `VertexAI` 时持久化。（由 `InMemory` 存储，但重启后丢失）  
+    * **用例**：全局设置（例如 `'app:api_endpoint'`），共享模板  
+    * **示例**：`session.state['app:global_discount_code'] = 'SAVE10'`
 
-* **`temp:` Prefix (Temporary Session State):**  
+* **`temp:` 前缀（临时会话状态）**  
 
-    * **Scope:** Specific to the *current* session processing turn.  
-    * **Persistence:** **Never Persistent.** Guaranteed to be discarded, even with persistent services.  
-    * **Use Cases:** Intermediate results needed only immediately, data you explicitly don't want stored.  
-    * **Example:** `session.state['temp:raw_api_response'] = {...}`
+    * **作用域**：特定于当前会话处理轮次  
+    * **持久性**：永不持久化。即使使用持久化服务也保证丢弃  
+    * **用例**：仅立即需要的中间结果，明确不希望存储的数据  
+    * **示例**：`session.state['temp:raw_api_response'] = {...}`
 
-**How the Agent Sees It:** Your agent code interacts with the *combined* state through the single `session.state` dictionary. The `SessionService` handles fetching/merging state from the correct underlying storage based on prefixes.
+**智能体如何查看它**：您的智能体代码通过单一的 `session.state` 字典与组合状态交互。`SessionService` 根据前缀从正确的底层存储中获取/合并状态。
 
-### How State is Updated: Recommended Methods
+### 如何更新 State：推荐方法
 
-State should **always** be updated as part of adding an `Event` to the session history using `session_service.append_event()`. This ensures changes are tracked, persistence works correctly, and updates are thread-safe.
+State 应始终作为向会话历史添加 `Event` 的一部分，使用 `session_service.append_event()` 进行更新。这确保更改被跟踪、持久化正常工作，并且更新是线程安全的。
 
-**1\. The Easy Way: `output_key` (for Agent Text Responses)**
+**1. 简单方法：`output_key`（适用于智能体文本响应）**
 
-This is the simplest method for saving an agent's final text response directly into the state. When defining your `LlmAgent`, specify the `output_key`:
+这是将智能体的最终文本响应直接保存到 state 的最简单方法。定义 `LlmAgent` 时，指定 `output_key`：
 
 ```py
 from google.adk.agents import LlmAgent
@@ -115,11 +115,11 @@ print(f"State after agent run: {updated_session.state}")
 # Expected output might include: {'last_greeting': 'Hello there! How can I help you today?'}
 ```
 
-Behind the scenes, the `Runner` uses the `output_key` to create the necessary `EventActions` with a `state_delta` and calls `append_event`.
+在后台，`Runner` 使用 `output_key` 创建必要的 `EventActions`，带有 `state_delta` 并调用 `append_event`。
 
-**2\. The Standard Way: `EventActions.state_delta` (for Complex Updates)**
+**2. 标准方法：`EventActions.state_delta`（适用于复杂更新）**
 
-For more complex scenarios (updating multiple keys, non-string values, specific scopes like `user:` or `app:`, or updates not tied directly to the agent's final text), you manually construct the `state_delta` within `EventActions`.
+对于更复杂的场景（更新多个键、非字符串值、特定作用域如 `user:` 或 `app:`，或与智能体最终文本不直接相关的更新），您可以在 `EventActions` 中手动构建 `state_delta`。
 
 ```py
 from google.adk.sessions import InMemorySessionService, Session
@@ -171,31 +171,31 @@ print(f"State after event: {updated_session.state}")
 # Note: 'temp:validation_needed' is NOT present.
 ```
 
-**What `append_event` Does:**
+**`append_event` 的作用：**
 
-* Adds the `Event` to `session.events`.  
-* Reads the `state_delta` from the event's `actions`.  
-* Applies these changes to the state managed by the `SessionService`, correctly handling prefixes and persistence based on the service type.  
-* Updates the session's `last_update_time`.  
-* Ensures thread-safety for concurrent updates.
+* 将 `Event` 添加到 `session.events`  
+* 从事件的 `actions` 读取 `state_delta`  
+* 将这些更改应用到由 `SessionService` 管理的 state，根据服务类型正确处理前缀和持久化  
+* 更新会话的 `last_update_time`  
+* 确保并发更新的线程安全
 
-### ⚠️ A Warning About Direct State Modification
+### ⚠️ 关于直接修改 State 的警告
 
-Avoid directly modifying the `session.state` dictionary after retrieving a session (e.g., `retrieved_session.state['key'] = value`).
+避免在检索会话后直接修改 `session.state` 字典（例如 `retrieved_session.state['key'] = value`）。
 
-**Why this is strongly discouraged:**
+**强烈不建议这样做的原因：**
 
-1. **Bypasses Event History:** The change isn't recorded as an `Event`, losing auditability.  
-2. **Breaks Persistence:** Changes made this way **will likely NOT be saved** by `DatabaseSessionService` or `VertexAiSessionService`. They rely on `append_event` to trigger saving.  
-3. **Not Thread-Safe:** Can lead to race conditions and lost updates.  
-4. **Ignores Timestamps/Logic:** Doesn't update `last_update_time` or trigger related event logic.
+1. **绕过事件历史**：更改不会记录为 `Event`，失去可审计性  
+2. **破坏持久化**：以这种方式进行的更改很可能不会被 `DatabaseSessionService` 或 `VertexAiSessionService` 保存。它们依赖 `append_event` 触发保存  
+3. **非线程安全**：可能导致竞态条件和更新丢失  
+4. **忽略时间戳/逻辑**：不会更新 `last_update_time` 或触发相关事件逻辑
 
-**Recommendation:** Stick to updating state via `output_key` or `EventActions.state_delta` within the `append_event` flow for reliable, trackable, and persistent state management. Use direct access only for *reading* state.
+**建议**：为了可靠、可跟踪和持久化的状态管理，坚持通过 `output_key` 或 `EventActions.state_delta` 在 `append_event` 流程中更新 state。仅在读取 state 时使用直接访问。
 
-### Best Practices for State Design Recap
+### State 设计最佳实践回顾
 
-* **Minimalism:** Store only essential, dynamic data.  
-* **Serialization:** Use basic, serializable types.  
-* **Descriptive Keys & Prefixes:** Use clear names and appropriate prefixes (`user:`, `app:`, `temp:`, or none).  
-* **Shallow Structures:** Avoid deep nesting where possible.  
-* **Standard Update Flow:** Rely on `append_event`.
+* **极简主义**：仅存储必要的动态数据  
+* **序列化**：使用基本的可序列化类型  
+* **描述性键和前缀**：使用清晰名称和适当前缀（`user:`，`app:`，`temp:` 或无前缀）  
+* **浅层结构**：尽可能避免深度嵌套  
+* **标准更新流程**：依赖 `append_event`

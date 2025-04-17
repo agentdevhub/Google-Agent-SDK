@@ -1,45 +1,45 @@
-# Loop agents
+# 循环代理
 
-## The `LoopAgent`
+## `LoopAgent`
 
-The `LoopAgent` is a workflow agent that executes its sub-agents in a loop (i.e. iteratively). It **_repeatedly runs_ a sequence of agents** for a specified number of iterations or until a termination condition is met.
+`LoopAgent` 是一种工作流代理，能够以循环（即迭代）方式执行其子代理。它**会重复运行一系列代理**，直到达到指定迭代次数或满足终止条件。
 
-Use the `LoopAgent` when your workflow involves repetition or iterative refinement, such as like revising code.
+当您的工作流程涉及重复操作或迭代优化时（例如代码修订），请使用 `LoopAgent`。
 
-### Example
+### 示例
 
-* You want to build an agent that can generate images of food, but sometimes when you want to generate a specific number of items (e.g. 5 bananas), it generates a different number of those items in the image (e.g. an image of 7 bananas). You have two tools: `generate_image`, `count_food_items`. Because you want to keep generating images until it either correctly generates the specified number of items, or after a certain number of iterations, you should build your agent using a `LoopAgent`.
+* 假设您需要构建一个能生成食物图片的代理，但有时当您想生成特定数量物品（例如5根香蕉）时，生成的图片中物品数量可能不符（例如出现7根香蕉）。您有两个工具：`generate_image` 和 `count_food_items`。由于您希望持续生成图片直到正确生成指定数量物品或达到最大迭代次数，此时应使用 `LoopAgent` 构建代理。
 
-As with other [workflow agents](index.md), the `LoopAgent` is not powered by an LLM, and is thus deterministic in how it executes. That being said, workflow agents are only concerned only with their execution (i.e. in a loop), and not their internal logic; the tools or sub-agents of a workflow agent may or may not utilize LLMs.
+与其他[工作流代理](index.md)相同，`LoopAgent` 并非由大模型驱动，因此其执行过程是确定性的。需要注意的是，工作流代理仅关注执行机制（即循环执行），而不涉及内部逻辑——工作流代理的工具或子代理可能会使用大模型，也可能不会。
 
-### How it Works
+### 工作原理
 
-When the `LoopAgent`'s `run_async()` method is called, it performs the following actions:
+当调用 `LoopAgent` 的 `run_async()` 方法时，它会执行以下操作：
 
-1. **Sub-Agent Execution:**  It iterates through the `sub_agents` list _in order_. For _each_ sub-agent, it calls the agent's `run_async()` method.
-2. **Termination Check:**
+1. **子代理执行**：按顺序遍历 `sub_agents` 列表，对每个子代理调用其 `run_async()` 方法
+2. **终止检查**：
 
-    _Crucially_, the `LoopAgent` itself does _not_ inherently decide when to stop looping. You _must_ implement a termination mechanism to prevent infinite loops.  Common strategies include:
+    **关键点**在于，`LoopAgent` 本身并不具备停止循环的决策能力。您必须实现终止机制来避免无限循环。常用策略包括：
 
-    * **`max_iterations`**: Set a maximum number of iterations in the `LoopAgent`. **The loop will terminate after that many iterations**.
-    * **Escalation from sub-agent**: Design one or more sub-agents to evaluate a condition (e.g., "Is the document quality good enough?", "Has a consensus been reached?").  If the condition is met, the sub-agent can signal termination (e.g., by raising a custom event, setting a flag in a shared context, or returning a specific value).
+    * **`max_iterations`**：在 `LoopAgent` 中设置最大迭代次数，循环将在达到该次数后终止
+    * **子代理触发终止**：设计一个或多个子代理来评估条件（例如"文档质量是否达标？"、"是否达成共识？"）。当条件满足时，子代理可通过抛出自定义事件、在共享上下文中设置标志位或返回特定值来发出终止信号
 
 ![Loop Agent](../../assets/loop-agent.png)
 
-### Full Example: Iterative Document Improvement
+### 完整示例：文档迭代优化
 
-Imagine a scenario where you want to iteratively improve a document:
+假设您需要对文档进行迭代优化：
 
-* **Writer Agent:** An `LlmAgent` that generates or refines a draft on a topic.
-* **Critic Agent:** An `LlmAgent` that critiques the draft, identifying areas for improvement.
+* **写手代理**：`LlmAgent`，负责生成或优化主题草稿
+* **评审代理**：`LlmAgent`，负责评估草稿并提出改进建议
 
     ```py
     LoopAgent(sub_agents=[WriterAgent, CriticAgent], max_iterations=5)
     ```
 
-In this setup, the `LoopAgent` would manage the iterative process.  The `CriticAgent` could be **designed to return a "STOP" signal when the document reaches a satisfactory quality level**, preventing further iterations. Alternatively, the `max_iterations` parameter could be used to limit the process to a fixed number of cycles, or external logic could be implemented to make stop decisions. The **loop would run at most five times**, ensuring the iterative refinement doesn't continue indefinitely.
+在此配置中，`LoopAgent` 将管理整个迭代流程。`CriticAgent` 可被设计为当文档质量达到满意水平时返回"STOP"信号来终止迭代。或者，也可以通过 `max_iterations` 参数限制循环次数，或实现外部逻辑来决策终止时机。本例中**循环最多运行五次**，确保优化过程不会无限持续。
 
-???+ "Full Code"
+???+ "完整代码"
 
     ```py
     --8<-- "examples/python/snippets/agents/workflow-agents/loop_agent_doc_improv_agent.py"

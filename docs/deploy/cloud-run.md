@@ -1,23 +1,22 @@
-# Deploy to Cloud Run
+# 部署至 Cloud Run
 
-[Cloud Run](https://cloud.google.com/run)
-is a fully managed platform that enables you to run your code directly on top of Google's scalable infrastructure.
+[Cloud Run](https://cloud.google.com/run) 是 Google 提供的全托管平台，可直接在谷歌可扩展的基础架构上运行您的代码。
 
-To deploy your agent, you can use either the `adk deploy cloud_run` command (recommended), or with `gcloud run deploy` command through Cloud Run.
+您可以通过两种方式部署智能体：使用 `adk deploy cloud_run` 命令（推荐），或通过 Cloud Run 使用 `gcloud run deploy` 命令。
 
-## Agent sample
+## 智能体示例
 
-For each of the commands, we will reference a `capital_agent` sample defined in on the [LLM agent](../agents/llm-agents.md) page. We will assume it's in a `capital_agent` directory.
+以下命令示例均基于 [LLM 智能体](../agents/llm-agents.md) 页面定义的 `capital_agent` 示例。假设该示例位于 `capital_agent` 目录中。
 
-To proceed, confirm that your agent code is configured as follows:
+部署前请确认您的智能体代码配置如下：
 
-1. Agent code is in a file called `agent.py` within your agent directory.
-2. Your agent variable is named `root_agent`.
-3. `__init__.py` is within your agent directory and contains `from . import agent`.
+1. 智能体代码位于代理目录中名为 `agent.py` 的文件
+2. 智能体变量命名为 `root_agent`
+3. `__init__.py` 文件位于智能体目录中，且包含 `from . import agent`
 
-## Environment variables
+## 环境变量
 
-Set your environment variables as described in the [Setup and Installation](../get-started/installation.md) guide.
+请按照 [设置与安装](../get-started/installation.md) 指南配置环境变量。
 
 ```bash
 export GOOGLE_CLOUD_PROJECT=your-project-id
@@ -25,42 +24,42 @@ export GOOGLE_CLOUD_LOCATION=us-central1 # Or your preferred location
 export GOOGLE_GENAI_USE_VERTEXAI=True
 ```
 
-*(Replace `your-project-id` with your actual GCP project ID)*
+*(将 `your-project-id` 替换为您的实际 GCP 项目 ID)*
 
-## Deployment commands
+## 部署命令
 
 === "adk CLI"
 
-    ###  adk CLI
+    ### adk CLI
 
-    The `adk deploy cloud_run` command deploys your agent code to Google Cloud Run.
+    `adk deploy cloud_run` 命令可将智能体代码部署至 Google Cloud Run。
 
-    Ensure you have authenticated with Google Cloud (`gcloud auth login` and `gcloud config set project <your-project-id>`).
+    部署前请确保已完成 Google Cloud 认证（`gcloud auth login` 和 `gcloud config set project <your-project-id>`）。
 
-    #### Setup environment variables
+    #### 设置环境变量
 
-    Optional but recommended: Setting environment variables can make the deployment commands cleaner.
+    此步骤可选但推荐：设置环境变量可使部署命令更简洁。
 
     ```bash
-    # Set your Google Cloud Project ID
+    # 设置 Google Cloud 项目 ID
     export GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
 
-    # Set your desired Google Cloud Location
-    export GOOGLE_CLOUD_LOCATION="us-central1" # Example location
+    # 设置目标 Google Cloud 位置
+    export GOOGLE_CLOUD_LOCATION="us-central1" # 示例位置
 
-    # Set the path to your agent code directory
-    export AGENT_PATH="./capital_agent" # Assuming capital_agent is in the current directory
+    # 设置智能体代码目录路径
+    export AGENT_PATH="./capital_agent" # 假设 capital_agent 位于当前目录
 
-    # Set a name for your Cloud Run service (optional)
+    # 设置 Cloud Run 服务名称（可选）
     export SERVICE_NAME="capital-agent-service"
 
-    # Set an application name (optional)
+    # 设置应用名称（可选）
     export APP_NAME="capital-agent-app"
     ```
 
-    #### Command usage
+    #### 命令用法
 
-    ##### Minimal command
+    ##### 最简命令
 
     ```bash
     adk deploy cloud_run \
@@ -69,7 +68,7 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
     $AGENT_PATH
     ```
 
-    ##### Full command with optional flags
+    ##### 完整命令（含可选参数）
 
     ```bash
     adk deploy cloud_run \
@@ -81,57 +80,57 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
     $AGENT_PATH
     ```
 
-    ##### Arguments
+    ##### 参数说明
 
-    * `AGENT_PATH`: (Required) Positional argument specifying the path to the directory containing your agent's source code (e.g., `$AGENT_PATH` in the examples, or `capital_agent/`). This directory must contain at least an `__init__.py` and your main agent file (e.g., `agent.py`).
+    * `AGENT_PATH`:（必填）指定智能体源代码目录路径的位置参数（如示例中的 `$AGENT_PATH` 或 `capital_agent/`）。该目录必须至少包含 `__init__.py` 和主智能体文件（如 `agent.py`）。
 
-    ##### Options
+    ##### 选项说明
 
-    * `--project TEXT`: (Required) Your Google Cloud project ID (e.g., `$GOOGLE_CLOUD_PROJECT`).
-    * `--region TEXT`: (Required) The Google Cloud location for deployment (e.g., `$GOOGLE_CLOUD_LOCATION`, `us-central1`).
-    * `--service_name TEXT`: (Optional) The name for the Cloud Run service (e.g., `$SERVICE_NAME`). Defaults to `adk-default-service-name`.
-    * `--app_name TEXT`: (Optional) The application name for the ADK API server (e.g., `$APP_NAME`). Defaults to the name of the directory specified by `AGENT_PATH` (e.g., `capital_agent` if `AGENT_PATH` is `./capital_agent`).
-    * `--agent_engine_id TEXT`: (Optional) If you are using a managed session service via Vertex AI Agent Engine, provide its resource ID here.
-    * `--port INTEGER`: (Optional) The port number the ADK API server will listen on within the container. Defaults to 8000.
-    * `--with_ui`: (Optional) If included, deploys the ADK dev UI alongside the agent API server. By default, only the API server is deployed.
-    * `--temp_folder TEXT`: (Optional) Specifies a directory for storing intermediate files generated during the deployment process. Defaults to a timestamped folder in the system's temporary directory. *(Note: This option is generally not needed unless troubleshooting issues).*
-    * `--help`: Show the help message and exit.
+    * `--project TEXT`:（必填）Google Cloud 项目 ID（如 `$GOOGLE_CLOUD_PROJECT`）
+    * `--region TEXT`:（必填）部署目标区域（如 `$GOOGLE_CLOUD_LOCATION`、`us-central1`）
+    * `--service_name TEXT`:（可选）Cloud Run 服务名称（如 `$SERVICE_NAME`），默认为 `adk-default-service-name`
+    * `--app_name TEXT`:（可选）ADK API 服务器应用名称（如 `$APP_NAME`），默认为 `AGENT_PATH` 指定目录的名称（如 `AGENT_PATH` 为 `./capital_agent` 时默认为 `capital_agent`）
+    * `--agent_engine_id TEXT`:（可选）若通过 Vertex AI Agent Engine 使用托管会话服务，请在此提供资源 ID
+    * `--port INTEGER`:（可选）ADK API 服务器在容器内监听的端口号，默认为 8000
+    * `--with_ui`:（可选）添加此标志可同时部署 ADK 开发界面。默认仅部署 API 服务器
+    * `--temp_folder TEXT`:（可选）指定部署过程中生成中间文件的存储目录，默认为系统临时目录中的时间戳文件夹（注：通常仅在排查问题时需要此选项）
+    * `--help`: 显示帮助信息并退出
 
-    ##### Authenticated access 
-    During the deployment process, you might be prompted: `Allow unauthenticated invocations to [your-service-name] (y/N)?`.
+    ##### 认证访问
+    部署过程中可能会提示：`Allow unauthenticated invocations to [your-service-name] (y/N)?`
 
-    * Enter `y` to allow public access to your agent's API endpoint without authentication.
-    * Enter `N` (or press Enter for the default) to require authentication (e.g., using an identity token as shown in the "Testing your agent" section).
+    * 输入 `y` 允许无需认证即可公开访问智能体 API 端点
+    * 输入 `N`（或直接回车选择默认值）则要求认证（如"测试智能体"章节所示需使用身份令牌）
 
-    Upon successful execution, the command will deploy your agent to Cloud Run and provide the URL of the deployed service.
+    成功执行后，命令将把智能体部署至 Cloud Run 并返回服务 URL。
 
 === "gcloud CLI"
 
     ### gcloud CLI
 
-    Alternatively, you can deploy using the standard `gcloud run deploy` command with a `Dockerfile`. This method requires more manual setup compared to the `adk` command but offers flexibility, particularly if you want to embed your agent within a custom [FastAPI](https://fastapi.tiangolo.com/) application.
+    您也可以使用标准 `gcloud run deploy` 命令配合 `Dockerfile` 进行部署。相比 `adk` 命令，此方法需要更多手动配置，但灵活性更高，特别适合将智能体嵌入自定义 [FastAPI](https://fastapi.tiangolo.com/) 应用的场景。
 
-    Ensure you have authenticated with Google Cloud (`gcloud auth login` and `gcloud config set project <your-project-id>`).
+    部署前请确保已完成 Google Cloud 认证（`gcloud auth login` 和 `gcloud config set project <your-project-id>`）。
 
-    #### Project Structure
+    #### 项目结构
 
-    Organize your project files as follows:
+    按如下结构组织项目文件：
 
     ```txt
     your-project-directory/
     ├── capital_agent/
     │   ├── __init__.py
-    │   └── agent.py       # Your agent code (see "Agent sample" tab)
-    ├── main.py            # FastAPI application entry point
-    ├── requirements.txt   # Python dependencies
-    └── Dockerfile         # Container build instructions
+    │   └── agent.py       # 智能体代码（参见"智能体示例"标签页）
+    ├── main.py            # FastAPI 应用入口
+    ├── requirements.txt   # Python 依赖项
+    └── Dockerfile         # 容器构建指令
     ```
 
-    Create the following files (`main.py`, `requirements.txt`, `Dockerfile`) in the root of `your-project-directory/`.
+    在 `your-project-directory/` 根目录创建以下文件（`main.py`、`requirements.txt`、`Dockerfile`）。
 
-    #### Code files
+    #### 代码文件
 
-    1. This file sets up the FastAPI application using `get_fast_api_app()` from ADK:
+    1. 此文件使用 ADK 的 `get_fast_api_app()` 配置 FastAPI 应用：
 
         ```python title="main.py"
         import os
@@ -140,17 +139,17 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
         from fastapi import FastAPI
         from google.adk.cli.fast_api import get_fast_api_app
 
-        # Get the directory where main.py is located
+        # 获取 main.py 所在目录
         AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
-        # Example session DB URL (e.g., SQLite)
+        # 会话数据库 URL 示例（如 SQLite）
         SESSION_DB_URL = "sqlite:///./sessions.db"
-        # Example allowed origins for CORS
+        # CORS 允许的源示例
         ALLOWED_ORIGINS = ["http://localhost", "http://localhost:8080", "*"]
-        # Set web=True if you intend to serve a web interface, False otherwise
+        # 如需提供网页界面则设为 True，否则为 False
         SERVE_WEB_INTERFACE = True
 
-        # Call the function to get the FastAPI app instance
-        # Ensure the agent directory name ('capital_agent') matches your agent folder
+        # 调用函数获取 FastAPI 应用实例
+        # 确保代理目录名称（'capital_agent'）与您的代理文件夹匹配
         app: FastAPI = get_fast_api_app(
             agent_dir=AGENT_DIR,
             session_db_url=SESSION_DB_URL,
@@ -158,27 +157,27 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
             web=SERVE_WEB_INTERFACE,
         )
 
-        # You can add more FastAPI routes or configurations below if needed
-        # Example:
+        # 如需添加更多 FastAPI 路由或配置，可在下方添加
+        # 示例：
         # @app.get("/hello")
         # async def read_root():
         #     return {"Hello": "World"}
 
         if __name__ == "__main__":
-            # Use the PORT environment variable provided by Cloud Run, defaulting to 8080
+            # 使用 Cloud Run 提供的 PORT 环境变量，默认 8080
             uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
         ```
 
-        *Note: We specify `agent_dir` to the directory `main.py` is in and use `os.environ.get("PORT", 8080)` for Cloud Run compatibility.*
+        *注：我们将 `agent_dir` 指定为 `main.py` 所在目录，并使用 `os.environ.get("PORT", 8080)` 确保 Cloud Run 兼容性。*
 
-    2. List the necessary Python packages:
+    2. 列出必要的 Python 包：
 
         ```txt title="requirements.txt"
         google_adk
-        # Add any other dependencies your agent needs
+        # 添加智能体所需的其他依赖项
         ```
 
-    3. Define the container image:
+    3. 定义容器镜像：
 
         ```dockerfile title="Dockerfile"
         FROM python:3.13-slim
@@ -199,9 +198,9 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
         CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
         ```
 
-    #### Deploy using `gcloud`
+    #### 使用 `gcloud` 部署
 
-    Navigate to `your-project-directory` in your terminal.
+    在终端中导航至 `your-project-directory` 目录。
 
     ```bash
     gcloud run deploy capital-agent-service \
@@ -210,89 +209,89 @@ export GOOGLE_GENAI_USE_VERTEXAI=True
     --project $GOOGLE_CLOUD_PROJECT \
     --allow-unauthenticated \
     --set-env-vars="GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT,GOOGLE_CLOUD_LOCATION=$GOOGLE_CLOUD_LOCATION,GOOGLE_GENAI_USE_VERTEXAI=$GOOGLE_GENAI_USE_VERTEXAI"
-    # Add any other necessary environment variables your agent might need
+    # 添加智能体可能需要的其他环境变量
     ```
 
-    * `capital-agent-service`: The name you want to give your Cloud Run service.
-    * `--source .`: Tells gcloud to build the container image from the Dockerfile in the current directory.
-    * `--region`: Specifies the deployment region.
-    * `--project`: Specifies the GCP project.
-    * `--allow-unauthenticated`: Allows public access to the service. Remove this flag for private services.
-    * `--set-env-vars`: Passes necessary environment variables to the running container. Ensure you include all variables required by ADK and your agent (like API keys if not using Application Default Credentials).
+    * `capital-agent-service`: Cloud Run 服务名称
+    * `--source .`: 指示 gcloud 使用当前目录的 Dockerfile 构建容器镜像
+    * `--region`: 指定部署区域
+    * `--project`: 指定 GCP 项目
+    * `--allow-unauthenticated`: 允许公开访问服务。如需私有服务请移除此标志
+    * `--set-env-vars`: 向运行容器传递必要的环境变量。请确保包含 ADK 和智能体所需的所有变量（如未使用应用默认凭据需包含 API 密钥）
 
-    `gcloud` will build the Docker image, push it to Google Artifact Registry, and deploy it to Cloud Run. Upon completion, it will output the URL of your deployed service.
+    `gcloud` 将构建 Docker 镜像，推送至 Google Artifact Registry，并部署到 Cloud Run。完成后将输出已部署服务的 URL。
 
-    For a full list of deployment options, see the [`gcloud run deploy` reference documentation](https://cloud.google.com/sdk/gcloud/reference/run/deploy).
+    完整部署选项请参阅 [`gcloud run deploy` 参考文档](https://cloud.google.com/sdk/gcloud/reference/run/deploy)。
 
-## Testing your agent
+## 测试智能体
 
-Once your agent is deployed to Cloud Run, you can interact with it via the deployed UI (if enabled) or directly with its API endpoints using tools like `curl`. You'll need the service URL provided after deployment.
+智能体部署至 Cloud Run 后，您可通过部署的 UI（如启用）或使用 `curl` 等工具直接与其 API 端点交互。测试需要用到部署后提供的服务 URL。
 
-=== "UI Testing"
+=== "UI 测试"
 
-    ### UI Testing
+    ### UI 测试
 
-    If you deployed your agent with the UI enabled:
+    若您在部署时启用了 UI：
 
-    *   **adk CLI:** You included the `--with_ui` flag during deployment.
-    *   **gcloud CLI:** You set `SERVE_WEB_INTERFACE = True` in your `main.py`.
+    *   **adk CLI:** 部署时包含 `--with_ui` 标志
+    *   **gcloud CLI:** 在 `main.py` 中设置 `SERVE_WEB_INTERFACE = True`
 
-    You can test your agent by simply navigating to the Cloud Run service URL provided after deployment in your web browser.
+    您只需在浏览器中访问部署后提供的 Cloud Run 服务 URL 即可测试智能体。
 
     ```bash
-    # Example URL format
+    # URL 格式示例
     # https://your-service-name-abc123xyz.a.run.app
     ```
 
-    The ADK dev UI allows you to interact with your agent, manage sessions, and view execution details directly in the browser.
+    ADK 开发界面支持直接通过浏览器与智能体交互、管理会话及查看执行详情。
 
-    To verify your agent is working as intended, you can:
+    验证智能体功能是否正常：
 
-    1. Select your agent from the dropdown menu.
-    2. Type a message and verify that you receive an expected response from your agent.
+    1. 从下拉菜单中选择您的智能体
+    2. 输入消息并确认收到预期响应
 
-    If you experience any unexpected behavior, check the [Cloud Run](https://console.cloud.google.com/run) console logs.
+    如遇异常行为，请查看 [Cloud Run](https://console.cloud.google.com/run) 控制台日志。
 
-=== "API Testing (curl)"
+=== "API 测试 (curl)"
 
-    ### API Testing (curl)
+    ### API 测试 (curl)
 
-    You can interact with the agent's API endpoints using tools like `curl`. This is useful for programmatic interaction or if you deployed without the UI.
+    您可以使用 `curl` 等工具与智能体 API 端点交互。这在程序化交互或未启用 UI 的部署中特别有用。
 
-    You'll need the service URL provided after deployment and potentially an identity token for authentication if your service isn't set to allow unauthenticated access.
+    测试需要部署后提供的服务 URL，如果服务未设置为允许未认证访问，则可能还需要身份令牌。
 
-    #### Set the application URL
+    #### 设置应用 URL
 
-    Replace the example URL with the actual URL of your deployed Cloud Run service.
+    将示例 URL 替换为您实际部署的 Cloud Run 服务 URL。
 
     ```bash
     export APP_URL="YOUR_CLOUD_RUN_SERVICE_URL"
-    # Example: export APP_URL="https://adk-default-service-name-abc123xyz.a.run.app"
+    # 示例：export APP_URL="https://adk-default-service-name-abc123xyz.a.run.app"
     ```
 
-    #### Get an identity token (if needed)
+    #### 获取身份令牌（如需）
 
-    If your service requires authentication (i.e., you didn't use `--allow-unauthenticated` with `gcloud` or answered 'N' to the prompt with `adk`), obtain an identity token.
+    如果服务需要认证（即未使用 `--allow-unauthenticated` 配合 `gcloud` 或在 `adk` 提示时回答'N'），请获取身份令牌。
 
     ```bash
     export TOKEN=$(gcloud auth print-identity-token)
     ```
 
-    *If your service allows unauthenticated access, you can omit the `-H "Authorization: Bearer $TOKEN"` header from the `curl` commands below.*
+    *如服务允许未认证访问，可省略以下 `curl` 命令中的 `-H "Authorization: Bearer $TOKEN"` 请求头。*
 
-    #### List available apps
+    #### 列出可用应用
 
-    Verify the deployed application name.
+    验证已部署的应用名称。
 
     ```bash
     curl -X GET -H "Authorization: Bearer $TOKEN" $APP_URL/list-apps
     ```
 
-    *(Adjust the `app_name` in the following commands based on this output if needed. The default is often the agent directory name, e.g., `capital_agent`)*.
+    *（后续命令中的 `app_name` 可根据此输出调整。默认通常为代理目录名称，如 `capital_agent`）*。
 
-    #### Create or Update a Session
+    #### 创建或更新会话
 
-    Initialize or update the state for a specific user and session. Replace `capital_agent` with your actual app name if different. The values `user_123` and `session_abc` are example identifiers; you can replace them with your desired user and session IDs.
+    初始化或更新特定用户和会话的状态。如应用名称不同请替换 `capital_agent`。`user_123` 和 `session_abc` 为示例标识符，可替换为您所需的用户和会话 ID。
 
     ```bash
     curl -X POST -H "Authorization: Bearer $TOKEN" \
@@ -301,9 +300,9 @@ Once your agent is deployed to Cloud Run, you can interact with it via the deplo
         -d '{"state": {"preferred_language": "English", "visit_count": 5}}'
     ```
 
-    #### Run the Agent
+    #### 运行智能体
 
-    Send a prompt to your agent. Replace `capital_agent` with your app name and adjust the user/session IDs and prompt as needed.
+    向智能体发送提示词。请替换 `capital_agent` 为您的应用名称，并按需调整用户/会话 ID 及提示内容。
 
     ```bash
     curl -X POST -H "Authorization: Bearer $TOKEN" \
@@ -323,5 +322,5 @@ Once your agent is deployed to Cloud Run, you can interact with it via the deplo
         }'
     ```
 
-    * Set `"streaming": true` if you want to receive Server-Sent Events (SSE).
-    * The response will contain the agent's execution events, including the final answer.
+    * 如需接收服务器发送事件 (SSE)，请设置 `"streaming": true`
+    * 响应将包含智能体的执行事件，包括最终答案

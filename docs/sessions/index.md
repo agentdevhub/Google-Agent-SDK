@@ -1,57 +1,57 @@
-# Introduction to Conversational Context: Session, State, and Memory
+# 对话上下文入门：会话、状态与记忆
 
-## Why Context Matters
+## 上下文为何重要
 
-Meaningful, multi-turn conversations require agents to understand context. Just like humans, they need to recall what's been said and done to maintain continuity and avoid repetition. The Agent Development Kit (ADK) provides structured ways to manage this context through `Session`, `State`, and `Memory`.
+要实现有意义的多轮对话，智能体必须理解上下文。就像人类一样，它们需要记住之前的对话内容和行为，以保持对话连贯性并避免重复。Agent Development Kit (ADK) 通过 `Session`、`State` 和 `Memory` 提供了结构化的上下文管理方式。
 
-## Core Concepts
+## 核心概念
 
-Think of interacting with your agent as having distinct **conversation threads**, potentially drawing upon **long-term knowledge**.
+与智能体的交互可以理解为存在独立的**对话线程**，这些线程可能调用**长期知识**。
 
-1. **`Session`**: The Current Conversation Thread  
+1. **`Session`**：当前对话线程  
 
-    * Represents a *single, ongoing interaction* between a user and your agent system.  
-    * Contains the chronological sequence of messages and actions (`Events`) for *that specific interaction*.  
-    * A `Session` can also hold temporary data (`State`) relevant only *during this conversation*.
+    * 表示用户与智能体系统之间*单次持续进行的交互*  
+    * 包含*该特定交互*中的消息和动作(`Events`)时序记录  
+    * `Session` 还可保存*仅在此次对话期间*相关的临时数据(`State`)  
 
-2. **`State` (`session.state`)**: Data Within the Current Conversation  
+2. **`State` (`session.state`)**：当前对话中的数据  
 
-    * Data stored within a specific `Session`.  
-    * Used to manage information relevant *only* to the *current, active* conversation thread (e.g., items in a shopping cart *during this chat*, user preferences mentioned *in this session*).
+    * 存储在特定 `Session` 中的数据  
+    * 用于管理*仅与当前活跃*对话线程相关的信息（例如*本次聊天*中的购物车商品，*本次会话*中提到的用户偏好）  
 
-3. **`Memory`**: Searchable, Cross-Session Information  
+3. **`Memory`**：可检索的跨会话信息  
 
-    * Represents a store of information that might span *multiple past sessions* or include external data sources.  
-    * It acts as a knowledge base the agent can *search* to recall information or context beyond the immediate conversation.
+    * 表示可能跨越*多次历史会话*或包含外部数据源的信息存储  
+    * 作为知识库供智能体*检索*，以获取超出当前对话范围的信息或上下文  
 
-## Managing Context: Services
+## 上下文管理服务
 
-ADK provides services to manage these concepts:
+ADK 提供以下管理服务：
 
-1. **`SessionService`**: Manages Conversation Threads (`Session` objects)  
+1. **`SessionService`**：管理对话线程(`Session` 对象)  
 
-    * Handles the lifecycle: creating, retrieving, updating (appending `Events`, modifying `State`), and deleting individual `Session` threads.  
-    * Ensures the agent has the right history and state for the current turn.
+    * 处理生命周期：创建、检索、更新（追加 `Events`、修改 `State`）和删除单个 `Session` 线程  
+    * 确保智能体拥有当前轮次所需的正确历史和状态  
 
-2. **`MemoryService`**: Manages the Long-Term Knowledge Store (`Memory`)  
+2. **`MemoryService`**：管理长期知识存储(`Memory`)  
 
-    * Handles ingesting information (often from completed `Session`s) into the long-term store.  
-    * Provides methods to search this stored knowledge based on queries.
+    * 处理将信息（通常来自已完成的 `Session`）存入长期存储  
+    * 提供基于查询检索存储知识的方法  
 
-**Implementations**: ADK offers different implementations for both `SessionService` and `MemoryService`, allowing you to choose the storage backend that best fits your application's needs. Notably, **in-memory implementations** are provided for both services; these are designed specifically for **local quick testing and development**. It's important to remember that **all data stored using these in-memory options (sessions, state, or long-term knowledge) is lost when your application restarts**. For persistence and scalability beyond local testing, ADK also offers database and cloud-based service options.
+**实现方案**：ADK 为 `SessionService` 和 `MemoryService` 提供不同实现，允许选择最适合应用需求的存储后端。值得注意的是，两种服务都提供**内存实现**，这些实现专为**本地快速测试和开发**设计。需注意：**使用这些内存选项存储的所有数据（会话、状态或长期知识）在应用重启时都会丢失**。如需超越本地测试的持久化和可扩展性，ADK 还提供数据库和云服务选项。
 
-**In Summary:**
+**总结：**
 
-* **`Session` & `State`**: Focus on the **here and now** – the history and temporary data of the *single, active conversation*. Managed primarily by `SessionService`.  
-* **Memory**: Focuses on the **past and external information** – a *searchable archive* potentially spanning across conversations. Managed by `MemoryService`.
+* **`Session` 和 `State`**：聚焦**当下**——*单次活跃对话*的历史和临时数据，主要由 `SessionService` 管理  
+* **记忆**：聚焦**过去和外部信息**——可能跨越多次对话的*可检索档案*，由 `MemoryService` 管理  
 
-## What's Next?
+## 后续内容
 
-In the following sections, we'll dive deeper into each of these components:
+后续章节将深入探讨以下组件：
 
-* **`Session`**: Understanding its structure and `Events`.  
-* **`State`**: How to effectively read, write, and manage session-specific data.  
-* **`SessionService`**: Choosing the right storage backend for your sessions.  
-* **`MemoryService`**: Exploring options for storing and retrieving broader context.
+* **`Session`**：理解其结构和 `Events`  
+* **`State`**：如何有效读写和管理会话特定数据  
+* **`SessionService`**：为会话选择合适的存储后端  
+* **`MemoryService`**：探索存储和检索更广泛上下文的选项  
 
-Understanding these concepts is fundamental to building agents that can engage in complex, stateful, and context-aware conversations.
+理解这些概念对于构建能够进行复杂、有状态且具备上下文感知能力的对话智能体至关重要。

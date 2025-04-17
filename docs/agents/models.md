@@ -1,69 +1,69 @@
-# Using Different Models with ADK
+# 在ADK中使用不同的大模型
 
-The Agent Development Kit (ADK) is designed for flexibility, allowing you to integrate various Large Language Models (LLMs) into your agents. While the setup for Google Gemini models is covered in the [Setup Foundation Models](../get-started/installation.md) guide, this page details how to leverage Gemini effectively and integrate other popular models, including those hosted externally or running locally.
+Agent Development Kit (ADK) 设计具有高度灵活性，支持集成多种大模型到您的智能体中。虽然[设置基础模型](../get-started/installation.md)指南已涵盖Google Gemini模型的配置，但本文将详细介绍如何高效利用Gemini，并集成其他主流模型（包括外部托管或本地运行的模型）。
 
-ADK primarily uses two mechanisms for model integration:
+ADK主要通过两种机制实现模型集成：
 
-1. **Direct String / Registry:** For models tightly integrated with Google Cloud (like Gemini models accessed via Google AI Studio or Vertex AI) or models hosted on Vertex AI endpoints. You typically provide the model name or endpoint resource string directly to the `LlmAgent`. ADK's internal registry resolves this string to the appropriate backend client, often utilizing the `google-genai` library.
-2. **Wrapper Classes:** For broader compatibility, especially with models outside the Google ecosystem or those requiring specific client configurations (like models accessed via LiteLLM). You instantiate a specific wrapper class (e.g., `LiteLlm`) and pass this object as the `model` parameter to your `LlmAgent`.
+1. **直接字符串/注册表方式**：适用于与Google Cloud深度集成的模型（如通过Google AI Studio或Vertex AI访问的Gemini模型）或托管在Vertex AI终端的模型。通常直接将模型名称或终端资源字符串提供给`LlmAgent`。ADK内部注册表会将该字符串解析为对应的后端客户端，通常使用`google-genai`库实现。
+2. **封装类方式**：为获得更广泛的兼容性（特别是Google生态系统外的模型或需要特定客户端配置的模型，如通过LiteLLM访问的模型）。您需要实例化特定的封装类（例如`LiteLlm`），并将该对象作为`model`参数传递给您的`LlmAgent`。
 
-The following sections guide you through using these methods based on your needs.
+以下章节将根据您的需求指导您使用这些方法。
 
-## Using Google Gemini Models
+## 使用Google Gemini模型
 
-This is the most direct way to use Google's flagship models within ADK.
+这是在ADK中使用Google旗舰模型最直接的方式。
 
-**Integration Method:** Pass the model's identifier string directly to the `model` parameter of `LlmAgent` (or its alias, `Agent`).
+**集成方法**：将模型标识字符串直接传递给`LlmAgent`（或其别名`Agent`）的`model`参数。
 
-**Backend Options & Setup:**
+**后端选项与设置**：
 
-The `google-genai` library, used internally by ADK for Gemini, can connect through either Google AI Studio or Vertex AI.
+ADK内部用于Gemini的`google-genai`库可通过Google AI Studio或Vertex AI建立连接。
 
-!!!note "Model support for voice/video streaming"
+!!!note "语音/视频流支持的模型"
 
-    In order to use voice/video streaming in ADK, you will need to use Gemini models that support the Live API. You can find the **model ID(s)** that supports the Gemini Live API in the documentation:
+    要在ADK中使用语音/视频流功能，需要使用支持Live API的Gemini模型。您可以在以下文档中找到支持Gemini Live API的**模型ID**：
 
     - [Google AI Studio: Gemini Live API](https://ai.google.dev/gemini-api/docs/models#live-api)
     - [Vertex AI: Gemini Live API](https://cloud.google.com/vertex-ai/generative-ai/docs/live-api)
 
 ### Google AI Studio
 
-* **Use Case:** Google AI Studio is the easiest way to started with Gemini. All you need is the [API key](https://aistudio.google.com/app/apikey). Best for rapid prototyping and development.
-* **Setup:** Typically requires an API key set as an environment variable:
+* **使用场景**：Google AI Studio是开始使用Gemini的最简单方式。只需获取[API密钥](https://aistudio.google.com/app/apikey)。最适合快速原型开发和测试。
+* **设置**：通常需要将API密钥设置为环境变量：
 
 ```shell
 export GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY"
 export GOOGLE_GENAI_USE_VERTEXAI=FALSE
 ```
 
-* **Models:** Find all available models on the [Google AI for Developers site](https://ai.google.dev/gemini-api/docs/models).
+* **模型列表**：所有可用模型请参见[Google AI开发者网站](https://ai.google.dev/gemini-api/docs/models)。
 
 ### Vertex AI
 
-* **Use Case:** Recommended for production applications, leveraging Google Cloud infrastructure. Gemini on Vertex AI supports enterprise-grade features, security, and compliance controls.
-* **Setup:**
-    * Authenticate using Application Default Credentials (ADC):
+* **使用场景**：推荐用于生产环境应用，可充分利用Google云基础设施。Vertex AI上的Gemini支持企业级功能、安全性和合规控制。
+* **设置**：
+    * 使用应用默认凭证(ADC)进行认证：
 
         ```shell
         gcloud auth application-default login
         ```
 
-    * Set your Google Cloud project and location:
+    * 设置Google Cloud项目和位置：
 
         ```shell
         export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
-        export GOOGLE_CLOUD_LOCATION="YOUR_VERTEX_AI_LOCATION" # e.g., us-central1
+        export GOOGLE_CLOUD_LOCATION="YOUR_VERTEX_AI_LOCATION" # 例如us-central1
         ```
 
-    * Explicitly tell the library to use Vertex AI:
+    * 明确告知库使用Vertex AI：
 
         ```shell
         export GOOGLE_GENAI_USE_VERTEXAI=TRUE
         ```
 
-* **Models:** Find available model IDs in the [Vertex AI documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models).
+* **模型列表**：可用模型ID请参见[Vertex AI文档](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models)。
 
-**Example:**
+**示例**：
 
 ```python
 from google.adk.agents import LlmAgent
@@ -90,183 +90,183 @@ agent_gemini_pro = LlmAgent(
 )
 ```
 
-## Using Cloud & Proprietary Models via LiteLLM
+## 通过LiteLLM使用云端及专有模型
 
-To access a vast range of LLMs from providers like OpenAI, Anthropic (non-Vertex AI), Cohere, and many others, ADK offers integration through the LiteLLM library.
+要访问OpenAI、Anthropic（非Vertex AI）、Cohere等提供商的大量大模型，ADK通过LiteLLM库提供集成支持。
 
-**Integration Method:** Instantiate the `LiteLlm` wrapper class and pass it to the `model` parameter of `LlmAgent`.
+**集成方法**：实例化`LiteLlm`封装类并将其传递给`LlmAgent`的`model`参数。
 
-**LiteLLM Overview:** [LiteLLM](https://docs.litellm.ai/) acts as a translation layer, providing a standardized, OpenAI-compatible interface to over 100+ LLMs.
+**LiteLLM概述**：[LiteLLM](https://docs.litellm.ai/)作为转换层，为100+大模型提供标准化的OpenAI兼容接口。
 
-**Setup:**
+**设置**：
 
-1. **Install LiteLLM:**
+1. **安装LiteLLM**：
         ```shell
         pip install litellm
         ```
-2. **Set Provider API Keys:** Configure API keys as environment variables for the specific providers you intend to use.
+2. **设置提供商API密钥**：为您计划使用的特定提供商配置环境变量。
 
-    * *Example for OpenAI:*
+    * *OpenAI示例*：
 
         ```shell
         export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
         ```
 
-    * *Example for Anthropic (non-Vertex AI):*
+    * *Anthropic（非Vertex AI）示例*：
 
         ```shell
         export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
         ```
 
-    * *Consult the [LiteLLM Providers Documentation](https://docs.litellm.ai/docs/providers) for the correct environment variable names for other providers.*
+    * *其他提供商的环境变量名称请参考[LiteLLM提供商文档](https://docs.litellm.ai/docs/providers)*
 
-        **Example:**
+        **示例**：
 
         ```python
         from google.adk.agents import LlmAgent
         from google.adk.models.lite_llm import LiteLlm
 
-        # --- Example Agent using OpenAI's GPT-4o ---
-        # (Requires OPENAI_API_KEY)
+        # --- 使用OpenAI GPT-4o的智能体示例 ---
+        # (需要OPENAI_API_KEY)
         agent_openai = LlmAgent(
-            model=LiteLlm(model="openai/gpt-4o"), # LiteLLM model string format
+            model=LiteLlm(model="openai/gpt-4o"), # LiteLLM模型字符串格式
             name="openai_agent",
-            instruction="You are a helpful assistant powered by GPT-4o.",
-            # ... other agent parameters
+            instruction="您是由GPT-4o驱动的助手。",
+            # ... 其他智能体参数
         )
 
-        # --- Example Agent using Anthropic's Claude Haiku (non-Vertex) ---
-        # (Requires ANTHROPIC_API_KEY)
+        # --- 使用Anthropic Claude Haiku（非Vertex）的智能体示例 ---
+        # (需要ANTHROPIC_API_KEY)
         agent_claude_direct = LlmAgent(
             model=LiteLlm(model="anthropic/claude-3-haiku-20240307"),
             name="claude_direct_agent",
-            instruction="You are an assistant powered by Claude Haiku.",
-            # ... other agent parameters
+            instruction="您是由Claude Haiku驱动的助手。",
+            # ... 其他智能体参数
         )
         ```
 
-## Using Open & Local Models via LiteLLM
+## 通过LiteLLM使用开源及本地模型
 
-For maximum control, cost savings, privacy, or offline use cases, you can run open-source models locally or self-host them and integrate them using LiteLLM.
+为了获得最大控制权、节省成本、保护隐私或离线使用，您可以本地运行开源模型或自行托管，并通过LiteLLM集成。
 
-**Integration Method:** Instantiate the `LiteLlm` wrapper class, configured to point to your local model server.
+**集成方法**：实例化`LiteLlm`封装类，并配置指向您的本地模型服务器。
 
-### Ollama Integration
+### Ollama集成
 
-[Ollama](https://ollama.com/) allows you to easily run open-source models locally.
+[Ollama](https://ollama.com/)让您可以轻松在本地运行开源模型。
 
-**Prerequisites:**
+**前提条件**：
 
-1. Install Ollama.
-2. Pull the desired model (e.g., Google's Gemma):
+1. 安装Ollama。
+2. 拉取所需模型（例如Google的Gemma）：
 
     ```shell
     ollama pull gemma:2b
     ```
 
-3. Ensure the Ollama server is running (usually happens automatically after installation or by running `ollama serve`).
+3. 确保Ollama服务器正在运行（安装后通常自动运行，或通过运行`ollama serve`启动）。
 
-    **Example:**
+    **示例**：
 
     ```python
     from google.adk.agents import LlmAgent
     from google.adk.models.lite_llm import LiteLlm
 
-    # --- Example Agent using Gemma 2B running via Ollama ---
+    # --- 使用通过Ollama运行的Gemma 2B的智能体示例 ---
     agent_ollama_gemma = LlmAgent(
-        # LiteLLM knows how to connect to a local Ollama server by default
-        model=LiteLlm(model="ollama/gemma:2b"), # Standard LiteLLM format for Ollama
+        # LiteLLM默认知道如何连接本地Ollama服务器
+        model=LiteLlm(model="ollama/gemma:2b"), # Ollama的标准LiteLLM格式
         name="ollama_gemma_agent",
-        instruction="You are Gemma, running locally via Ollama.",
-        # ... other agent parameters
+        instruction="您是通过Ollama本地运行的Gemma。",
+        # ... 其他智能体参数
     )
     ```
 
-### Self-Hosted Endpoint (e.g., vLLM)
+### 自托管终端（如vLLM）
 
-Tools like [vLLM](https://github.com/vllm-project/vllm) allow you to host models efficiently and often expose an OpenAI-compatible API endpoint.
+[vLLM](https://github.com/vllm-project/vllm)等工具可让您高效托管模型，并通常提供OpenAI兼容的API终端。
 
-**Setup:**
+**设置**：
 
-1. **Deploy Model:** Deploy your chosen model using vLLM (or a similar tool). Note the API base URL (e.g., `https://your-vllm-endpoint.run.app/v1`).
-    * *Important for ADK Tools:* When deploying, ensure the serving tool supports and enables OpenAI-compatible tool/function calling. For vLLM, this might involve flags like `--enable-auto-tool-choice` and potentially a specific `--tool-call-parser`, depending on the model. Refer to the vLLM documentation on Tool Use.
-2. **Authentication:** Determine how your endpoint handles authentication (e.g., API key, bearer token).
+1. **部署模型**：使用vLLM（或类似工具）部署所选模型。记录API基础URL（例如`https://your-vllm-endpoint.run.app/v1`）。
+    * *ADK工具重要提示*：部署时确保服务工具支持并启用OpenAI兼容的工具/函数调用功能。对于vLLM，可能需要使用`--enable-auto-tool-choice`等标志，并根据模型可能需要特定的`--tool-call-parser`。请参考vLLM关于工具使用的文档。
+2. **认证**：确定您的终端如何处理认证（例如API密钥、Bearer令牌）。
 
-    **Integration Example:**
+    **集成示例**：
 
     ```python
     import subprocess
     from google.adk.agents import LlmAgent
     from google.adk.models.lite_llm import LiteLlm
 
-    # --- Example Agent using a model hosted on a vLLM endpoint ---
+    # --- 使用vLLM终端托管模型的智能体示例 ---
 
-    # Endpoint URL provided by your vLLM deployment
+    # vLLM部署提供的终端URL
     api_base_url = "https://your-vllm-endpoint.run.app/v1"
 
-    # Model name as recognized by *your* vLLM endpoint configuration
-    model_name_at_endpoint = "hosted_vllm/google/gemma-3-4b-it" # Example from vllm_test.py
+    # 您的vLLM终端配置识别的模型名称
+    model_name_at_endpoint = "hosted_vllm/google/gemma-3-4b-it" # 来自vllm_test.py的示例
 
-    # Authentication (Example: using gcloud identity token for a Cloud Run deployment)
-    # Adapt this based on your endpoint's security
+    # 认证（示例：对Cloud Run部署使用gcloud身份令牌）
+    # 根据您的终端安全需求进行调整
     try:
         gcloud_token = subprocess.check_output(
             ["gcloud", "auth", "print-identity-token", "-q"]
         ).decode().strip()
         auth_headers = {"Authorization": f"Bearer {gcloud_token}"}
     except Exception as e:
-        print(f"Warning: Could not get gcloud token - {e}. Endpoint might be unsecured or require different auth.")
-        auth_headers = None # Or handle error appropriately
+        print(f"警告：无法获取gcloud令牌 - {e}。终端可能未受保护或需要其他认证方式。")
+        auth_headers = None # 或适当处理错误
 
     agent_vllm = LlmAgent(
         model=LiteLlm(
             model=model_name_at_endpoint,
             api_base=api_base_url,
-            # Pass authentication headers if needed
+            # 如果需要，传递认证头信息
             extra_headers=auth_headers
-            # Alternatively, if endpoint uses an API key:
+            # 或者，如果终端使用API密钥：
             # api_key="YOUR_ENDPOINT_API_KEY"
         ),
         name="vllm_agent",
-        instruction="You are a helpful assistant running on a self-hosted vLLM endpoint.",
-        # ... other agent parameters
+        instruction="您是在自托管vLLM终端上运行的助手。",
+        # ... 其他智能体参数
     )
     ```
 
-## Using Hosted & Tuned Models on Vertex AI
+## 使用Vertex AI上的托管及调优模型
 
-For enterprise-grade scalability, reliability, and integration with Google Cloud's MLOps ecosystem, you can use models deployed to Vertex AI Endpoints. This includes models from Model Garden or your own fine-tuned models.
+为了获得企业级扩展性、可靠性和与Google Cloud MLOps生态系统的集成，您可以使用部署到Vertex AI终端的模型。这包括来自Model Garden的模型或您自己微调的模型。
 
-**Integration Method:** Pass the full Vertex AI Endpoint resource string (`projects/PROJECT_ID/locations/LOCATION/endpoints/ENDPOINT_ID`) directly to the `model` parameter of `LlmAgent`.
+**集成方法**：将完整的Vertex AI终端资源字符串(`projects/PROJECT_ID/locations/LOCATION/endpoints/ENDPOINT_ID`)直接传递给`LlmAgent`的`model`参数。
 
-**Vertex AI Setup (Consolidated):**
+**Vertex AI设置（整合版）**：
 
-Ensure your environment is configured for Vertex AI:
+确保您的环境已配置好Vertex AI：
 
-1. **Authentication:** Use Application Default Credentials (ADC):
+1. **认证**：使用应用默认凭证(ADC)：
 
     ```shell
     gcloud auth application-default login
     ```
 
-2. **Environment Variables:** Set your project and location:
+2. **环境变量**：设置您的项目和位置：
 
     ```shell
     export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
-    export GOOGLE_CLOUD_LOCATION="YOUR_ENDPOINT_LOCATION" # e.g., us-central1
+    export GOOGLE_CLOUD_LOCATION="YOUR_ENDPOINT_LOCATION" # 例如us-central1
     ```
 
-3. **Enable Vertex Backend:** Crucially, ensure the `google-genai` library targets Vertex AI:
+3. **启用Vertex后端**：关键是要确保`google-genai`库指向Vertex AI：
 
     ```shell
     export GOOGLE_GENAI_USE_VERTEXAI=TRUE
     ```
 
-### Model Garden Deployments
+### Model Garden部署
 
-You can deploy various open and proprietary models from the [Vertex AI Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) to an endpoint.
+您可以从[Vertex AI Model Garden](https://console.cloud.google.com/vertex-ai/model-garden)部署各种开源和专有模型到终端。
 
-**Example:**
+**示例**：
 
 ```python
 from google.adk.agents import LlmAgent
@@ -286,11 +286,11 @@ agent_llama3_vertex = LlmAgent(
 )
 ```
 
-### Fine-tuned Model Endpoints
+### 微调模型终端
 
-Deploying your fine-tuned models (whether based on Gemini or other architectures supported by Vertex AI) results in an endpoint that can be used directly.
+部署您微调的模型（无论是基于Gemini还是Vertex AI支持的其他架构）将生成可直接使用的终端。
 
-**Example:**
+**示例**：
 
 ```python
 from google.adk.agents import LlmAgent
@@ -308,54 +308,54 @@ agent_finetuned_gemini = LlmAgent(
 )
 ```
 
-### Third-Party Models on Vertex AI (e.g., Anthropic Claude)
+### Vertex AI上的第三方模型（如Anthropic Claude）
 
-Some providers, like Anthropic, make their models available directly through Vertex AI.
+一些提供商（如Anthropic）通过Vertex AI直接提供他们的模型。
 
-**Integration Method:** Uses the direct model string (e.g., `"claude-3-sonnet@20240229"`), *but requires manual registration* within ADK.
+**集成方法**：使用直接模型字符串（例如`"claude-3-sonnet@20240229"`），但需要在ADK中手动注册。
 
-**Why Registration?** ADK's registry automatically recognizes `gemini-*` strings and standard Vertex AI endpoint strings (`projects/.../endpoints/...`) and routes them via the `google-genai` library. For other model types used directly via Vertex AI (like Claude), you must explicitly tell the ADK registry which specific wrapper class (`Claude` in this case) knows how to handle that model identifier string with the Vertex AI backend.
+**为何需要注册？** ADK的注册表会自动识别`gemini-*`字符串和标准Vertex AI终端字符串(`projects/.../endpoints/...`)，并通过`google-genai`库路由它们。对于通过Vertex AI直接使用的其他模型类型（如Claude），您必须明确告知ADK注册表哪个特定的封装类（本例中为`Claude`）知道如何处理该模型标识字符串与Vertex AI后端。
 
-**Setup:**
+**设置**：
 
-1. **Vertex AI Environment:** Ensure the consolidated Vertex AI setup (ADC, Env Vars, `GOOGLE_GENAI_USE_VERTEXAI=TRUE`) is complete.
-2. **Install Provider Library:** Install the necessary client library configured for Vertex AI.
+1. **Vertex AI环境**：确保完成整合的Vertex AI设置（ADC、环境变量、`GOOGLE_GENAI_USE_VERTEXAI=TRUE`）。
+2. **安装提供商库**：安装为Vertex AI配置的必要客户端库。
 
     ```shell
     pip install "anthropic[vertex]"
     ```
 
-3. **Register Model Class:** Add this code near the start of your application, *before* creating an agent using the Claude model string:
+3. **注册模型类**：在应用程序启动时添加此代码，在使用Claude模型字符串创建智能体之前：
 
     ```python
-    # Required for using Claude model strings directly via Vertex AI with LlmAgent
+    # 使用Vertex AI直接通过Claude模型字符串与LlmAgent配合所需
     from google.adk.models.anthropic_llm import Claude
     from google.adk.models.registry import LLMRegistry
 
     LLMRegistry.register(Claude)
     ```
 
-    **Example:**
+    **示例**：
 
     ```python
     from google.adk.agents import LlmAgent
-    from google.adk.models.anthropic_llm import Claude # Import needed for registration
-    from google.adk.models.registry import LLMRegistry # Import needed for registration
+    from google.adk.models.anthropic_llm import Claude # 注册所需导入
+    from google.adk.models.registry import LLMRegistry # 注册所需导入
     from google.genai import types
 
-    # --- Register Claude class (do this once at startup) ---
+    # --- 注册Claude类（在启动时执行一次） ---
     LLMRegistry.register(Claude)
 
-    # --- Example Agent using Claude 3 Sonnet on Vertex AI ---
+    # --- 使用Vertex AI上Claude 3 Sonnet的智能体示例 ---
 
-    # Standard model name for Claude 3 Sonnet on Vertex AI
+    # Vertex AI上Claude 3 Sonnet的标准模型名称
     claude_model_vertexai = "claude-3-sonnet@20240229"
 
     agent_claude_vertexai = LlmAgent(
-        model=claude_model_vertexai, # Pass the direct string after registration
+        model=claude_model_vertexai, # 注册后传递直接字符串
         name="claude_vertexai_agent",
-        instruction="You are an assistant powered by Claude 3 Sonnet on Vertex AI.",
+        instruction="您是在Vertex AI上由Claude 3 Sonnet驱动的助手。",
         generate_content_config=types.GenerateContentConfig(max_output_tokens=4096),
-        # ... other agent parameters
+        # ... 其他智能体参数
     )
     ```

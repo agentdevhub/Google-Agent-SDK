@@ -1,29 +1,29 @@
-# Memory: Long-Term Knowledge with `MemoryService`
+# 记忆模块：`MemoryService`实现的长时知识存储
 
-We've seen how `Session` tracks the history (`events`) and temporary data (`state`) for a *single, ongoing conversation*. But what if an agent needs to recall information from *past* conversations or access external knowledge bases? This is where the concept of **Long-Term Knowledge** and the **`MemoryService`** come into play.
+我们已经了解`Session`如何追踪*单次持续对话*中的历史记录（`events`）和临时数据（`state`）。但当智能体需要回忆*过往*对话内容或访问外部知识库时，就需要**长时知识**和**`MemoryService`**的概念发挥作用。
 
-Think of it this way:
+可以这样理解：
 
-* **`Session` / `State`:** Like your short-term memory during one specific chat.  
-* **Long-Term Knowledge (`MemoryService`)**: Like a searchable archive or knowledge library the agent can consult, potentially containing information from many past chats or other sources.
+* **`Session` / `State`：** 如同单次对话中的短期记忆  
+* **长时知识（`MemoryService`）：** 如同可检索的档案库或知识库，智能体可以查阅其中可能包含的多次历史对话内容或其他来源的信息
 
-## The `MemoryService` Role
+## `MemoryService`的核心作用
 
-The `BaseMemoryService` defines the interface for managing this searchable, long-term knowledge store. Its primary responsibilities are:
+`BaseMemoryService`定义了管理这种可检索长时知识存储的接口，其主要职责包括：
 
-1. **Ingesting Information (`add_session_to_memory`):** Taking the contents of a (usually completed) `Session` and adding relevant information to the long-term knowledge store.  
-2. **Searching Information (`search_memory`):** Allowing an agent (typically via a `Tool`) to query the knowledge store and retrieve relevant snippets or context based on a search query.
+1. **信息摄入（%%PH_92a94c2%%）：** 获取（通常已完成的）`Session`内容，并将相关信息添加至长时知识存储  
+2. **信息检索（`search_memory`）：** 允许智能体（通常通过`Tool`）查询知识库，根据搜索条件返回相关片段或上下文
 
-## `MemoryService` Implementations
+## `MemoryService`实现方案
 
-ADK provides different ways to implement this long-term knowledge store:
+ADK提供多种长时知识存储实现方式：
 
 1. **`InMemoryMemoryService`**  
 
-    * **How it works:** Stores session information in the application's memory and performs basic keyword matching for searches.  
-    * **Persistence:** None. **All stored knowledge is lost if the application restarts.**  
-    * **Requires:** Nothing extra.  
-    * **Best for:** Prototyping, simple testing, scenarios where only basic keyword recall is needed and persistence isn't required.
+    * **工作原理：** 在应用内存中存储会话信息，通过基础关键词匹配实现搜索  
+    * **持久性：** 无。**应用重启后所有存储知识都将丢失**  
+    * **依赖项：** 无需额外配置  
+    * **适用场景：** 原型开发、简单测试、仅需基础关键词召回且无需持久化的场景  
 
     ```py
     from google.adk.memory import InMemoryMemoryService
@@ -32,19 +32,19 @@ ADK provides different ways to implement this long-term knowledge store:
 
 2. **`VertexAiRagMemoryService`**  
 
-    * **How it works:** Leverages Google Cloud's Vertex AI RAG (Retrieval-Augmented Generation) service. It ingests session data into a specified RAG Corpus and uses powerful semantic search capabilities for retrieval.  
-    * **Persistence:** Yes. The knowledge is stored persistently within the configured Vertex AI RAG Corpus.  
-    * **Requires:** A Google Cloud project, appropriate permissions, necessary SDKs (`pip install google-adk[vertexai]`), and a pre-configured Vertex AI RAG Corpus resource name/ID.  
-    * **Best for:** Production applications needing scalable, persistent, and semantically relevant knowledge retrieval, especially when deployed on Google Cloud.
+    * **工作原理：** 利用Google Cloud的Vertex AI RAG（检索增强生成）服务。将会话数据摄入指定的RAG语料库，使用强大的语义搜索能力进行检索  
+    * **持久性：** 有。知识持久存储在配置的Vertex AI RAG语料库中  
+    * **依赖项：** 需要Google Cloud项目、适当权限、必要SDK（`pip install google-adk[vertexai]`）以及预配置的Vertex AI RAG语料库资源名称/ID  
+    * **适用场景：** 需要可扩展、持久化且语义相关检索的生产级应用，特别是部署在Google Cloud环境时  
 
     ```py
-    # Requires: pip install google-adk[vertexai]
-    # Plus GCP setup, RAG Corpus, and authentication
+    # 需要：pip install google-adk[vertexai]
+    # 以及GCP配置、RAG语料库和认证
     from google.adk.memory import VertexAiRagMemoryService
 
-    # The RAG Corpus name or ID
+    # RAG语料库名称或ID
     RAG_CORPUS_RESOURCE_NAME = "projects/your-gcp-project-id/locations/us-central1/ragCorpora/your-corpus-id"
-    # Optional configuration for retrieval
+    # 可选的检索配置
     SIMILARITY_TOP_K = 5
     VECTOR_DISTANCE_THRESHOLD = 0.7
 
@@ -55,118 +55,117 @@ ADK provides different ways to implement this long-term knowledge store:
     )
     ```
 
-## How Memory Works in Practice
+## 实际工作流程
 
-The typical workflow involves these steps:
+典型工作流程包含以下步骤：
 
-1. **Session Interaction:** A user interacts with an agent via a `Session`, managed by a `SessionService`. Events are added, and state might be updated.  
-2. **Ingestion into Memory:** At some point (often when a session is considered complete or has yielded significant information), your application calls `memory_service.add_session_to_memory(session)`. This extracts relevant information from the session's events and adds it to the long-term knowledge store (in-memory dictionary or RAG Corpus).  
-3. **Later Query:** In a *different* (or the same) session, the user might ask a question requiring past context (e.g., "What did we discuss about project X last week?").  
-4. **Agent Uses Memory Tool:** An agent equipped with a memory-retrieval tool (like the built-in `load_memory` tool) recognizes the need for past context. It calls the tool, providing a search query (e.g., "discussion project X last week").  
-5. **Search Execution:** The tool internally calls `memory_service.search_memory(app_name, user_id, query)`.  
-6. **Results Returned:** The `MemoryService` searches its store (using keyword matching or semantic search) and returns relevant snippets as a `SearchMemoryResponse` containing a list of `MemoryResult` objects (each potentially holding events from a relevant past session).  
-7. **Agent Uses Results:** The tool returns these results to the agent, usually as part of the context or function response. The agent can then use this retrieved information to formulate its final answer to the user.
+1. **会话交互：** 用户通过`Session`与智能体交互，由`SessionService`管理。事件被添加，状态可能更新  
+2. **记忆存储：** 当会话被认为完成或产生重要信息时，应用调用`memory_service.add_session_to_memory(session)`。这会从会话事件中提取相关信息并存入长时知识存储（内存字典或RAG语料库）  
+3. **后续查询：** 在*不同*（或相同）会话中，用户可能提出需要历史上下文的问题（如"我们上周关于项目X讨论了什么？"）  
+4. **调用记忆工具：** 配备记忆检索工具（如内置`load_memory`工具）的智能体识别需要历史上下文，调用工具并提交搜索查询（如"上周项目X讨论"）  
+5. **执行搜索：** 工具内部调用`memory_service.search_memory(app_name, user_id, query)`  
+6. **返回结果：** `MemoryService`搜索存储（使用关键词匹配或语义搜索），返回相关片段作为`SearchMemoryResponse`（包含`MemoryResult`对象列表，每个对象可能包含相关历史会话事件）  
+7. **结果应用：** 工具将结果返回智能体（通常作为上下文或函数响应）。智能体利用检索到的信息生成最终回答  
 
-## Example: Adding and Searching Memory
+## 示例：记忆的添加与检索
 
-This example demonstrates the basic flow using the `InMemory` services for simplicity.
+以下示例使用`InMemory`服务演示基础流程：
 
-???+ "Full Code"
+???+ "完整代码"
 
     ```py
     import asyncio
     from google.adk.agents import LlmAgent
     from google.adk.sessions import InMemorySessionService, Session
-    from google.adk.memory import InMemoryMemoryService # Import MemoryService
+    from google.adk.memory import InMemoryMemoryService # 导入MemoryService
     from google.adk.runners import Runner
-    from google.adk.tools import load_memory # Tool to query memory
+    from google.adk.tools import load_memory # 查询记忆的工具
     from google.genai.types import Content, Part
 
-    # --- Constants ---
+    # --- 常量 ---
     APP_NAME = "memory_example_app"
     USER_ID = "mem_user"
-    MODEL = "gemini-2.0-flash" # Use a valid model
+    MODEL = "gemini-2.0-flash" # 使用有效模型
 
-    # --- Agent Definitions ---
-    # Agent 1: Simple agent to capture information
+    # --- 智能体定义 ---
+    # 智能体1：用于捕获信息的简单智能体
     info_capture_agent = LlmAgent(
         model=MODEL,
         name="InfoCaptureAgent",
-        instruction="Acknowledge the user's statement.",
-        # output_key="captured_info" # Could optionally save to state too
+        instruction="确认用户的陈述",
+        # output_key="captured_info" # 可选保存到状态
     )
 
-    # Agent 2: Agent that can use memory
+    # 智能体2：可使用记忆的智能体
     memory_recall_agent = LlmAgent(
         model=MODEL,
         name="MemoryRecallAgent",
-        instruction="Answer the user's question. Use the 'load_memory' tool "
-                    "if the answer might be in past conversations.",
-        tools=[load_memory] # Give the agent the tool
+        instruction="回答用户问题。若答案可能在历史对话中，使用'load_memory'工具",
+        tools=[load_memory] # 为智能体提供工具
     )
 
-    # --- Services and Runner ---
+    # --- 服务与运行器 ---
     session_service = InMemorySessionService()
-    memory_service = InMemoryMemoryService() # Use in-memory for demo
+    memory_service = InMemoryMemoryService() # 演示使用内存存储
 
     runner = Runner(
-        # Start with the info capture agent
+        # 初始使用信息捕获智能体
         agent=info_capture_agent,
         app_name=APP_NAME,
         session_service=session_service,
-        memory_service=memory_service # Provide the memory service to the Runner
+        memory_service=memory_service # 为Runner提供记忆服务
     )
 
-    # --- Scenario ---
+    # --- 场景演示 ---
 
-    # Turn 1: Capture some information in a session
-    print("--- Turn 1: Capturing Information ---")
+    # 第一轮：在会话中捕获信息
+    print("--- 第一轮：信息捕获 ---")
     session1_id = "session_info"
     session1 = session_service.create_session(APP_NAME, USER_ID, session1_id)
-    user_input1 = Content(parts=[Part(text="My favorite project is Project Alpha.")])
+    user_input1 = Content(parts=[Part(text="我最喜欢的项目是Project Alpha。")])
 
-    # Run the agent
-    final_response_text = "(No final response)"
+    # 运行智能体
+    final_response_text = "(无最终响应)"
     for event in runner.run(USER_ID, session1_id, user_input1):
         if event.is_final_response() and event.content and event.content.parts:
             final_response_text = event.content.parts[0].text
-    print(f"Agent 1 Response: {final_response_text}")
+    print(f"智能体1响应：{final_response_text}")
 
-    # Get the completed session
+    # 获取已完成的会话
     completed_session1 = session_service.get_session(APP_NAME, USER_ID, session1_id)
 
-    # Add this session's content to the Memory Service
-    print("\n--- Adding Session 1 to Memory ---")
+    # 将会话内容添加至记忆服务
+    print("\n--- 将会话1添加至记忆 ---")
     memory_service.add_session_to_memory(completed_session1)
-    print("Session added to memory.")
+    print("会话已存入记忆")
 
-    # Turn 2: In a *new* (or same) session, ask a question requiring memory
-    print("\n--- Turn 2: Recalling Information ---")
-    session2_id = "session_recall" # Can be same or different session ID
+    # 第二轮：在*新*（或相同）会话中提出需要记忆的问题
+    print("\n--- 第二轮：信息回忆 ---")
+    session2_id = "session_recall" # 可使用相同或不同会话ID
     session2 = session_service.create_session(APP_NAME, USER_ID, session2_id)
 
-    # Switch runner to the recall agent
+    # 将运行器切换至回忆智能体
     runner.agent = memory_recall_agent
-    user_input2 = Content(parts=[Part(text="What is my favorite project?")])
+    user_input2 = Content(parts=[Part(text="我最喜欢的项目是什么？")])
 
-    # Run the recall agent
-    print("Running MemoryRecallAgent...")
-    final_response_text_2 = "(No final response)"
+    # 运行回忆智能体
+    print("运行MemoryRecallAgent...")
+    final_response_text_2 = "(无最终响应)"
     for event in runner.run(USER_ID, session2_id, user_input2):
-        print(f"  Event: {event.author} - Type: {'Text' if event.content and event.content.parts and event.content.parts[0].text else ''}"
-            f"{'FuncCall' if event.get_function_calls() else ''}"
-            f"{'FuncResp' if event.get_function_responses() else ''}")
+        print(f"  事件：{event.author} - 类型：{'文本' if event.content and event.content.parts and event.content.parts[0].text else ''}"
+            f"{'函数调用' if event.get_function_calls() else ''}"
+            f"{'函数响应' if event.get_function_responses() else ''}")
         if event.is_final_response() and event.content and event.content.parts:
             final_response_text_2 = event.content.parts[0].text
-            print(f"Agent 2 Final Response: {final_response_text_2}")
-            break # Stop after final response
+            print(f"智能体2最终响应：{final_response_text_2}")
+            break # 最终响应后停止
 
-    # Expected Event Sequence for Turn 2:
-    # 1. User sends "What is my favorite project?"
-    # 2. Agent (LLM) decides to call `load_memory` tool with a query like "favorite project".
-    # 3. Runner executes the `load_memory` tool, which calls `memory_service.search_memory`.
-    # 4. `InMemoryMemoryService` finds the relevant text ("My favorite project is Project Alpha.") from session1.
-    # 5. Tool returns this text in a FunctionResponse event.
-    # 6. Agent (LLM) receives the function response, processes the retrieved text.
-    # 7. Agent generates the final answer (e.g., "Your favorite project is Project Alpha.").
+    # 第二轮预期事件序列：
+    # 1. 用户发送"我最喜欢的项目是什么？"
+    # 2. 智能体（大模型）决定调用`load_memory`工具，查询如"favorite project"
+    # 3. Runner执行`load_memory`工具，调用`memory_service.search_memory`
+    # 4. `InMemoryMemoryService`从session1找到相关文本（"我最喜欢的项目是Project Alpha。"）
+    # 5. 工具在FunctionResponse事件中返回该文本
+    # 6. 智能体（大模型）接收函数响应，处理检索到的文本
+    # 7. 智能体生成最终答案（如"您最喜欢的项目是Project Alpha。"）
     ```

@@ -1,28 +1,28 @@
-# Multi-Agent Systems in ADK
+# ADK 中的多智能体系统
 
-As agentic applications grow in complexity, structuring them as a single, monolithic agent can become challenging to develop, maintain, and reason about. The Agent Development Kit (ADK) supports building sophisticated applications by composing multiple, distinct `BaseAgent` instances into a **Multi-Agent System (MAS)**.
+随着智能体应用复杂度的提升，将其构建为单一整体式智能体会导致开发、维护和逻辑梳理的困难。Agent Development Kit (ADK) 支持通过组合多个独立的 `BaseAgent` 实例来构建**多智能体系统 (MAS)**，从而开发复杂应用。
 
-In ADK, a multi-agent system is an application where different agents, often forming a hierarchy, collaborate or coordinate to achieve a larger goal. Structuring your application this way offers significant advantages, including enhanced modularity, specialization, reusability, maintainability, and the ability to define structured control flows using dedicated workflow agents.
+在 ADK 中，多智能体系统是由不同智能体（通常形成层级结构）通过协作实现更大目标的应用程序。这种架构方式具有显著优势，包括增强的模块化、专业化、可重用性、可维护性，以及通过专用工作流智能体定义结构化控制流的能力。
 
-You can compose various types of agents derived from `BaseAgent` to build these systems:
+您可以通过组合派生自 `BaseAgent` 的多种智能体来构建这些系统：
 
-* **LLM Agents:** Agents powered by large language models. (See [LLM Agents](llm-agents.md))
-* **Workflow Agents:** Specialized agents (`SequentialAgent`, `ParallelAgent`, `LoopAgent`) designed to manage the execution flow of their sub-agents. (See [Workflow Agents](workflow-agents/index.md))
-* **Custom agents:** Your own agents inheriting from `BaseAgent` with specialized, non-LLM logic. (See [Custom Agents](custom-agents.md))
+* **大模型智能体**：基于大模型驱动的智能体（参见[大模型智能体](llm-agents.md)）
+* **工作流智能体**：专门用于管理子智能体执行流程的特殊智能体（`SequentialAgent`、`ParallelAgent`、`LoopAgent`）（参见[工作流智能体](workflow-agents/index.md)）
+* **自定义智能体**：继承自 `BaseAgent` 的自定义智能体，包含非大模型的专用逻辑（参见[自定义智能体](custom-agents.md)）
 
-The following sections detail the core ADK primitives—such as agent hierarchy, workflow agents, and interaction mechanisms—that enable you to construct and manage these multi-agent systems effectively.
+以下章节详细介绍了 ADK 的核心原语——如智能体层级结构、工作流智能体和交互机制——这些原语能帮助您有效构建和管理多智能体系统。
 
-## 2. ADK Primitives for Agent Composition
+## 2. 用于智能体组合的 ADK 原语
 
-ADK provides core building blocks—primitives—that enable you to structure and manage interactions within your multi-agent system.
+ADK 提供核心构建块（原语），用于构建和管理多智能体系统中的交互。
 
-### 2.1. Agent Hierarchy (`parent_agent`, `sub_agents`)
+### 2.1. 智能体层级结构（`parent_agent`、`sub_agents`）
 
-The foundation for structuring multi-agent systems is the parent-child relationship defined in `BaseAgent`.
+多智能体系统的基础结构是通过 `BaseAgent` 中定义的父子关系建立的。
 
-* **Establishing Hierarchy:** You create a tree structure by passing a list of agent instances to the `sub_agents` argument when initializing a parent agent. ADK automatically sets the `parent_agent` attribute on each child agent during initialization (`google.adk.agents.base_agent.py` - `model_post_init`).
-* **Single Parent Rule:** An agent instance can only be added as a sub-agent once. Attempting to assign a second parent will result in a `ValueError`.
-* **Importance:** This hierarchy defines the scope for [Workflow Agents](#22-workflow-agents-as-orchestrators) and influences the potential targets for LLM-Driven Delegation. You can navigate the hierarchy using `agent.parent_agent` or find descendants using `agent.find_agent(name)`.
+* **建立层级**：在初始化父智能体时，通过向 `sub_agents` 参数传递智能体实例列表来创建树形结构。ADK 在初始化期间（`google.adk.agents.base_agent.py` - `model_post_init`）会自动设置每个子智能体的 `parent_agent` 属性。
+* **单一父节点规则**：一个智能体实例只能作为一个子智能体被添加一次。尝试分配第二个父节点将导致 `ValueError`。
+* **重要性**：该层级结构定义了[工作流智能体](#22-作为协调器的工作流智能体)的作用范围，并影响大模型驱动委派的潜在目标。您可以使用 `agent.parent_agent` 导航层级结构，或使用 `agent.find_agent(name)` 查找后代。
 
 ```python
 # Conceptual Example: Defining Hierarchy
@@ -49,80 +49,80 @@ coordinator = LlmAgent(
 
 ```
 
-### 2.2. Workflow Agents as Orchestrators
+### 2.2. 作为协调器的工作流智能体
 
-ADK includes specialized agents derived from `BaseAgent` that don't perform tasks themselves but orchestrate the execution flow of their `sub_agents`.
+ADK 包含派生自 `BaseAgent` 的专用智能体，它们本身不执行任务，而是协调其 `sub_agents` 的执行流程。
 
-* **[`SequentialAgent`](workflow-agents/sequential-agents.md):** Executes its `sub_agents` one after another in the order they are listed.
-    * **Context:** Passes the *same* [`InvocationContext`](../runtime/index.md) sequentially, allowing agents to easily pass results via shared state.
+* **[`SequentialAgent`](workflow-agents/sequential-agents.md)**：按列表顺序依次执行其 `sub_agents`。
+    * **上下文**：依次传递*相同的* [`InvocationContext`](../runtime/index.md)，允许智能体通过共享状态轻松传递结果。
 
     ```python
-    # Conceptual Example: Sequential Pipeline
+    # 概念示例：顺序管道
     from google.adk.agents import SequentialAgent, LlmAgent
 
-    step1 = LlmAgent(name="Step1_Fetch", output_key="data") # Saves output to state['data']
+    step1 = LlmAgent(name="Step1_Fetch", output_key="data") # 将输出保存到 state['data']
     step2 = LlmAgent(name="Step2_Process", instruction="Process data from state key 'data'.")
 
     pipeline = SequentialAgent(name="MyPipeline", sub_agents=[step1, step2])
-    # When pipeline runs, Step2 can access the state['data'] set by Step1.
+    # 当管道运行时，Step2 可以访问 Step1 设置的 state['data']。
     ```
 
-* **[`ParallelAgent`](workflow-agents/parallel-agents.md):** Executes its `sub_agents` in parallel. Events from sub-agents may be interleaved.
-    * **Context:** Modifies the `InvocationContext.branch` for each child agent (e.g., `ParentBranch.ChildName`), providing a distinct contextual path which can be useful for isolating history in some memory implementations.
-    * **State:** Despite different branches, all parallel children access the *same shared* `session.state`, enabling them to read initial state and write results (use distinct keys to avoid race conditions).
+* **[`ParallelAgent`](workflow-agents/parallel-agents.md)**：并行执行其 `sub_agents`。来自子智能体的事件可能会交错。
+    * **上下文**：为每个子智能体修改 `InvocationContext.branch`（例如 `ParentBranch.ChildName`），提供不同的上下文路径，这有助于在某些内存实现中隔离历史记录。
+    * **状态**：尽管分支不同，所有并行子智能体访问*相同的共享* `session.state`，使它们能够读取初始状态并写入结果（使用不同的键以避免竞争条件）。
 
     ```python
-    # Conceptual Example: Parallel Execution
+    # 概念示例：并行执行
     from google.adk.agents import ParallelAgent, LlmAgent
 
     fetch_weather = LlmAgent(name="WeatherFetcher", output_key="weather")
     fetch_news = LlmAgent(name="NewsFetcher", output_key="news")
 
     gatherer = ParallelAgent(name="InfoGatherer", sub_agents=[fetch_weather, fetch_news])
-    # When gatherer runs, WeatherFetcher and NewsFetcher run concurrently.
-    # A subsequent agent could read state['weather'] and state['news'].
+    # 当 gatherer 运行时，WeatherFetcher 和 NewsFetcher 并发运行。
+    # 后续智能体可以读取 state['weather'] 和 state['news']。
     ```
 
-* **[`LoopAgent`](workflow-agents/loop-agents.md):** Executes its `sub_agents` sequentially in a loop.
-    * **Termination:** The loop stops if the optional `max_iterations` is reached, or if any sub-agent yields an [`Event`](../events/index.md) with `actions.escalate=True`.
-    * **Context & State:** Passes the *same* `InvocationContext` in each iteration, allowing state changes (e.g., counters, flags) to persist across loops.
+* **[`LoopAgent`](workflow-agents/loop-agents.md)**：在循环中依次执行其 `sub_agents`。
+    * **终止**：如果达到可选的 `max_iterations`，或任何子智能体生成带有 `actions.escalate=True` 的 [`Event`](../events/index.md)，则循环停止。
+    * **上下文和状态**：在每次迭代中传递*相同的* `InvocationContext`，允许状态更改（例如计数器、标志）在循环之间持续存在。
 
     ```python
-    # Conceptual Example: Loop with Condition
+    # 概念示例：带条件的循环
     from google.adk.agents import LoopAgent, LlmAgent, BaseAgent
     from google.adk.events import Event, EventActions
     from google.adk.agents.invocation_context import InvocationContext
     from typing import AsyncGenerator
 
-    class CheckCondition(BaseAgent): # Custom agent to check state
+    class CheckCondition(BaseAgent): # 检查状态的自定义智能体
         async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
             status = ctx.session.state.get("status", "pending")
             is_done = (status == "completed")
-            yield Event(author=self.name, actions=EventActions(escalate=is_done)) # Escalate if done
+            yield Event(author=self.name, actions=EventActions(escalate=is_done)) # 如果完成则升级
 
-    process_step = LlmAgent(name="ProcessingStep") # Agent that might update state['status']
+    process_step = LlmAgent(name="ProcessingStep") # 可能更新 state['status'] 的智能体
 
     poller = LoopAgent(
         name="StatusPoller",
         max_iterations=10,
         sub_agents=[process_step, CheckCondition(name="Checker")]
     )
-    # When poller runs, it executes process_step then Checker repeatedly
-    # until Checker escalates (state['status'] == 'completed') or 10 iterations pass.
+    # 当 poller 运行时，它会重复执行 process_step 然后 Checker，
+    # 直到 Checker 升级（state['status'] == 'completed'）或达到 10 次迭代。
     ```
 
-### 2.3. Interaction & Communication Mechanisms
+### 2.3. 交互与通信机制
 
-Agents within a system often need to exchange data or trigger actions in one another. ADK facilitates this through:
+系统中的智能体通常需要交换数据或触发彼此的操作。ADK 通过以下方式实现这一点：
 
-#### a) Shared Session State (`session.state`)
+#### a) 共享会话状态（`session.state`）
 
-The most fundamental way for agents operating within the same invocation (and thus sharing the same [`Session`](../sessions/session.md) object via the `InvocationContext`) to communicate passively.
+在同一调用中运行的智能体（通过 `InvocationContext` 共享相同的 [`Session`](../sessions/session.md) 对象）进行被动通信的最基本方式。
 
-* **Mechanism:** One agent (or its tool/callback) writes a value (`context.state['data_key'] = processed_data`), and a subsequent agent reads it (`data = context.state.get('data_key')`). State changes are tracked via [`CallbackContext`](../callbacks/index.md).
-* **Convenience:** The `output_key` property on [`LlmAgent`](llm-agents.md) automatically saves the agent's final response text (or structured output) to the specified state key.
-* **Nature:** Asynchronous, passive communication. Ideal for pipelines orchestrated by `SequentialAgent` or passing data across `LoopAgent` iterations.
-* **See Also:** [State Management](../sessions/state.md)
+* **机制**：一个智能体（或其工具/回调）写入值（`context.state['data_key'] = processed_data`），后续智能体读取该值（`data = context.state.get('data_key')`）。状态更改通过 [`CallbackContext`](../callbacks/index.md) 跟踪。
+* **便利性**：[`LlmAgent`](llm-agents.md) 上的 `output_key` 属性会自动将智能体的最终响应文本（或结构化输出）保存到指定的状态键。
+* **特性**：异步、被动通信。适用于由 `SequentialAgent` 协调的管道或在 `LoopAgent` 迭代之间传递数据。
+* **另请参阅**：[状态管理](../sessions/state.md)
 
 ```python
 # Conceptual Example: Using output_key and reading state
@@ -136,14 +136,14 @@ pipeline = SequentialAgent(name="CityInfo", sub_agents=[agent_A, agent_B])
 # AgentB runs, its instruction processor reads state['capital_city'] to get "Paris".
 ```
 
-#### b) LLM-Driven Delegation (Agent Transfer)
+#### b) 大模型驱动委派（智能体转移）
 
-Leverages an [`LlmAgent`](llm-agents.md)'s understanding to dynamically route tasks to other suitable agents within the hierarchy.
+利用 [`LlmAgent`](llm-agents.md) 的理解能力，将任务动态路由到层级结构中的其他合适智能体。
 
-* **Mechanism:** The agent's LLM generates a specific function call: `transfer_to_agent(agent_name='target_agent_name')`.
-* **Handling:** The `AutoFlow`, used by default when sub-agents are present or transfer isn't disallowed, intercepts this call. It identifies the target agent using `root_agent.find_agent()` and updates the `InvocationContext` to switch execution focus.
-* **Requires:** The calling `LlmAgent` needs clear `instructions` on when to transfer, and potential target agents need distinct `description`s for the LLM to make informed decisions. Transfer scope (parent, sub-agent, siblings) can be configured on the `LlmAgent`.
-* **Nature:** Dynamic, flexible routing based on LLM interpretation.
+* **机制**：智能体的大模型生成特定函数调用：`transfer_to_agent(agent_name='target_agent_name')`。
+* **处理**：默认情况下，当存在子智能体或未禁止转移时，`AutoFlow` 会拦截此调用。它使用 `root_agent.find_agent()` 识别目标智能体，并更新 `InvocationContext` 以切换执行焦点。
+* **要求**：调用的 `LlmAgent` 需要关于何时转移的清晰 `instructions`，潜在目标智能体需要不同的 `description` 以便大模型做出明智决策。转移范围（父节点、子智能体、同级节点）可在 `LlmAgent` 上配置。
+* **特性**：基于大模型解释的动态、灵活路由。
 
 ```python
 # Conceptual Setup: LLM Transfer
@@ -164,14 +164,14 @@ coordinator = LlmAgent(
 # ADK framework then routes execution to booking_agent.
 ```
 
-#### c) Explicit Invocation (`AgentTool`)
+#### c) 显式调用（`AgentTool`）
 
-Allows an [`LlmAgent`](llm-agents.md) to treat another `BaseAgent` instance as a callable function or [Tool](../tools/index.md).
+允许 [`LlmAgent`](llm-agents.md) 将另一个 `BaseAgent` 实例视为可调用函数或[工具](../tools/index.md)。
 
-* **Mechanism:** Wrap the target agent instance in `AgentTool` and include it in the parent `LlmAgent`'s `tools` list. `AgentTool` generates a corresponding function declaration for the LLM.
-* **Handling:** When the parent LLM generates a function call targeting the `AgentTool`, the framework executes `AgentTool.run_async`. This method runs the target agent, captures its final response, forwards any state/artifact changes back to the parent's context, and returns the response as the tool's result.
-* **Nature:** Synchronous (within the parent's flow), explicit, controlled invocation like any other tool.
-* **(Note:** `AgentTool` needs to be imported and used explicitly).
+* **机制**：将目标智能体实例包装在 `AgentTool` 中，并将其包含在父 `LlmAgent` 的 `tools` 列表中。`AgentTool` 会为大模型生成相应的函数声明。
+* **处理**：当父大模型生成针对 `AgentTool` 的函数调用时，框架执行 `AgentTool.run_async`。此方法运行目标智能体，捕获其最终响应，将任何状态/工件更改转发回父上下文，并将响应作为工具结果返回。
+* **特性**：同步（在父流程内）、显式、受控调用，类似于其他工具。
+* **（注意**：需要显式导入和使用 `AgentTool`）。
 
 ```python
 # Conceptual Setup: Agent as a Tool
@@ -206,19 +206,19 @@ artist_agent = LlmAgent(
 # The resulting image Part is returned to the Artist agent as the tool result.
 ```
 
-These primitives provide the flexibility to design multi-agent interactions ranging from tightly coupled sequential workflows to dynamic, LLM-driven delegation networks.
+这些原语提供了灵活性，可以设计从紧密耦合的顺序工作流到动态的大模型驱动委派网络的多智能体交互。
 
-## 3. Common Multi-Agent Patterns using ADK Primitives
+## 3. 使用 ADK 原语的常见多智能体模式
 
-By combining ADK's composition primitives, you can implement various established patterns for multi-agent collaboration.
+通过组合 ADK 的组合原语，您可以实现多种既定的多智能体协作模式。
 
-### Coordinator/Dispatcher Pattern
+### 协调器/调度器模式
 
-* **Structure:** A central [`LlmAgent`](llm-agents.md) (Coordinator) manages several specialized `sub_agents`.
-* **Goal:** Route incoming requests to the appropriate specialist agent.
-* **ADK Primitives Used:**
-    * **Hierarchy:** Coordinator has specialists listed in `sub_agents`.
-    * **Interaction:** Primarily uses **LLM-Driven Delegation** (requires clear `description`s on sub-agents and appropriate `instruction` on Coordinator) or **Explicit Invocation (`AgentTool`)** (Coordinator includes `AgentTool`-wrapped specialists in its `tools`).
+* **结构**：一个中央 [`LlmAgent`](llm-agents.md)（协调器）管理多个专用 `sub_agents`。
+* **目标**：将传入请求路由到适当的专业智能体。
+* **使用的 ADK 原语**：
+    * **层级结构**：协调器在 `sub_agents` 中列出专业智能体。
+    * **交互**：主要使用**大模型驱动委派**（需要子智能体的清晰 `description` 和协调器上的适当 `instruction`）或**显式调用（`AgentTool`）**（协调器在其 `tools` 中包含 `AgentTool` 包装的专业智能体）。
 
 ```python
 # Conceptual Code: Coordinator using LLM Transfer
@@ -239,13 +239,13 @@ coordinator = LlmAgent(
 # User asks "I can't log in" -> Coordinator's LLM should call transfer_to_agent(agent_name='Support')
 ```
 
-### Sequential Pipeline Pattern
+### 顺序管道模式
 
-* **Structure:** A [`SequentialAgent`](workflow-agents/sequential-agents.md) contains `sub_agents` executed in a fixed order.
-* **Goal:** Implement a multi-step process where the output of one step feeds into the next.
-* **ADK Primitives Used:**
-    * **Workflow:** `SequentialAgent` defines the order.
-    * **Communication:** Primarily uses **Shared Session State**. Earlier agents write results (often via `output_key`), later agents read those results from `context.state`.
+* **结构**：一个 [`SequentialAgent`](workflow-agents/sequential-agents.md) 包含按固定顺序执行的 `sub_agents`。
+* **目标**：实现多步骤流程，其中一步的输出作为下一步的输入。
+* **使用的 ADK 原语**：
+    * **工作流**：`SequentialAgent` 定义顺序。
+    * **通信**：主要使用**共享会话状态**。早期智能体写入结果（通常通过 `output_key`），后续智能体从 `context.state` 读取这些结果。
 
 ```python
 # Conceptual Code: Sequential Data Pipeline
@@ -264,13 +264,13 @@ data_pipeline = SequentialAgent(
 # reporter runs -> reads state['result']
 ```
 
-### Parallel Fan-Out/Gather Pattern
+### 并行扇出/收集模式
 
-* **Structure:** A [`ParallelAgent`](workflow-agents/parallel-agents.md) runs multiple `sub_agents` concurrently, often followed by a later agent (in a `SequentialAgent`) that aggregates results.
-* **Goal:** Execute independent tasks simultaneously to reduce latency, then combine their outputs.
-* **ADK Primitives Used:**
-    * **Workflow:** `ParallelAgent` for concurrent execution (Fan-Out). Often nested within a `SequentialAgent` to handle the subsequent aggregation step (Gather).
-    * **Communication:** Sub-agents write results to distinct keys in **Shared Session State**. The subsequent "Gather" agent reads multiple state keys.
+* **结构**：一个 [`ParallelAgent`](workflow-agents/parallel-agents.md) 并发运行多个 `sub_agents`，通常后跟一个稍后的智能体（在 `SequentialAgent` 中）聚合结果。
+* **目标**：同时执行独立任务以减少延迟，然后合并它们的输出。
+* **使用的 ADK 原语**：
+    * **工作流**：`ParallelAgent` 用于并发执行（扇出）。通常嵌套在 `SequentialAgent` 中以处理后续聚合步骤（收集）。
+    * **通信**：子智能体将结果写入**共享会话状态**中的不同键。后续的“收集”智能体读取多个状态键。
 
 ```python
 # Conceptual Code: Parallel Information Gathering
@@ -297,13 +297,13 @@ overall_workflow = SequentialAgent(
 # synthesizer runs afterwards, reading state['api1_data'] and state['api2_data'].
 ```
 
-### Hierarchical Task Decomposition
+### 分层任务分解
 
-* **Structure:** A multi-level tree of agents where higher-level agents break down complex goals and delegate sub-tasks to lower-level agents.
-* **Goal:** Solve complex problems by recursively breaking them down into simpler, executable steps.
-* **ADK Primitives Used:**
-    * **Hierarchy:** Multi-level `parent_agent`/`sub_agents` structure.
-    * **Interaction:** Primarily **LLM-Driven Delegation** or **Explicit Invocation (`AgentTool`)** used by parent agents to assign tasks to children. Results are returned up the hierarchy (via tool responses or state).
+* **结构**：多级智能体树，其中高级智能体分解复杂目标并将子任务委派给低级智能体。
+* **目标**：通过递归分解复杂问题为更简单的可执行步骤来解决问题。
+* **使用的 ADK 原语**：
+    * **层级结构**：多级 `parent_agent`/`sub_agents` 结构。
+    * **交互**：父智能体主要使用**大模型驱动委派**或**显式调用（`AgentTool`）**将任务分配给子智能体。结果通过工具响应或状态返回层级结构。
 
 ```python
 # Conceptual Code: Hierarchical Research Task
@@ -336,13 +336,13 @@ report_writer = LlmAgent(
 # Results flow back up.
 ```
 
-### Review/Critique Pattern (Generator-Critic)
+### 审查/批评模式（生成器-批评器）
 
-* **Structure:** Typically involves two agents within a [`SequentialAgent`](workflow-agents/sequential-agents.md): a Generator and a Critic/Reviewer.
-* **Goal:** Improve the quality or validity of generated output by having a dedicated agent review it.
-* **ADK Primitives Used:**
-    * **Workflow:** `SequentialAgent` ensures generation happens before review.
-    * **Communication:** **Shared Session State** (Generator uses `output_key` to save output; Reviewer reads that state key). The Reviewer might save its feedback to another state key for subsequent steps.
+* **结构**：通常在 [`SequentialAgent`](workflow-agents/sequential-agents.md) 中包含两个智能体：生成器和批评器/审查器。
+* **目标**：通过专用智能体审查生成的输出来提高其质量或有效性。
+* **使用的 ADK 原语**：
+    * **工作流**：`SequentialAgent` 确保生成先于审查。
+    * **通信**：**共享会话状态**（生成器使用 `output_key` 保存输出；审查器读取该状态键）。审查器可能将其反馈保存到另一个状态键以供后续步骤使用。
 
 ```python
 # Conceptual Code: Generator-Critic
@@ -370,14 +370,14 @@ review_pipeline = SequentialAgent(
 # reviewer runs -> reads state['draft_text'], saves status to state['review_status']
 ```
 
-### Iterative Refinement Pattern
+### 迭代优化模式
 
-* **Structure:** Uses a [`LoopAgent`](workflow-agents/loop-agents.md) containing one or more agents that work on a task over multiple iterations.
-* **Goal:** Progressively improve a result (e.g., code, text, plan) stored in the session state until a quality threshold is met or a maximum number of iterations is reached.
-* **ADK Primitives Used:**
-    * **Workflow:** `LoopAgent` manages the repetition.
-    * **Communication:** **Shared Session State** is essential for agents to read the previous iteration's output and save the refined version.
-    * **Termination:** The loop typically ends based on `max_iterations` or a dedicated checking agent setting `actions.escalate=True` when the result is satisfactory.
+* **结构**：使用 [`LoopAgent`](workflow-agents/loop-agents.md)，其中包含一个或多个智能体在多次迭代中处理任务。
+* **目标**：逐步改进存储在会话状态中的结果（例如代码、文本、计划），直到达到质量阈值或最大迭代次数。
+* **使用的 ADK 原语**：
+    * **工作流**：`LoopAgent` 管理重复。
+    * **通信**：**共享会话状态**对于智能体读取前一次迭代的输出并保存优化版本至关重要。
+    * **终止**：循环通常基于 `max_iterations` 或专用检查智能体在结果满意时设置 `actions.escalate=True` 结束。
 
 ```python
 # Conceptual Code: Iterative Code Refinement
@@ -417,15 +417,15 @@ refinement_loop = LoopAgent(
 # Loop stops if QualityChecker outputs 'pass' (leading to StopChecker escalating) or after 5 iterations.
 ```
 
-### Human-in-the-Loop Pattern
+### 人在回路模式
 
-* **Structure:** Integrates human intervention points within an agent workflow.
-* **Goal:** Allow for human oversight, approval, correction, or tasks that AI cannot perform.
-* **ADK Primitives Used (Conceptual):**
-    * **Interaction:** Can be implemented using a custom **Tool** that pauses execution and sends a request to an external system (e.g., a UI, ticketing system) waiting for human input. The tool then returns the human's response to the agent.
-    * **Workflow:** Could use **LLM-Driven Delegation** (`transfer_to_agent`) targeting a conceptual "Human Agent" that triggers the external workflow, or use the custom tool within an `LlmAgent`.
-    * **State/Callbacks:** State can hold task details for the human; callbacks can manage the interaction flow.
-    * **Note:** ADK doesn't have a built-in "Human Agent" type, so this requires custom integration.
+* **结构**：在智能体工作流中集成人工干预点。
+* **目标**：允许人工监督、批准、纠正或执行 AI 无法完成的任务。
+* **使用的 ADK 原语（概念性）**：
+    * **交互**：可以使用自定义**工具**实现，该工具暂停执行并向外部系统（例如 UI、工单系统）发送请求，等待人工输入。然后工具将人工响应返回给智能体。
+    * **工作流**：可以使用**大模型驱动委派**（`transfer_to_agent`）针对触发外部工作流的概念性“人工智能体”，或在 `LlmAgent` 中使用自定义工具。
+    * **状态/回调**：状态可以保存任务的详细信息供人工使用；回调可以管理交互流程。
+    * **注意**：ADK 没有内置的“人工智能体”类型，因此需要自定义集成。
 
 ```python
 # Conceptual Code: Using a Tool for Human Approval
@@ -468,4 +468,4 @@ approval_workflow = SequentialAgent(
 )
 ```
 
-These patterns provide starting points for structuring your multi-agent systems. You can mix and match them as needed to create the most effective architecture for your specific application.
+这些模式为构建多智能体系统提供了起点。您可以根据需要混合搭配它们，为特定应用创建最有效的架构。

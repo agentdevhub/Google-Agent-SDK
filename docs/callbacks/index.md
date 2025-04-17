@@ -1,61 +1,50 @@
-# Callbacks: Observe, Customize, and Control Agent Behavior
+# 回调机制：观察、定制与控制智能体行为
 
-## Introduction: What are Callbacks and Why Use Them?
+## 引言：什么是回调及其价值
 
-Callbacks are a cornerstone feature of ADK, providing a powerful mechanism to hook into an agent's execution process. They allow you to observe, customize, and even control the agent's behavior at specific, predefined points without modifying the core ADK framework code.
+回调是ADK框架的核心功能，它提供了一种强大的机制来介入智能体的执行流程。通过回调，您可以在不修改ADK核心框架代码的前提下，在预定义的特定节点观察、定制甚至控制智能体的行为。
 
-**What are they?** In essence, callbacks are standard Python functions that you define. You then associate these functions with an agent when you create it. The ADK framework automatically calls your functions at key stages in the agent's lifecycle, such as:
+**本质解析**  
+回调本质上是由用户定义的标准Python函数。当创建智能体时，您需要将这些函数与智能体关联。ADK框架会在智能体生命周期的关键阶段自动调用这些函数，例如：
 
-* Before or after the agent's main processing logic runs.  
-* Before sending a request to, or after receiving a response from, the Large Language Model (LLM).  
-* Before executing a tool (like a Python function or another agent) or after it finishes.
+* 在智能体主逻辑运行前或运行后  
+* 在向大模型发送请求前或接收响应后  
+* 在执行工具（如Python函数或其他智能体）前或完成执行后  
 
 ![intro_components.png](../assets/callback_flow.png)
 
-**Why use them?** Callbacks unlock significant flexibility and enable advanced agent capabilities:
+**核心价值**  
+回调机制能带来显著的灵活性并实现高级功能：
 
-* **Observe & Debug:** Log detailed information at critical steps for monitoring and troubleshooting.  
-* **Customize & Control:** Modify data flowing through the agent (like LLM requests or tool results) or even bypass certain steps entirely based on your logic.  
-* **Implement Guardrails:** Enforce safety rules, validate inputs/outputs, or prevent disallowed operations.  
-* **Manage State:** Read or dynamically update the agent's session state during execution.  
-* **Integrate & Enhance:** Trigger external actions (API calls, notifications) or add features like caching.
+* **观察与调试**：在关键步骤记录详细信息以供监控和故障排查  
+* **定制与控制**：修改流经智能体的数据（如大模型请求或工具结果），或根据业务逻辑完全跳过某些步骤  
+* **安全防护**：实施安全规则、验证输入输出、阻止违规操作  
+* **状态管理**：在执行过程中读取或动态更新智能体的会话状态  
+* **集成增强**：触发外部操作（API调用、通知）或添加缓存等特性  
 
-**How are they added?** You register callbacks by passing your defined Python functions as arguments to the agent's constructor (`__init__`) when you create an instance of `Agent` or `LlmAgent`.
+**注册方式**  
+在创建`Agent`或`LlmAgent`实例时，通过将定义好的Python函数作为参数传递给智能体构造函数（`__init__`）来注册回调。
 
 ```py
 --8<-- "examples/python/snippets/callbacks/callback_basic.py:callback_basic"
 ```
 
-## The Callback Mechanism: Interception and Control
+## 回调机制：拦截与控制原理
 
-When the ADK framework encounters a point where a callback can run (e.g., just before calling the LLM), it checks if you provided a corresponding callback function for that agent. If you did, the framework executes your function.
+当ADK框架运行到可触发回调的节点时（例如调用大模型前），会检查是否为此智能体注册了对应的回调函数。若存在注册函数，框架将执行该函数。
 
-**Context is Key:** Your callback function isn't called in isolation. The framework provides special **context objects** (`CallbackContext` or `ToolContext`) as arguments. These objects contain vital information about the current state of the agent's execution, including the invocation details, session state, and potentially references to services like artifacts or memory. You use these context objects to understand the situation and interact with the framework. (See the dedicated "Context Objects" section for full details).
+**上下文核心**  
+回调函数并非孤立运行。框架会提供特殊的**上下文对象**（`CallbackContext`或`ToolContext`）作为参数，这些对象包含智能体当前执行状态的关键信息，包括调用详情、会话状态，以及可能存在的服务引用（如工件或内存）。您需要通过这些上下文对象来理解当前状态并与框架交互（详见"上下文对象"专章）。
 
-**Controlling the Flow (The Core Mechanism):** The most powerful aspect of callbacks lies in how their **return value** influences the agent's subsequent actions. This is how you intercept and control the execution flow:
+**流程控制（核心机制）**  
+回调最强大的特性在于其**返回值**能影响智能体的后续行为，这是实现执行流拦截与控制的关键：
 
-1. **`return None` (Allow Default Behavior):**  
+1. **`return None`（允许默认行为）**  
 
-    * This is the standard way to signal that your callback has finished its work (e.g., logging, inspection, minor modifications to *mutable* input arguments like `llm_request`) and that the ADK agent should **proceed with its normal operation**.  
-    * For `before_*` callbacks (`before_agent`, `before_model`, `before_tool`), returning `None` means the next step in the sequence (running the agent logic, calling the LLM, executing the tool) will occur.  
-    * For `after_*` callbacks (`after_agent`, `after_model`, `after_tool`), returning `None` means the result just produced by the preceding step (the agent's output, the LLM's response, the tool's result) will be used as is.
-
-2. **`return <Specific Object>` (Override Default Behavior):**  
-
-    * Returning a *specific type of object* (instead of `None`) is how you **override** the ADK agent's default behavior. The framework will use the object you return and *skip* the step that would normally follow or *replace* the result that was just generated.  
-    * **`before_agent_callback` → `types.Content`**: Skips the agent's main execution logic (`_run_async_impl` / `_run_live_impl`). The returned `Content` object is immediately treated as the agent's final output for this turn. Useful for handling simple requests directly or enforcing access control.  
-    * **`before_model_callback` → `LlmResponse`**: Skips the call to the external Large Language Model. The returned `LlmResponse` object is processed as if it were the actual response from the LLM. Ideal for implementing input guardrails, prompt validation, or serving cached responses.  
-    * **`before_tool_callback` → `dict`**: Skips the execution of the actual tool function (or sub-agent). The returned `dict` is used as the result of the tool call, which is then typically passed back to the LLM. Perfect for validating tool arguments, applying policy restrictions, or returning mocked/cached tool results.  
-    * **`after_agent_callback` → `types.Content`**: *Replaces* the `Content` that the agent's run logic just produced.  
-    * **`after_model_callback` → `LlmResponse`**: *Replaces* the `LlmResponse` received from the LLM. Useful for sanitizing outputs, adding standard disclaimers, or modifying the LLM's response structure.  
-    * **`after_tool_callback` → `dict`**: *Replaces* the `dict` result returned by the tool. Allows for post-processing or standardization of tool outputs before they are sent back to the LLM.
-
-**Conceptual Code Example (Guardrail):**
-
-This example demonstrates the common pattern for a guardrail using `before_model_callback`.
+    * 此返回值表示回调已完成其工作（如日志记录、检查、对`llm_request`等可变输入参数的微调），ADK智能体应**继续正常执行流程**  
+    * 对于`before_*`类回调（`before_agent`、`before_model`、`before_tool`），返回`None`意味着将继续执行后续步骤（运行智能体逻辑、调用大模型、执行工具）  
+    * 对于`after_*`类回调（`after_agent`、`after_model`、`after_tool`），返回`None`表示直接使用上一步骤产生的结果（智能体输出、大模型响应、工具结果）  
 
 ```py
 --8<-- "examples/python/snippets/callbacks/before_model_callback.py"
 ```
-
-By understanding this mechanism of returning `None` versus returning specific objects, you can precisely control the agent's execution path, making callbacks an essential tool for building sophisticated and reliable agents with ADK.

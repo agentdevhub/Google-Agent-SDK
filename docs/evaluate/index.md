@@ -1,37 +1,37 @@
-# Why Evaluate Agents
+# 为何需要评估智能体
 
-In traditional software development, unit tests and integration tests provide confidence that code functions as expected and remains stable through changes. These tests provide a clear "pass/fail" signal, guiding further development. However, LLM agents introduce a level of variability that makes traditional testing approaches insufficient.
+在传统软件开发中，单元测试和集成测试能确保代码按预期运行并在变更后保持稳定。这些测试提供明确的"通过/失败"信号，指导后续开发。然而大模型智能体引入了不确定性，使得传统测试方法不再适用。
 
-Due to the probabilistic nature of models, deterministic "pass/fail" assertions are often unsuitable for evaluating agent performance. Instead, we need qualitative evaluations of both the final output and the agent's trajectory \- the sequence of steps taken to reach the solution. This involves assessing the quality of the agent's decisions, its reasoning process, and the final result.
+由于模型的概率特性，确定性的"通过/失败"断言往往不适合评估智能体表现。我们需要对最终输出和智能体轨迹（即解决问题的步骤序列）进行定性评估。这包括评估智能体的决策质量、推理过程以及最终结果。
 
-This may seem like a lot of extra work to set up, but the investment of automating evaluations pays off quickly. If you intend to progress beyond prototype, this is a highly recommended best practice.
+虽然建立评估体系看似需要额外工作，但自动化评估的投入能快速获得回报。如果您希望超越原型阶段，这绝对是最佳实践。
 
 ![intro_components.png](../assets/evaluate_agent.png)
 
-## Preparing for Agent Evaluations
+## 评估前的准备工作
 
-Before automating agent evaluations, define clear objectives and success criteria:
+在自动化评估前，需明确目标和成功标准：
 
-* **Define Success:** What constitutes a successful outcome for your agent?  
-* **Identify Critical Tasks:** What are the essential tasks your agent must accomplish?  
-* **Choose Relevant Metrics:** What metrics will you track to measure performance?
+* **定义成功标准**：您的智能体达成何种结果才算成功？  
+* **识别关键任务**：智能体必须完成哪些核心任务？  
+* **选择相关指标**：追踪哪些指标来衡量性能？
 
-These considerations will guide the creation of evaluation scenarios and enable effective monitoring of agent behavior in real-world deployments.
+这些考量将指导评估场景的创建，并有效监控实际部署中的智能体行为。
 
-## What to Evaluate?
+## 评估什么？
 
-To bridge the gap between a proof-of-concept and a production-ready AI agent, a robust and automated evaluation framework is essential. Unlike evaluating generative models, where the focus is primarily on the final output, agent evaluation requires a deeper understanding of the decision-making process. Agent evaluation can be broken down into two components:
+要跨越概念验证与生产级AI智能体之间的鸿沟，必须建立稳健的自动化评估框架。与生成式模型评估不同（仅关注最终输出），智能体评估需要深入理解决策过程。评估可分为两部分：
 
-1. **Evaluating Trajectory and Tool Use:** Analyzing the steps an agent takes to reach a solution, including its choice of tools, strategies, and the efficiency of its approach.  
-2. **Evaluating the Final Response:** Assessing the quality, relevance, and correctness of the agent's final output.
+1. **评估轨迹和工具使用**：分析智能体解决问题的步骤，包括工具选择、策略及方法效率  
+2. **评估最终响应**：评判最终输出的质量、相关性和准确性
 
-The trajectory is just a list of steps the agent took before it returned to the user. We can compare that against the list of steps we expect the agent to have taken.
+轨迹就是智能体返回结果前执行的操作步骤列表。我们可以将其与预期步骤列表进行比对。
 
-### Evaluating trajectory and tool use
+### 评估轨迹和工具使用
 
-Before responding to a user, an agent typically performs a series of actions, which we refer to as a 'trajectory.' It might compare the user input with session history to disambiguate a term, or lookup a policy document, search a knowledge base or invoke an API to save a ticket. We call this a ‘trajectory’ of actions. Evaluating an agent's performance requires comparing its actual trajectory to an expected, or ideal, one. This comparison can reveal errors and inefficiencies in the agent's process. The expected trajectory represents the ground truth \-- the list of steps we anticipate the agent should take.
+在响应用户前，智能体通常会执行一系列动作（称为"轨迹"）。它可能比对用户输入和会话历史来消除术语歧义，或查询政策文档、搜索知识库、调用API创建工单。我们称这些动作为"轨迹"。评估表现需要将实际轨迹与预期（理想）轨迹对比，从而发现流程中的错误和低效。预期轨迹代表基准事实——我们期望智能体执行的步骤序列。
 
-For example:
+例如：
 
 ```py
 // Trajectory evaluation will compare
@@ -39,31 +39,31 @@ expected_steps = ["determine_intent", "use_tool", "review_results", "report_gene
 actual_steps = ["determine_intent", "use_tool", "review_results", "report_generation"]
 ```
 
-Several ground-truth-based trajectory evaluations exist:
+存在多种基于基准事实的轨迹评估方法：
 
-1. **Exact match:** Requires a perfect match to the ideal trajectory.  
-2. **In-order match:** Requires the correct actions in the correct order, allows for extra actions.  
-3. **Any-order match:** Requires the correct actions in any order, allows for extra actions.  
-4. **Precision:** Measures the relevance/correctness of predicted actions.  
-5. **Recall:** Measures how many essential actions are captured in the prediction.  
-6. **Single-tool use:** Checks for the inclusion of a specific action.
+1. **精确匹配**：要求与理想轨迹完全一致  
+2. **顺序匹配**：要求动作顺序正确，允许额外动作  
+3. **任意顺序匹配**：只需包含正确动作，顺序不限，允许额外动作  
+4. **精确率**：衡量预测动作的相关性/正确性  
+5. **召回率**：衡量预测包含多少必要动作  
+6. **单一工具检查**：验证是否包含特定动作
 
-Choosing the right evaluation metric depends on the specific requirements and goals of your agent. For instance, in high-stakes scenarios, an exact match might be crucial, while in more flexible situations, an in-order or any-order match might suffice.
+选择合适指标取决于智能体的具体需求和目标。例如高风险场景可能需要精确匹配，而灵活场景可能只需顺序或任意顺序匹配。
 
-## How Evaluation works with the ADK
+## ADK的评估机制
 
-The ADK offers two methods for evaluating agent performance against predefined datasets and evaluation criteria. While conceptually similar, they differ in the amount of data they can process, which typically dictates the appropriate use case for each.
+ADK提供两种方法，基于预设数据集和评估标准来评测智能体表现。虽然概念相似，但二者处理的数据量不同，通常决定了各自的适用场景。
 
-### First approach: Using a test file
+### 方法一：使用测试文件
 
-This approach involves creating individual test files, each representing a single, simple agent-model interaction (a session). It's most effective during active agent development, serving as a form of unit testing. These tests are designed for rapid execution and should focus on simple session complexity. Each test file contains a single session, which may consist of multiple turns. A turn represents a single interaction between the user and the agent. Each turn includes
+该方法需创建独立的测试文件，每个文件代表一次简单的智能体-模型交互（会话）。最适合活跃开发阶段，相当于单元测试。这些测试设计用于快速执行，应关注简单会话场景。每个测试文件包含单个会话（可能含多轮交互）。每轮交互包括：
 
-* `query:` This is the user query.  
-* `expected_tool_use`: The tool call(s) that we expect the agent to make in order to respond correctly to the user `query`.  
-* `expected_intermediate_agent_responses`:  This field contains the natural language responses produced by the agent as it progresses towards a final answer. These responses are typical in multi-agent systems where a root agent relies on child agents to accomplish a task. While generally not directly relevant to end-users, these intermediate responses are valuable for developers. They provide insight into the agent's reasoning path and help verify that it followed the correct steps to generate the final response.
-* `reference`: The expected final response from the model.
+* `query:` 用户查询语句  
+* `expected_tool_use`：智能体为正确响应应调用的工具 `query`  
+* `expected_intermediate_agent_responses`：该字段包含智能体生成最终答案过程中产生的自然语言响应。这些响应常见于多智能体系统，当根智能体依赖子智能体完成任务时产生。虽然通常不直接面向终端用户，但这些中间响应对开发者极具价值，能揭示智能体的推理路径，帮助验证其是否遵循正确步骤生成最终响应  
+* `reference`：模型的预期最终响应
 
-You can give the file any name for example `evaluation.test.json`.The framework only checks for the `.test.json` suffix, and the preceding part of the filename is not constrained. Here is a test file with a few examples:
+文件名可任意指定（如 `evaluation.test.json`）。框架仅检测 `.test.json` 后缀，前缀不受限制。以下是示例测试文件：
 
 ```json
 [
@@ -94,15 +94,15 @@ You can give the file any name for example `evaluation.test.json`.The framework 
 ]
 ```
 
-Test files can be organized into folders. Optionally, a folder can also include a `test_config.json` file that specifies the evaluation criteria.
+测试文件可组织到文件夹中。可选地，文件夹可包含 `test_config.json` 文件来指定评估标准。
 
-### Second approach: Using An Evalset File
+### 方法二：使用评估集文件
 
-The evalset approach utilizes a dedicated dataset called an "evalset" for evaluating agent-model interactions. Similar to a test file, the evalset contains example interactions. However, an evalset can contain multiple, potentially lengthy sessions, making it ideal for simulating complex, multi-turn conversations. Due to its ability to represent complex sessions, the evalset is well-suited for integration tests. These tests are typically run less frequently than unit tests due to their more extensive nature.
+评估集方法使用专用数据集（称为"evalset"）来评估智能体-模型交互。与测试文件类似，但评估集可包含多个可能冗长的会话，非常适合模拟复杂的多轮对话。因其能呈现复杂会话，评估集特别适合集成测试。由于测试规模较大，通常执行频率低于单元测试。
 
-An evalset file contains multiple "evals," each representing a distinct session. Each eval consists of one or more "turns," which include the user query, expected tool use, expected intermediate agent responses, and a reference response. These fields have the same meaning as they do in the test file approach. Each eval is identified by a unique name. Furthermore, each eval includes an associated initial session state.
+评估集文件包含多个"eval"，每个代表独立会话。每个eval含一至多轮"turns"，包括用户查询、预期工具使用、预期中间响应和参考响应。这些字段含义与测试文件方法相同。每个eval有唯一名称，且包含关联的初始会话状态。
 
-Creating evalsets manually can be complex, therefore UI tools are provided to help capture relevant sessions and easily convert them into evals within your evalset. Learn more about using the web UI for evaluation below. Here is an example evalset containing two sessions.
+手动创建评估集较复杂，因此提供了UI工具帮助捕获相关会话并轻松转换为评估集条目。下方将详述网页UI使用方法。以下是包含两个会话的评估集示例：
 
 ```json
 [
@@ -188,19 +188,19 @@ Creating evalsets manually can be complex, therefore UI tools are provided to he
 ]
 ```
 
-### Evaluation Criteria
+### 评估标准
 
-The evaluation criteria define how the agent's performance is measured against the evalset. The following metrics are supported:
+评估标准定义了如何根据评估集衡量智能体表现。支持以下指标：
 
-* `tool_trajectory_avg_score`: This metric compares the agent's actual tool usage during the evaluation against the expected tool usage defined in the `expected_tool_use` field. Each matching tool usage step receives a score of 1, while a mismatch receives a score of 0\. The final score is the average of these matches, representing the accuracy of the tool usage trajectory.  
-* `response_match_score`: This metric compares the agent's final natural language response to the expected final response, stored in the `reference` field. We use the [ROUGE](https://en.wikipedia.org/wiki/ROUGE_\(metric\)) metric to calculate the similarity between the two responses.
+* `tool_trajectory_avg_score`：该指标将评估期间智能体的实际工具使用与 `expected_tool_use` 字段定义的预期使用进行比对。每个匹配的工具使用步骤得1分，不匹配得0分。最终得分是这些匹配的平均值，代表工具使用轨迹的准确度  
+* `response_match_score`：该指标比较智能体的最终自然语言响应与 `reference` 字段存储的预期响应。我们使用[ROUGE](https://en.wikipedia.org/wiki/ROUGE_\(metric\))指标计算两者相似度
 
-If no evaluation criteria are provided, the following default configuration is used:
+若未提供评估标准，则使用以下默认配置：
 
-* `tool_trajectory_avg_score`: Defaults to 1.0, requiring a 100% match in the tool usage trajectory.  
-* `response_match_score`: Defaults to 0.8, allowing for a small margin of error in the agent's natural language responses.
+* `tool_trajectory_avg_score`：默认为1.0，要求工具使用轨迹100%匹配  
+* `response_match_score`：默认为0.8，允许智能体自然语言响应存在小幅误差
 
-Here is an example of a `test_config.json` file specifying custom evaluation criteria:
+以下是 `test_config.json` 文件指定自定义评估标准的示例：
 
 ```json
 {
@@ -211,43 +211,43 @@ Here is an example of a `test_config.json` file specifying custom evaluation cri
 }
 ```
 
-## How to run Evaluation with the ADK
+## 如何使用ADK运行评估
 
-As a developer, you can evaluate your agents using the ADK in the following ways:
+开发者可通过以下方式使用ADK评估智能体：
 
-1. **Web-based UI (**`adk web`**):** Evaluate agents interactively through a web-based interface.  
-2. **Programmatically (**`pytest`**)**: Integrate evaluation into your testing pipeline using `pytest` and test files.  
-3. **Command Line Interface (**`adk eval`**):** Run evaluations on an existing evaluation set file directly from the command line.
+1. **网页UI（**`adk web`**）**：通过交互式网页界面评估  
+2. **编程方式（**`pytest`**）**：使用 `pytest` 和测试文件将评估集成到测试流程  
+3. **命令行界面（**`adk eval`**）**：直接从命令行对现有评估集文件运行评估
 
-### 1\. `adk web` \- Run Evaluations via the Web UI
+### 1. `adk web` - 通过网页UI运行评估
 
-The web UI provides an interactive way to evaluate agents and generate evaluation datasets.
+网页UI提供交互式评估方式，并可生成评估数据集。
 
-Steps to run evaluation via the web ui:
+网页UI评估步骤：
 
-1. Start the web server by running: `bash adk web samples_for_testing`  
-2. In the web interface:  
-    * Select an agent (e.g., `hello_world`).  
-    * Interact with the agent to create a session that you want to save as a test case.  
-    * Click the **“Eval tab”** on the right side of the interface.  
-    * If you already have an existing eval set, select that or create a new one by clicking on **"Create new eval set"** button. Give your eval set a contextual name. Select the newly created evaluation set.  
-    * Click **"Add current session"** to save the current session as an eval in the eval set file. You will be asked to provide a name for this eval, again give it a contextual name.  
-    * Once created, the newly created eval will show up in the list of available evals in the eval set file. You can run all or select specific ones to run the eval.  
-    * The status of each eval will be shown in the UI.
+1. 运行以下命令启动服务器：`bash adk web samples_for_testing`  
+2. 在网页界面中：  
+    * 选择智能体（如 `hello_world`）  
+    * 与智能体交互创建要保存为测试用例的会话  
+    * 点击界面右侧**"Eval标签"**  
+    * 如有现有评估集则选择，或点击**"Create new eval set"**新建。为评估集起情境化名称，选择新建的评估集  
+    * 点击**"Add current session"**将当前会话保存为评估集条目。需为此eval命名（建议情境化名称）  
+    * 创建后，新eval将显示在评估集文件列表中。可运行全部或选择特定eval执行评估  
+    * 每个eval状态将显示在UI中
 
-### 2\.  `pytest` \- Run Tests Programmatically
+### 2. `pytest` - 编程方式运行测试
 
-You can also use **`pytest`** to run test files as part of your integration tests.
+您也可以使用 **`pytest`** 将测试文件作为集成测试的一部分运行。
 
-#### Example Command
+#### 示例命令
 
 ```shell
 pytest tests/integration/
 ```
 
-#### Example Test Code
+#### 测试代码示例
 
-Here is an example of a `pytest` test case that runs a single test file:
+以下是运行单个测试文件的 `pytest` 测试用例示例：
 
 ```py
 def test_with_single_test_file():
@@ -258,9 +258,9 @@ def test_with_single_test_file():
     )
 ```
 
-This approach allows you to integrate agent evaluations into your CI/CD pipelines or larger test suites. If you want to specify the initial session state for your tests, you can do that by storing the session details in a file and passing that to `AgentEvaluator.evaluate` method.
+此方法允许将智能体评估集成到CI/CD流程或大型测试套件中。如需为测试指定初始会话状态，可将会话详情存入文件并传递给 `AgentEvaluator.evaluate` 方法。
 
-Here is a sample session json file:
+以下是会话JSON文件示例：
 
 ```json
 {
@@ -280,7 +280,7 @@ Here is a sample session json file:
 }
 ```
 
-And the sample code will look like this:
+对应示例代码如下：
 
 ```py
 def test_with_single_test_file():
@@ -292,11 +292,11 @@ def test_with_single_test_file():
     )
 ```
 
-### 3\. `adk eval` \- Run Evaluations via the cli
+### 3. `adk eval` - 通过CLI运行评估
 
-You can also run evaluation of an eval set file through the command line interface (CLI). This runs the same evaluation that runs on the UI, but it helps with automation, i.e. you can add this command as a part of your regular build generation and verification process.
+也可通过命令行界面(CLI)对评估集文件运行评估。这与UI执行的评估相同，但有助于自动化（例如可将此命令加入常规构建验证流程）。
 
-Here is the command:
+命令如下：
 
 ```shell
 adk eval \
@@ -306,7 +306,7 @@ adk eval \
     [--print_detailed_results]
 ```
 
-For example:
+例如：
 
 ```shell
 adk eval \
@@ -314,11 +314,11 @@ adk eval \
     samples_for_testing/hello_world/hello_world_eval_set_001.evalset.json
 ```
 
-Here are the details for each command line argument:
+各命令行参数说明：
 
-* `AGENT_MODULE_FILE_PATH`: The path to the `init.py` file that contains a module by the name "agent". "agent" module contains a `root_agent`.  
-* `EVAL_SET_FILE_PATH`: The path to evaluations file(s). You can specify one or more eval set file paths. For each file, all evals will be run by default. If you want to run only specific evals from a eval set, first create a comma separated list of eval names and then add that as a suffix to the eval set file name, demarcated by a colon `:` .
-* For example: `sample_eval_set_file.json:eval_1,eval_2,eval_3`  
+* `AGENT_MODULE_FILE_PATH`：指向包含名为"agent"模块的 `init.py` 文件路径。"agent"模块需包含 `root_agent`  
+* `EVAL_SET_FILE_PATH`：评估文件路径。可指定一个或多个评估集文件路径。默认运行每个文件的所有eval。如需仅运行特定eval，先创建逗号分隔的eval名称列表，然后以冒号 `:` 为分隔符附加在文件名后  
+  例如：`sample_eval_set_file.json:eval_1,eval_2,eval_3`  
   `This will only run eval_1, eval_2 and eval_3 from sample_eval_set_file.json`  
-* `CONFIG_FILE_PATH`: The path to the config file.  
-* `PRINT_DETAILED_RESULTS`: Prints detailed results on the console.
+* `CONFIG_FILE_PATH`：配置文件路径  
+* `PRINT_DETAILED_RESULTS`：在控制台打印详细结果

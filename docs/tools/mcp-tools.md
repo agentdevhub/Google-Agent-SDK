@@ -1,26 +1,26 @@
-# Model Context Protocol Tools
+# 模型上下文协议工具指南
 
- This guide walks you through two ways of integrating Model Context Protocol (MCP) with ADK.
+本指南将介绍两种将模型上下文协议（MCP）与ADK集成的方法。
 
-## What is Model Context Protocol (MCP)?
+## 什么是模型上下文协议（MCP）？
 
-The Model Context Protocol (MCP) is an open standard designed to standardize how Large Language Models (LLMs) like Gemini and Claude communicate with external applications, data sources, and tools. Think of it as a universal connection mechanism that simplifies how LLMs obtain context, execute actions, and interact with various systems.
+模型上下文协议（MCP）是一个开放标准，旨在规范Gemini、Claude等大模型与外部应用程序、数据源和工具的通信方式。可以将其视为一种通用连接机制，简化了大模型获取上下文、执行操作以及与各类系统交互的过程。
 
-MCP follows a client-server architecture, defining how **data** (resources), **interactive templates** (prompts), and **actionable functions** (tools) are exposed by an **MCP server** and consumed by an **MCP client** (which could be an LLM host application or an AI agent).
+MCP采用客户端-服务器架构，定义了**数据**（资源）、**交互模板**（提示词）和**可执行功能**（工具）如何通过**MCP服务器**暴露，并由**MCP客户端**（可能是大模型宿主应用或AI代理）消费。
 
-This guide covers two primary integration patterns:
+本指南涵盖两种主要集成模式：
 
-1. **Using Existing MCP Servers within ADK:** An ADK agent acts as an MCP client, leveraging tools provided by external MCP servers.  
-2. **Exposing ADK Tools via an MCP Server:** Building an MCP server that wraps ADK tools, making them accessible to any MCP client.
+1. **在ADK中使用现有MCP服务器**：ADK代理作为MCP客户端，利用外部MCP服务器提供的工具  
+2. **通过MCP服务器暴露ADK工具**：构建封装ADK工具的MCP服务器，使其可供任何MCP客户端访问
 
-## Prerequisites
+## 前提条件
 
-Before you begin, ensure you have the following set up:
+开始前请确保已完成以下设置：
 
-* **Set up ADK:** Follow the standard ADK \[setup\]() instructions in the quickstart.  
-* **Install/update Python:** MCP requires Python version of 3.9 or higher.  
-* **Setup Node.js and npx:** Many community MCP servers are distributed as Node.js packages and run using `npx`. Install Node.js (which includes npx) if you haven't already. For details, see [https://nodejs.org/en](https://nodejs.org/en).  
-* **Verify Installations:** Confirm `adk` and `npx` are in your PATH within the activated virtual environment:
+* **配置ADK环境**：按照快速入门中的标准ADK[安装]()说明操作  
+* **安装/更新Python**：MCP需要Python 3.9或更高版本  
+* **安装Node.js和npx**：许多社区MCP服务器以Node.js包形式分发，需使用`npx`运行。若未安装请先安装Node.js（包含npx）。详情参见[https://nodejs.org/en](https://nodejs.org/en)  
+* **验证安装**：在激活的虚拟环境中确认`adk`和`npx`已加入PATH：
 
 ```shell
 # Both commands should print the path to the executables.
@@ -28,30 +28,30 @@ which adk
 which npx
 ```
 
-## 1. **Using MCP servers with ADK agents (ADK as an MCP client)**
+## 1. **ADK代理使用MCP服务器（ADK作为MCP客户端）**
 
-This section shows two examples of using MCP servers with ADK agents. This is the most common integration pattern. Your ADK agent needs to use functionality provided by an existing service that exposes itself as an MCP Server.
+本节展示两个ADK代理使用MCP服务器的示例。这是最常见的集成模式，您的ADK代理需要使用现有服务通过MCP服务器暴露的功能。
 
-### `MCPToolset` class
+### `MCPToolset`类
 
-The examples use the `MCPToolset` class in ADK which acts as the bridge to the MCP server. Your ADK agent uses `MCPToolset` to:
+示例使用ADK中的`MCPToolset`类作为与MCP服务器的桥梁。ADK代理通过`MCPToolset`实现：
 
-1. **Connect:** Establish a connection to an MCP server process. This can be a local server communicating over standard input/output (`StdioServerParameters`) or a remote server using Server-Sent Events (`SseServerParams`).  
-2. **Discover:** Query the MCP server for its available tools (`list_tools` MCP method).  
-3. **Adapt:** Convert the MCP tool schemas into ADK-compatible `BaseTool` instances.  
-4. **Expose:** Present these adapted tools to the ADK `LlmAgent`.  
-5. **Proxy Calls:** When the `LlmAgent` decides to use one of these tools, `MCPToolset` forwards the call (`call_tool` MCP method) to the MCP server and returns the result.  
-6. **Manage Connection:** Handle the lifecycle of the connection to the MCP server process, often requiring explicit cleanup.
+1. **连接**：建立与MCP服务器进程的连接（通过标准输入/输出`StdioServerParameters`或使用Server-Sent Events`SseServerParams`的远程服务器）  
+2. **发现**：查询MCP服务器获取可用工具（`list_tools` MCP方法）  
+3. **适配**：将MCP工具模式转换为ADK兼容的`BaseTool`实例  
+4. **暴露**：向ADK `LlmAgent`提供这些适配后的工具  
+5. **代理调用**：当`LlmAgent`决定使用某个工具时，`MCPToolset`将调用（`call_tool` MCP方法）转发至MCP服务器并返回结果  
+6. **管理连接**：处理与MCP服务器进程的连接生命周期，通常需要显式清理
 
-### Example 1: File System MCP Server
+### 示例1：文件系统MCP服务器
 
-This example demonstrates connecting to a local MCP server that provides file system operations.
+本示例演示连接提供文件系统操作的本地MCP服务器。
 
-#### Step 1: Attach the MCP Server to your ADK agent via `MCPToolset`
+#### 步骤1：通过`MCPToolset`将MCP服务器附加到ADK代理
 
-Create `agent.py` in `./adk_agent_samples/mcp_agent/` and use the following code snippet to define a function that initializes the `MCPToolset`.
+在`./adk_agent_samples/mcp_agent/`中创建`agent.py`，使用以下代码片段初始化`MCPToolset`
 
-* **Important:** Replace `"/path/to/your/folder"` with the **absolute path** to an actual folder on your system.
+* **重要**：将`"/path/to/your/folder"`替换为您系统上的**绝对路径**
 
 ```py
 # ./adk_agent_samples/mcp_agent/agent.py
@@ -147,16 +147,16 @@ if __name__ == '__main__':
     print(f"An error occurred: {e}")
 ```
 
-#### Step 2: Observe the result
+#### 步骤2：观察结果
 
-Run the script from the adk_agent_samples directory (ensure your virtual environment is active):
+从adk_agent_samples目录运行脚本（确保虚拟环境已激活）：
 
 ```shell
 cd ./adk_agent_samples
 python3 ./mcp_agent/agent.py
 ```
 
-The following shows the expected output for the connection attempt, the MCP server starting (via npx), the ADK agent events (including the FunctionCall to list\_directory and the FunctionResponse), and the final agent text response based on the file listing. Ensure the exit\_stack.aclose() runs at the end.
+以下显示连接尝试的预期输出：MCP服务器启动（通过npx）、ADK代理事件（包括对list_directory的FunctionCall和FunctionResponse）以及基于文件列表的最终代理文本响应。确保最后执行exit_stack.aclose()。
 
 ```text
 User Query: 'list files in the tests folder'
@@ -178,19 +178,19 @@ Cleanup complete.
 
 ```
 
-### Example 2: Google Maps MCP Server
+### 示例2：Google地图MCP服务器
 
-This follows the same pattern but targets the Google Maps MCP server.
+遵循相同模式，但针对Google地图MCP服务器。
 
-#### Step 1: Get API Key and Enable APIs
+#### 步骤1：获取API密钥并启用API
 
-Follow the directions at [Use API keys](https://developers.google.com/maps/documentation/javascript/get-api-key#create-api-keys) to get a Google Maps API Key.
+按照[使用API密钥](https://developers.google.com/maps/documentation/javascript/get-api-key#create-api-keys)指南获取Google地图API密钥。
 
-Enable Directions API and Routes API in your Google Cloud project. For instructions, see [Getting started with Google Maps Platform](https://developers.google.com/maps/get-started#enable-api-sdk) topic.
+在Google Cloud项目中启用Directions API和Routes API。操作说明参见[Google Maps Platform入门](https://developers.google.com/maps/get-started#enable-api-sdk)主题。
 
-#### Step 2: Update get\_tools\_async
+#### 步骤2：更新get_tools_async
 
-Modify get\_tools\_async in agent.py to connect to the Maps server, passing your API key via the env parameter of StdioServerParameters.
+修改agent.py中的get_tools_async以连接地图服务器，通过StdioServerParameters的env参数传递API密钥。
 
 ```py
 # agent.py (modify get_tools_async and other parts as needed)
@@ -284,16 +284,16 @@ if __name__ == '__main__':
 
 ```
 
-#### Step 3: Observe the Result
+#### 步骤3：观察结果
 
-Run the script from the adk_agent_samples directory (ensure your virtual environment is active):
+从adk_agent_samples目录运行脚本（确保虚拟环境已激活）：
 
 ```shell
 cd ./adk_agent_samples
 python3 ./mcp_agent/agent.py
 ```
 
-A successful run will show events indicating the agent called the relevant Google Maps tool (likely related to directions or routes) and a final response containing the directions. An example is shown below.
+成功运行将显示事件日志，表明代理调用了相关Google地图工具（可能与路线规划相关）以及包含路线信息的最终响应。示例如下：
 
 ```text
 User Query: 'What is the route from 1600 Amphitheatre Pkwy to 1165 Borregas Ave'
@@ -310,33 +310,33 @@ Cleanup complete.
 
 ```
 
-## 2. **Building an MCP server with ADK tools (MCP server exposing ADK)**
+## 2. **构建包含ADK工具的MCP服务器（通过MCP暴露ADK）**
 
-This pattern allows you to wrap ADK's tools and make them available to any standard MCP client application. The example in this section exposes the load\_web\_page ADK tool through the MCP server.
+此模式允许您封装ADK工具，使其可供任何标准MCP客户端应用使用。本节示例通过MCP服务器暴露load_web_page ADK工具。
 
-### Summary of steps
+### 步骤概览
 
-You will create a standard Python MCP server application using the model-context-protocol library. Within this server, you will:
+您将使用model-context-protocol库创建标准Python MCP服务器应用。在该服务器中需要：
 
-1. Instantiate the ADK tool(s) you want to expose (e.g., FunctionTool(load\_web\_page)).  
-2. Implement the MCP server's @app.list\_tools handler to advertise the ADK tool(s), converting the ADK tool definition to the MCP schema using adk\_to\_mcp\_tool\_type.  
-3. Implement the MCP server's @app.call\_tool handler to receive requests from MCP clients, identify if the request targets your wrapped ADK tool, execute the ADK tool's .run\_async() method, and format the result into an MCP-compliant response (e.g., types.TextContent).
+1. 实例化要暴露的ADK工具（如FunctionTool(load_web_page)）  
+2. 实现MCP服务器的@app.list_tools处理程序来发布ADK工具，使用adk_to_mcp_tool_type将ADK工具定义转换为MCP模式  
+3. 实现MCP服务器的@app.call_tool处理程序接收MCP客户端请求，识别是否针对封装的ADK工具，执行ADK工具的.run_async()方法，并将结果格式化为MCP兼容响应（如types.TextContent）
 
-### Prerequisites
+### 前提条件
 
-Install the MCP server library in the same environment as ADK:
+在ADK相同环境中安装MCP服务器库：
 
 ```shell
 pip install mcp
 ```
 
-### Step 1: Create the MCP Server Script
+### 步骤1：创建MCP服务器脚本
 
-Create a new Python file, e.g., adk\_mcp\_server.py.
+新建Python文件，如adk_mcp_server.py。
 
-### Step 2: Implement the Server Logic
+### 步骤2：实现服务器逻辑
 
-Add the following code, which sets up an MCP server exposing the ADK load\_web\_page tool.
+添加以下代码设置暴露ADK load_web_page工具的MCP服务器。
 
 ```py
 # adk_mcp_server.py
@@ -453,9 +453,9 @@ if __name__ == "__main__":
 
 ```
 
-### Step 3: Test your MCP Server with ADK
+### 步骤3：使用ADK测试MCP服务器
 
-Follow the same instructions in “Example 1: File System MCP Server” and create a MCP client. This time use your MCP Server file created above as input command:
+按照"示例1：文件系统MCP服务器"相同说明创建MCP客户端。这次使用上述创建的MCP服务器文件作为输入命令：
 
 ```py
 # ./adk_agent_samples/mcp_agent/agent.py
@@ -475,36 +475,34 @@ async def get_tools_async():
   )
 ```
 
-Execute the agent script from your terminal similar to above (ensure necessary libraries like model-context-protocol and google-adk are installed in your environment):
+从终端执行代理脚本（确保环境中已安装model-context-protocol和google-adk等必要库）：
 
 ```shell
 cd ./adk_agent_samples
 python3 ./mcp_agent/agent.py
 ```
 
-The script will print startup messages and then wait for an MCP client to connect via its standard input/output to your MCP Server in adk\_mcp\_server.py. Any MCP-compliant client (like Claude Desktop, or a custom client using the MCP libraries) can now connect to this process, discover the load\_web\_page tool, and invoke it. The server will print log messages indicating received requests and ADK tool execution. Refer to the [documentation](https://modelcontextprotocol.io/quickstart/server#core-mcp-concepts), to try it out with Claude Desktop.
+脚本将打印启动消息，然后等待MCP客户端通过标准输入/输出连接到adk_mcp_server.py中的MCP服务器。任何MCP兼容客户端（如Claude Desktop或使用MCP库的自定义客户端）现在都可以连接此进程，发现load_web_page工具并调用它。服务器将打印日志消息显示接收到的请求和ADK工具执行情况。参考[文档](https://modelcontextprotocol.io/quickstart/server#core-mcp-concepts)尝试与Claude Desktop集成。
 
-## Key considerations
+## 关键注意事项
 
-When working with MCP and ADK, keep these points in mind:
+使用MCP和ADK时需注意：
 
-* **Protocol vs. Library:** MCP is a protocol specification, defining communication rules. ADK is a Python library/framework for building agents. MCPToolset bridges these by implementing the client side of the MCP protocol within the ADK framework. Conversely, building an MCP server in Python requires using the model-context-protocol library.
+* **协议与库的区别**：MCP是协议规范，定义通信规则；ADK是构建代理的Python库/框架。MCPToolset通过在ADK框架内实现MCP协议的客户端来桥接二者。反之，构建Python MCP服务器需要使用model-context-protocol库。
 
-* **ADK Tools vs. MCP Tools:**
+* **ADK工具与MCP工具的区别**：
+    * ADK工具（BaseTool、FunctionTool、AgentTool等）是为ADK的LlmAgent和Runner直接使用的Python对象  
+    * MCP工具是MCP服务器根据协议模式暴露的能力。MCPToolset使这些工具对LlmAgent表现为ADK工具  
+    * Langchain/CrewAI工具是这些库中的特定实现，通常是简单函数或类，缺乏MCP的服务器/协议结构。ADK提供部分互操作封装器（LangchainTool、CrewaiTool）
 
-    * ADK Tools (BaseTool, FunctionTool, AgentTool, etc.) are Python objects designed for direct use within the ADK's LlmAgent and Runner.  
-    * MCP Tools are capabilities exposed by an MCP Server according to the protocol's schema. MCPToolset makes these look like ADK tools to an LlmAgent.  
-    * Langchain/CrewAI Tools are specific implementations within those libraries, often simple functions or classes, lacking the server/protocol structure of MCP. ADK offers wrappers (LangchainTool, CrewaiTool) for some interoperability.
+* **异步特性**：ADK和MCP Python库都深度依赖asyncio库。工具实现和服务器处理程序通常应为异步函数。
 
-* **Asynchronous nature:** Both ADK and the MCP Python library are heavily based on the asyncio Python library. Tool implementations and server handlers should generally be async functions.
+* **有状态会话（MCP）**：MCP在客户端和服务器实例间建立有状态的持久连接，这与典型的无状态REST API不同。
+    * **部署**：这种有状态性可能带来扩展和部署挑战，特别是远程服务器处理多用户时。原始MCP设计通常假设客户端和服务器共置。管理这些持久连接需要谨慎的基础设施考虑（如负载均衡、会话亲和性）  
+    * **ADK MCPToolset**：管理此连接生命周期。示例中展示的exit_stack模式对确保连接（以及可能的服务器进程）在ADK代理结束时正确终止至关重要。
 
-* **Stateful sessions (MCP):** MCP establishes stateful, persistent connections between a client and server instance. This differs from typical stateless REST APIs.
+## 扩展资源
 
-    * **Deployment:** This statefulness can pose challenges for scaling and deployment, especially for remote servers handling many users. The original MCP design often assumed client and server were co-located. Managing these persistent connections requires careful infrastructure considerations (e.g., load balancing, session affinity).  
-    * **ADK MCPToolset:** Manages this connection lifecycle. The exit\_stack pattern shown in the examples is crucial for ensuring the connection (and potentially the server process) is properly terminated when the ADK agent finishes.
-
-## Further Resources
-
-* [Model Context Protocol Documentation](https://modelcontextprotocol.io/ )
-* [MCP Specification](https://modelcontextprotocol.io/specification/)  
-* [MCP Python SDK & Examples](https://github.com/modelcontextprotocol/)
+* [模型上下文协议文档](https://modelcontextprotocol.io/)  
+* [MCP规范](https://modelcontextprotocol.io/specification/)  
+* [MCP Python SDK及示例](https://github.com/modelcontextprotocol/)

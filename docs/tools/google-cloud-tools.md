@@ -1,33 +1,24 @@
-# Google Cloud Tools
+# Google Cloud 工具集
 
-Google Cloud tools make it easier to connect your agents to Google Cloud’s
-products and services. With just a few lines of code you can use these tools to
-connect your agents with:
+Google Cloud 工具集能便捷地将您的智能体与 Google Cloud 产品服务相连。仅需几行代码，即可实现以下连接：
 
-* **Millions of custom APIs** that developers host in Apigee.
-* **100s** of **prebuilt connectors** to enterprise systems such as Salesforce,
-  Workday, and SAP.
-* **Automation workflows** built using application integration.
-* **Databases** such as Spanner, AlloyDB, Postgres and more using the MCP Toolbox for
-  databases.
+* **数百万个自定义 API**：开发者通过 Apigee 托管的各类接口
+* **数百个预构建连接器**：支持 Salesforce、Workday、SAP 等企业系统
+* **自动化工作流**：基于应用集成构建的流程自动化
+* **数据库服务**：通过 MCP Toolbox 连接 Spanner、AlloyDB、Postgres 等数据库
 
 ![Google Cloud Tools](../assets/google_cloud_tools.svg)
 
-## Apigee API Hub Tools
+## Apigee API Hub 工具集
 
-**ApiHubToolset** lets you turn any documented API from Apigee API hub into a
-tool with a few lines of code. This section shows you the step by step
-instructions including setting up authentication for a secure connection to your
-APIs.
+**ApiHubToolset** 可将 Apigee API hub 中任何文档化的 API 快速转化为工具。本节将分步指导如何设置 API 安全连接的认证配置。
 
-**Prerequisites**
+**前置条件**
 
-1. [Install ADK](../get-started/installation.md)
-2. Install the
-   [Google Cloud CLI](https://cloud.google.com/sdk/docs/install?db=bigtable-docs#installation_instructions).
-3. [Apigee API hub](https://cloud.google.com/apigee/docs/apihub/what-is-api-hub)
-    instance with documented (i.e. OpenAPI spec) APIs
-4. Set up your project structure and create required files
+1. [安装 ADK](../get-started/installation.md)
+2. 安装 [Google Cloud CLI](https://cloud.google.com/sdk/docs/install?db=bigtable-docs#installation_instructions)
+3. 已配置 [Apigee API hub](https://cloud.google.com/apigee/docs/apihub/what-is-api-hub) 实例并包含文档化 API（如 OpenAPI 规范）
+4. 完成项目结构搭建及必要文件创建
 
 ```console
 project_root_folder
@@ -39,69 +30,56 @@ project_root_folder
      `__ tool.py
 ```
 
-### Create an API Hub Toolset
+### 创建 API Hub 工具集
 
-Note: This tutorial includes an agent creation. If you already have an agent,
-you only need to follow a subset of these steps.
+注：本教程包含智能体创建步骤。若已有智能体，仅需执行部分操作。
 
-1. Get your access token, so that APIHubToolset can fetch spec from API Hub API.
-   In your terminal run the following command
+1. 获取访问令牌以便 APIHubToolset 从 API Hub 获取规范。终端执行：
 
     ```shell
     gcloud auth print-access-token
-    # Prints your access token like 'ya29....'
+    # 输出类似 'ya29....' 的访问令牌
     ```
 
-2. Ensure that the account used has the required permissions. You can use the
-   pre-defined role `roles/apihub.viewer` or assign the following permissions:
+2. 确保所用账号具有必要权限。可使用预定义角色 `roles/apihub.viewer` 或分配以下权限：
+    1. **apihub.specs.get（必需）**
+    2. apihub.apis.get（可选）
+    3. apihub.apis.list（可选）
+    4. apihub.versions.get（可选）
+    5. apihub.versions.list（可选）
+    6. apihub.specs.list（可选）
 
-    1. **apihub.specs.get (required)**
-    2. apihub.apis.get (optional)
-    3. apihub.apis.list (optional)
-    4. apihub.versions.get (optional)
-    5. apihub.versions.list (optional)
-    6. apihub.specs.list (optional)
+3. 使用 `APIHubToolset` 创建工具。将以下代码添加至 `tools.py`：
 
-3. Create a tool with `APIHubToolset`. Add the below to `tools.py`
-
-    If your API requires authentication, you must configure authentication for
-    the tool. The following code sample demonstrates how to configure an API
-    key. ADK supports token based auth (API Key, Bearer token), service account,
-    and OpenID Connect. We will soon add support for various OAuth2 flows.
+    若 API 需认证，必须配置认证方式。以下示例演示如何配置 API 密钥。ADK 支持基于令牌的认证（API 密钥、Bearer 令牌）、服务账号和 OpenID Connect，后续将增加 OAuth2 流程支持。
 
     ```py
     from google.adk.tools.openapi_tool.auth.auth_helpers import token_to_scheme_credential
     from google.adk.tools.apihub_tool.apihub_toolset import APIHubToolset
 
-    # Provide authentication for your APIs. Not required if your APIs don't required authentication.
+    # 为 API 提供认证（若无需认证可省略）
     auth_scheme, auth_credential = token_to_scheme_credential(
         "apikey", "query", "apikey", apikey_credential_str
     )
 
     sample_toolset_with_auth = APIHubToolset(
         name="apihub-sample-tool",
-        description="Sample Tool",
-        access_token="...",  # Copy your access token generated in step 1
-        apihub_resource_name="...", # API Hub resource name
+        description="示例工具",
+        access_token="...",  # 粘贴步骤1生成的访问令牌
+        apihub_resource_name="...", # API Hub 资源名称
         auth_scheme=auth_scheme,
         auth_credential=auth_credential,
     )
     ```
 
-    For production deployment we recommend using a service account instead of an
-    access token. In the code snippet above, use
-    `service_account_json=service_account_cred_json_str` and provide your
-    security account credentials instead of the token.
+    生产环境建议使用服务账号替代访问令牌。在上述代码中，使用 `service_account_json=service_account_cred_json_str` 并提供服务账号凭证。
 
-    For apihub\_resource\_name, if you know the specific ID of the OpenAPI Spec
-    being used for your API, use
-    `` `projects/my-project-id/locations/us-west1/apis/my-api-id/versions/version-id/specs/spec-id` ``.
-    If you would like the Toolset to automatically pull the first available spec
-    from the API, use
-    `` `projects/my-project-id/locations/us-west1/apis/my-api-id` ``
+    对于 apihub_resource_name：若已知 OpenAPI 规范 ID，使用格式：
+    `` `projects/我的项目ID/locations/us-west1/apis/我的API-ID/versions/版本ID/specs/规范ID` ``
+    若需自动获取 API 的首个可用规范，使用格式：
+    `` `projects/我的项目ID/locations/us-west1/apis/我的API-ID` ``
 
-4. Create your agent file [Agent.py](http://Agent.py) and add the created tools
-   to your agent definition:
+4. 创建 [Agent.py](http://Agent.py) 并将工具添加至智能体定义：
 
     ```py
     from google.adk.agents.llm_agent import LlmAgent
@@ -110,61 +88,50 @@ you only need to follow a subset of these steps.
     root_agent = LlmAgent(
         model='gemini-2.0-flash',
         name='enterprise_assistant',
-        instruction='Help user, leverage the tools you have access to',
+        instruction='帮助用户，充分利用可用工具',
         tools=sample_toolset.get_tools(),
     )
     ```
 
-5. Configure your \`\_\_init\_\_.py\` to expose your agent
+5. 配置 \`\_\_init\_\_.py\` 以暴露智能体：
 
     ```py
     from . import agent
     ```
 
-6. Start the Google ADK Web UI and try your agent:
+6. 启动 Google ADK Web UI 测试智能体：
 
     ```shell
-    # make sure to run `adk web` from your project_root_folder
+    # 确保从 project_root_folder 执行 `adk web`
     adk web
     ```
 
-   Then go to [http://localhost:8000](http://localhost:8000) to try your agent from the Web UI.
+    访问 [http://localhost:8000](http://localhost:8000) 通过 Web UI 测试。
 
 ---
 
-## Application Integration Tools
+## 应用集成工具集
 
-With **ApplicationIntegrationToolset** you can seamlessly give your agents a
-secure and governed to enterprise applications using Integration Connector’s
-100+ pre-built connectors for systems like Salesforce, ServiceNow, JIRA, SAP,
-and more. Support for both on-prem and SaaS applications. In addition you can
-turn your existing Application Integration process automations into agentic
-workflows by providing application integration workflows as tools to your ADK
-agents.
+通过 **ApplicationIntegrationToolset**，您可安全合规地为智能体接入企业应用。该工具集提供 100+ 预构建连接器，支持 Salesforce、ServiceNow、JIRA、SAP 等系统（含本地与 SaaS 应用）。您还可将现有应用集成工作流转化为智能体工具。
 
-**Prerequisites**
+**前置条件**
 
-1. [Install ADK](../get-started/installation.md)
-2. An existing
-   [Application Integration](https://cloud.google.com/application-integration/docs/overview)
-   workflow or
-   [Integrations Connector](https://cloud.google.com/integration-connectors/docs/overview)
-   connection you want to use with your agent
-3. To use tool with default credentials: have Google Cloud CLI installed. See
-   [installation guide](https://cloud.google.com/sdk/docs/install#installation_instructions)*.*
+1. [安装 ADK](../get-started/installation.md)
+2. 已有 [应用集成工作流](https://cloud.google.com/application-integration/docs/overview) 或 [集成连接器](https://cloud.google.com/integration-connectors/docs/overview)
+3. 若使用默认凭证：需安装 Google Cloud CLI（参见[安装指南](https://cloud.google.com/sdk/docs/install#installation_instructions)）
 
-   *Run :*
+    *执行：*
 
     ```shell
     gcloud config set project
     gcloud auth application-default login
-    gcloud auth application-default set-quota-project <project-id>
+    gcloud auth application-default set-quota-project <项目ID>
     ```
 
-4. Set up your project structure and create required files
+4. 搭建项目结构并创建必要文件：
 
     ```console
-    project_root_folder
+    项目根目录
     |-- .env
     `-- my_agent
         |-- __init__.py
@@ -172,43 +139,34 @@ agents.
         `__ tools.py
     ```
 
-When running the agent, make sure to run adk web in project\_root\_folder
+运行智能体时，确保在项目根目录执行 adk web
 
-### Use Integration Connectors
+### 使用集成连接器
 
-Connect your agent to enterprise applications using
-[Integration Connectors](https://cloud.google.com/integration-connectors/docs/overview).
+通过[集成连接器](https://cloud.google.com/integration-connectors/docs/overview)连接企业应用：
 
-1. To use a connector from Integration Connectors, you need to provision
-   Application Integration in the same region as your connection, import and
-   publish
-   [Connection Tool](https://console.cloud.google.com/integrations/templates/connection-tool/locations/us-central1)
-   from the template library.
+1. 需在与连接器相同区域配置应用集成，并从模板库导入发布[连接工具](https://console.cloud.google.com/integrations/templates/connection-tool/locations/us-central1)
 
-2. Create a tool with `ApplicationIntegrationToolset`
+2. 使用 `ApplicationIntegrationToolset` 创建工具：
 
     ```py
     from google.adk.tools.application_integration_tool.application_integration_toolset import ApplicationIntegrationToolset
 
     connector_tool = ApplicationIntegrationToolset(
-        project="test-project", # TODO: replace with GCP project of the connection
-        location="us-central1", #TODO: replace with location of the connection
-        connection="test-connection", #TODO: replace with connection name
-        entity_operations={"Entity_One": ["LIST","CREATE"], "Entity_Two": []},#empty list for actions means all operations on the entity are supported.
-        actions=["action1"], #TODO: replace with actions
-        service_account_credentials='{...}', # optional
-        tool_name="tool_prefix2",
+        project="测试项目", # 替换为连接器所在GCP项目
+        location="us-central1", #替换为连接器区域
+        connection="测试连接", #替换为连接器名称
+        entity_operations={"实体1": ["LIST","CREATE"], "实体2": []}, #空列表表示支持该实体所有操作
+        actions=["操作1"], #替换为实际操作
+        service_account_credentials='{...}', # 可选
+        tool_name="工具前缀",
         tool_instructions="..."
     )
     ```
 
-    Note: You can provide service account to be used instead of using default
-    credentials To find the list of supported entities and actions for a
-    connection, use the connectors apis:
-    [listActions](https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections.connectionSchemaMetadata/listActions),
-    [listEntityTypes](https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections.connectionSchemaMetadata/listEntityTypes)
+    注：可提供服务账号替代默认凭证。通过连接器 API [listActions](https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections.connectionSchemaMetadata/listActions) 和 [listEntityTypes](https://...) 查询支持的实体与操作
 
-3. Add the tool to your agent. Update your `agent.py` file
+3. 将工具添加至智能体。更新 `agent.py` 文件：
 
     ```py
     from google.adk.agents.llm_agent import LlmAgent
@@ -217,50 +175,45 @@ Connect your agent to enterprise applications using
     root_agent = LlmAgent(
         model='gemini-2.0-flash',
         name='connector_agent',
-        instruction="Help user, leverage the tools you have access to",
+        instruction="帮助用户，充分利用可用工具",
         tools=connector_tool.get_tools(),
     )
     ```
 
-4. Configure your  \`\_\_init\_\_.py\` to expose your agent
+4. 配置 \`\_\_init\_\_.py\` 暴露智能体：
 
     ```py
     from . import agent
     ```
 
-5. Start the Google ADK Web UI and try your agent.
+5. 启动 Google ADK Web UI 测试：
 
     ```shell
-    # make sure to run `adk web` from your project_root_folder
+    # 从项目根目录执行 `adk web`
     adk web
     ```
 
-   Then go to [http://localhost:8000](http://localhost:8000), and choose
-   my\_agent agent (same as the agent folder name)
+    访问 [http://localhost:8000](http://localhost:8000) 选择 my_agent（与文件夹同名）
 
-### Use App Integration Workflows
+### 使用应用集成工作流
 
-Use existing
-[Application Integration](https://cloud.google.com/application-integration/docs/overview)
-workflow as a tool for your agent.
+将现有[应用集成工作流](https://cloud.google.com/application-integration/docs/overview)转化为智能体工具：
 
-1. Create a tool with `ApplicationIntegrationToolset`
+1. 使用 `ApplicationIntegrationToolset` 创建工具：
 
     ```py
     integration_tool = ApplicationIntegrationToolset(
-        project="test-project", # TODO: replace with GCP project of the connection
-        location="us-central1", #TODO: replace with location of the connection
-        integration="test-integration", #TODO: replace with integration name
-        trigger="api_trigger/test_trigger",#TODO: replace with trigger id
-        service_account_credentials='{...}', #optional
-        tool_name="tool_prefix1",
+        project="测试项目", # 替换为工作流所在GCP项目
+        location="us-central1", #替换为工作流区域
+        integration="测试集成", #替换为集成名称
+        trigger="api_trigger/测试触发器", #替换为触发器ID
+        service_account_credentials='{...}', #可选
+        tool_name="工具前缀",
         tool_instructions="..."
     )
     ```
 
-    Note: You can provide service account to be used instead of using default credentials
-
-2. Add the tool to your agent. Update your `agent.py` file
+2. 更新 `agent.py` 文件添加工具：
 
     ```py
     from google.adk.agents.llm_agent import LlmAgent
@@ -269,68 +222,53 @@ workflow as a tool for your agent.
     root_agent = LlmAgent(
         model='gemini-2.0-flash',
         name='integration_agent',
-        instruction="Help user, leverage the tools you have access to",
+        instruction="帮助用户，充分利用可用工具",
         tools=integration_tool.get_tools(),
     )
     ```
 
-3. Configure your \`\_\_init\_\_.py\` to expose your agent
+3. 配置 \`\_\_init\_\_.py\` 暴露智能体：
 
     ```py
     from . import agent
     ```
 
-4. Start the Google ADK Web UI and try your agent.
+4. 启动 Web UI 测试：
 
     ```shell
-    # make sure to run `adk web` from your project_root_folder
+    # 从项目根目录执行 `adk web`
     adk web
     ```
 
-    Then go to [http://localhost:8000](http://localhost:8000), and choose
-    my\_agent agent (same as the agent folder name)
+    访问 [http://localhost:8000](http://localhost:8000) 选择对应智能体
 
 ---
 
-## Toolbox Tools for Databases
+## 数据库工具箱工具
 
-[MCP Toolbox for Databases](https://github.com/googleapis/genai-toolbox) is an
-open source MCP server for databases. It was designed with enterprise-grade and
-production-quality in mind. It enables you to develop tools easier, faster, and
-more securely by handling the complexities such as connection pooling,
-authentication, and more.
+[MCP Toolbox for Databases](https://github.com/googleapis/genai-toolbox) 是开源的企业级数据库 MCP 服务器，通过处理连接池、认证等复杂问题，助您更安全高效地开发数据库工具。
 
-Google’s Agent Development Kit (ADK) has built in support for Toolbox. For more
-information on
-[getting started](https://googleapis.github.io/genai-toolbox/getting-started) or
-[configuring](https://googleapis.github.io/genai-toolbox/getting-started/configure/)
-Toolbox, see the
-[documentation](https://googleapis.github.io/genai-toolbox/getting-started/introduction/).
+Google Agent Development Kit (ADK) 内置工具箱支持。详见[入门指南](https://googleapis.github.io/genai-toolbox/getting-started)或[配置文档](https://googleapis.github.io/genai-toolbox/getting-started/configure/)。
 
 ![GenAI Toolbox](../assets/mcp_db_toolbox.svg)
 
-### Configure and deploy
+### 配置与部署
 
-Toolbox is an open source server that you deploy and manage yourself. For more
-instructions on deploying and configuring, see the official Toolbox
-documentation:
+Toolbox 需自行部署管理，参考官方文档：
+* [服务器安装](https://googleapis.github.io/genai-toolbox/getting-started/introduction/#installing-the-server)
+* [工具箱配置](https://googleapis.github.io/genai-toolbox/getting-started/configure/)
 
-* [Installing the Server](https://googleapis.github.io/genai-toolbox/getting-started/introduction/#installing-the-server)
-* [Configuring Toolbox](https://googleapis.github.io/genai-toolbox/getting-started/configure/)
+### 安装客户端 SDK
 
-### Install client SDK
-
-ADK relies on the `toolbox-langchain` python package to use Toolbox. Install the
-package before getting started:
+ADK 依赖 `toolbox-langchain` Python 包，使用前需安装：
 
 ```shell
 pip install toolbox-langchain langchain
 ```
 
-### Loading Toolbox Tools
+### 加载工具箱工具
 
-Once you’ve Toolbox server is configured and up and running, you can load tools
-from your server using the ADK:
+配置并运行工具箱服务器后，可通过 ADK 加载工具：
 
 ```py
 from google.adk.tools.toolbox_tool import ToolboxTool
@@ -349,11 +287,9 @@ root_agent = Agent(
 )
 ```
 
-### Advanced Toolbox Features
+### 高级功能
 
-Toolbox has a variety of features to make developing Gen AI tools for databases.
-For more information, read more about the following features:
-
-* [Authenticated Parameters](https://googleapis.github.io/genai-toolbox/resources/tools/#authenticated-parameters): bind tool inputs to values from OIDC tokens automatically, making it easy to run sensitive queries without potentially leaking data
-* [Authorized Invocations:](https://googleapis.github.io/genai-toolbox/resources/tools/#authorized-invocations)  restrict access to use a tool based on the users Auth token
-* [OpenTelemetry](https://googleapis.github.io/genai-toolbox/how-to/export_telemetry/): get metrics and tracing from Toolbox with OpenTelemetry
+工具箱提供多项增强功能：
+* [认证参数](https://googleapis.github.io/genai-toolbox/resources/tools/#authenticated-parameters)：自动绑定 OIDC 令牌值，安全执行敏感查询
+* [调用授权](https://googleapis.github.io/genai-toolbox/resources/tools/#authorized-invocations)：基于用户令牌限制工具访问
+* [OpenTelemetry](https://googleapis.github.io/genai-toolbox/how-to/export_telemetry/)：通过遥测技术获取指标与追踪数据

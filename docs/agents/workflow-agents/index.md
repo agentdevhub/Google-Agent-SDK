@@ -1,12 +1,12 @@
-# Workflow Agents
+# 工作流代理
 
-This section introduces "*workflow agents*" - **specialized agents that control the execution flow of its sub-agents**.  
+本节将介绍"*工作流代理*"——**一类专门用于控制子代理执行流程的特殊代理**。
 
-Workflow agents are specialized components in ADK designed purely for **orchestrating the execution flow of sub-agents**. Their primary role is to manage *how* and *when* other agents run, defining the control flow of a process.
+工作流代理是ADK中专为**编排子代理执行流程**设计的特殊组件。它们的主要职责是管理其他代理的*运行方式*和*触发时机*，从而定义整个流程的控制逻辑。
 
-Unlike [LLM Agents](../llm-agents.md), which use Large Language Models for dynamic reasoning and decision-making, Workflow Agents operate based on **predefined logic**. They determine the execution sequence according to their type (e.g., sequential, parallel, loop) without consulting an LLM for the orchestration itself. This results in **deterministic and predictable execution patterns**.
+与[LLM代理](../llm-agents.md)不同（后者依赖大模型进行动态推理和决策），工作流代理完全基于**预定义逻辑**运行。它们根据自身类型（如顺序型、并行型、循环型）确定执行顺序，而无需通过大模型进行编排决策，因此能产生**确定且可预测的执行模式**。
 
-ADK provides three core workflow agent types, each implementing a distinct execution pattern:
+ADK提供三种核心工作流代理类型，每种类型对应不同的执行模式：
 
 <div class="grid cards" markdown>
 
@@ -36,12 +36,12 @@ ADK provides three core workflow agent types, each implementing a distinct execu
 
 </div>
 
-## Why Use Workflow Agents?
+## 为何使用工作流代理？
 
-Workflow agents are essential when you need explicit control over how a series of tasks or agents are executed. They provide:
+当您需要精确控制一系列任务或代理的执行顺序时，工作流代理不可或缺。它们能提供：
 
-* **Predictability:** The flow of execution is guaranteed based on the agent type and configuration.
-* **Reliability:** Ensures tasks run in the required order or pattern consistently.
-* **Structure:** Allows you to build complex processes by composing agents within clear control structures.
+* **确定性**：执行流程完全由代理类型和配置保证
+* **可靠性**：确保任务始终按既定顺序或模式运行
+* **结构化**：通过清晰的流程控制结构组合多个代理，构建复杂流程
 
-While the workflow agent manages the control flow deterministically, the sub-agents it orchestrates can themselves be any type of agent, including intelligent `LlmAgent` instances. This allows you to combine structured process control with flexible, LLM-powered task execution.
+虽然工作流代理以确定性方式管理流程，但它所编排的子代理可以是任何类型——包括智能的`LlmAgent`实例。这种特性让您能将结构化流程控制与基于大模型的灵活任务执行相结合。

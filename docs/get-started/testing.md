@@ -1,15 +1,10 @@
-# Testing your Agents
+# 测试你的智能体
 
-Before you deploy your agent, you should test it to ensure that it is working as
-intended. The easiest way to test your agent in your development environment is
-to use the `adk api_server` command. This command will launch a local FastAPI
-server, where you can run cURL commands or send API requests to test your agent.
+在部署智能体之前，应当进行测试以确保其功能符合预期。开发环境中最简便的测试方式是使用 `adk api_server` 命令，该命令会启动本地 FastAPI 服务器，您可以通过 cURL 命令或发送 API 请求来测试智能体。
 
-## Local testing
+## 本地测试
 
-Local testing involves launching a local API server, creating a session, and
-sending queries to your agent. First, ensure you are in the correct working
-directory:
+本地测试包含启动本地 API 服务器、创建会话以及向智能体发送查询。首先请确保处于正确的工作目录：
 
 ```console
 parent_folder  <-- you should be here
@@ -19,15 +14,15 @@ parent_folder  <-- you should be here
   |- agent.py
 ```
 
-**Launch the Local Server**
+**启动本地服务器**
 
-Next, launch the local FastAPI server:
+接下来启动本地 FastAPI 服务器：
 
 ```shell
 adk api_server
 ```
 
-The output should appear similar to:
+输出应类似如下：
 
 ```shell
 INFO:     Started server process [12345]
@@ -36,12 +31,11 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
-Your server is now running locally at `http://0.0.0.0:8000`.
+此时服务器已在本地运行，地址为 `http://0.0.0.0:8000`。
 
-**Create a new session**
+**创建新会话**
 
-With the API server still running, open a new terminal window or tab and create
-a new session with the agent using:
+保持 API 服务器运行状态，打开新的终端窗口或标签页，使用以下命令创建智能体会话：
 
 ```shell
 curl -X POST http://0.0.0.0:8000/apps/my_sample_agent/users/u_123/sessions/s_123 \
@@ -49,20 +43,12 @@ curl -X POST http://0.0.0.0:8000/apps/my_sample_agent/users/u_123/sessions/s_123
   -d '{"state": {"key1": "value1", "key2": 42}}'
 ```
 
-Let's break down what's happening:
+以下是对命令的解析：
 
-* `http://0.0.0.0:8000/apps/my_sample_agent/users/u_123/sessions/s_123`: This
-  creates a new session for your agent `my_sample_agent`, which is the name of
-  the agent folder, for a user ID (`u_123`) and for a session ID (`s_123`). You
-  can replace `my_sample_agent` with the name of your agent folder. You can
-  replace `u_123` with a specific user ID, and `s_123` with a specific session
-  ID.
-* `{"state": {"key1": "value1", "key2": 42}}`: This is optional. You can use
-  this to customize the agent's pre-existing state (dict) when creating the
-  session.
+* `http://0.0.0.0:8000/apps/my_sample_agent/users/u_123/sessions/s_123`：为智能体 `my_sample_agent`（即智能体文件夹名称）创建新会话，指定用户 ID（`u_123`）和会话 ID（`s_123`）。您可以将 `my_sample_agent` 替换为智能体文件夹名称，`u_123` 替换为特定用户 ID，`s_123` 替换为特定会话 ID。
+* `{"state": {"key1": "value1", "key2": 42}}`：可选参数，用于在创建会话时自定义智能体的预设状态（字典格式）。
 
-This should return the session information if it was created successfully. The
-output should appear similar to:
+成功创建会话后将返回会话信息，输出应类似：
 
 ```shell
 {"id":"s_123","app_name":"my_sample_agent","user_id":"u_123","state":{"state":{"key1":"value1","key2":42}},"events":[],"last_update_time":1743711430.022186}
@@ -70,25 +56,16 @@ output should appear similar to:
 
 !!! info
 
-    You cannot create multiple sessions with exactly the same user ID and
-    session ID. If you try to, you may see a response, like:
-    `{"detail":"Session already exists: s_123"}`. To fix this, you can either
-    delete that session (e.g., `s_123`), or choose a different session ID.
+    无法使用完全相同的用户 ID 和会话 ID 创建多个会话。若尝试重复创建，可能收到如下响应：`{"detail":"Session already exists: s_123"}`。解决方法包括删除现有会话（如执行 `s_123`）或改用新的会话 ID。
 
-**Send a query**
+**发送查询**
 
-There are two ways to send queries via POST to your agent, via the `/run` or
-`/run_sse` routes.
+有两种通过 POST 请求向智能体发送查询的方式，分别通过 `/run` 或 `/run_sse` 路由：
 
-* `POST http://0.0.0.0:8000/run`: collects all events as a list and returns the
-  list all at once. Suitable for most users (if you are unsure, we recommend
-  using this one).
-* `POST http://0.0.0.0:8000/run_sse`: returns as Server-Sent-Events, which is a
-  stream of event objects. Suitable for those who want to be notified as soon as
-  the event is available. With `/run_sse`, you can also set `streaming` to
-  `true` to enable token-level streaming.
+* `POST http://0.0.0.0:8000/run`：以列表形式收集所有事件并一次性返回，适合大多数用户（若无特殊需求推荐使用此方式）
+* `POST http://0.0.0.0:8000/run_sse`：以服务器推送事件（Server-Sent-Events）形式返回事件流，适合需要实时获取事件通知的场景。通过 `/run_sse` 还可设置 `streaming` 为 `true` 来启用令牌级流式传输。
 
-**Using `/run`**
+**使用 `/run`**
 
 ```shell
 curl -X POST http://0.0.0.0:8000/run \
@@ -106,14 +83,13 @@ curl -X POST http://0.0.0.0:8000/run \
 }'
 ```
 
-If using `/run`, you will see the full output of events at the same time, as a
-list, which should appear similar to:
+使用 `/run` 时，所有事件输出将作为列表一次性返回，输出应类似：
 
 ```shell
 [{"content":{"parts":[{"functionCall":{"id":"af-e75e946d-c02a-4aad-931e-49e4ab859838","args":{"city":"new york"},"name":"get_weather"}}],"role":"model"},"invocation_id":"e-71353f1e-aea1-4821-aa4b-46874a766853","author":"weather_time_agent","actions":{"state_delta":{},"artifact_delta":{},"requested_auth_configs":{}},"long_running_tool_ids":[],"id":"2Btee6zW","timestamp":1743712220.385936},{"content":{"parts":[{"functionResponse":{"id":"af-e75e946d-c02a-4aad-931e-49e4ab859838","name":"get_weather","response":{"status":"success","report":"The weather in New York is sunny with a temperature of 25 degrees Celsius (41 degrees Fahrenheit)."}}}],"role":"user"},"invocation_id":"e-71353f1e-aea1-4821-aa4b-46874a766853","author":"weather_time_agent","actions":{"state_delta":{},"artifact_delta":{},"requested_auth_configs":{}},"id":"PmWibL2m","timestamp":1743712221.895042},{"content":{"parts":[{"text":"OK. The weather in New York is sunny with a temperature of 25 degrees Celsius (41 degrees Fahrenheit).\n"}],"role":"model"},"invocation_id":"e-71353f1e-aea1-4821-aa4b-46874a766853","author":"weather_time_agent","actions":{"state_delta":{},"artifact_delta":{},"requested_auth_configs":{}},"id":"sYT42eVC","timestamp":1743712221.899018}]
 ```
 
-**Using `/run_sse`**
+**使用 `/run_sse`**
 
 ```shell
 curl -X POST http://0.0.0.0:8000/run_sse \
@@ -132,10 +108,7 @@ curl -X POST http://0.0.0.0:8000/run_sse \
 }'
 ```
 
-You can set `streaming` to `true` to enable token-level streaming, which means
-the response will be returned to you in multiple chunks and the output should
-appear similar to:
-
+将 `streaming` 设为 `true` 可启用令牌级流式传输，响应将以多个数据块形式返回，输出应类似：
 
 ```shell
 data: {"content":{"parts":[{"functionCall":{"id":"af-f83f8af9-f732-46b6-8cb5-7b5b73bbf13d","args":{"city":"new york"},"name":"get_weather"}}],"role":"model"},"invocation_id":"e-3f6d7765-5287-419e-9991-5fffa1a75565","author":"weather_time_agent","actions":{"state_delta":{},"artifact_delta":{},"requested_auth_configs":{}},"long_running_tool_ids":[],"id":"ptcjaZBa","timestamp":1743712255.313043}
@@ -147,27 +120,17 @@ data: {"content":{"parts":[{"text":"OK. The weather in New York is sunny with a 
 
 !!! info
 
-    If you are using `/run_sse`, you should see each event as soon as it becomes
-    available.
+    使用 `/run_sse` 时，每个事件将在生成后立即显示。
 
-## Integrations
+## 集成方案
 
-ADK uses [Callbacks](../callbacks/index.md) to integrate with third-party
-observability tools. These integrations capture detailed traces of agent calls
-and interactions, which are crucial for understanding behavior, debugging
-issues, and evaluating performance.
+ADK 通过[回调函数](../callbacks/index.md)与第三方可观测性工具集成。这些集成能捕获智能体调用与交互的详细追踪记录，对于理解行为、调试问题和评估性能至关重要。
 
-* [Comet Opik](https://github.com/comet-ml/opik) is an open-source LLM
-  observability and evaluation platform that
-  [natively supports ADK](https://www.comet.com/docs/opik/tracing/integrations/adk).
+* [Comet Opik](https://github.com/comet-ml/opik) 是开源的大模型可观测性与评估平台，[原生支持 ADK](https://www.comet.com/docs/opik/tracing/integrations/adk)
 
-## Deploying your agent
+## 部署智能体
 
-Now that you've verified the local operation of your agent, you're ready to move
-on to deploying your agent! Here are some ways you can deploy your agent:
+完成本地验证后，即可开始部署智能体。以下是可选的部署方式：
 
-* Deploy to [Agent Engine](../deploy/agent-engine.md), the easiest way to deploy
-  your ADK agents to a managed service in Vertex AI on Google Cloud.
-* Deploy to [Cloud Run](../deploy/cloud-run.md) and have full control over how
-  you scale and manage your agents using serverless architecture on Google
-  Cloud.
+* 部署至 [Agent Engine](../deploy/agent-engine.md)，这是将 ADK 智能体部署到 Google Cloud Vertex AI 托管服务的最简途径
+* 部署至 [Cloud Run](../deploy/cloud-run.md)，通过 Google Cloud 的无服务器架构全面掌控智能体的扩展与管理

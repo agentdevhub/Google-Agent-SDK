@@ -1,17 +1,14 @@
-# Quickstart
+# 快速入门
 
-This quickstart guides you through installing the Agent Development Kit (ADK),
-setting up a basic agent with multiple tools, and running it locally either in the terminal or in the interactive, browser-based dev UI.
+本指南将带您完成安装Agent开发工具包(ADK)、配置一个具备多工具的基础智能体，并通过终端或基于浏览器的交互式开发界面在本地运行它的全过程。
 
-<!-- <img src="../../assets/quickstart.png" alt="Quickstart setup"> -->
+<!-- <img src="../../assets/quickstart.png" alt="快速入门配置"> -->
 
-This quickstart assumes a local IDE (VS Code, PyCharm, etc.) with Python 3.9+
-and terminal access. This method runs the application entirely on your machine
-and is recommended for internal development.
+本指南假设您已具备本地IDE环境(VS Code/PyCharm等)和Python 3.9+运行环境。此方法完全在本地运行应用，推荐用于内部开发。
 
-## 1. Set up Environment & Install ADK {#venv-install}
+## 1. 环境配置与安装ADK {#venv-install}
 
-Create & Activate Virtual Environment (Recommended):
+创建并激活虚拟环境(推荐)：
 
 ```bash
 # Create
@@ -22,17 +19,17 @@ python -m venv .venv
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 ```
 
-Install ADK:
+安装ADK：
 
 ```bash
 pip install google-adk
 ```
 
-## 2. Create Agent Project {#create-agent-project}
+## 2. 创建智能体项目 {#create-agent-project}
 
-### Project structure
+### 项目结构
 
-You will need to create the following project structure:
+需要创建以下项目结构：
 
 ```console
 parent_folder/
@@ -42,28 +39,25 @@ parent_folder/
         .env
 ```
 
-Create the folder `multi_tool_agent`:
+创建文件夹 `multi_tool_agent`：
 
 ```bash
 mkdir multi_tool_agent/
 ```
 
-!!! info "Note for Windows users"
+!!! info "Windows用户注意"
 
-    When using ADK on Windows for the next few steps, we recommend creating
-    Python files using File Explorer or an IDE because the following commands
-    (`mkdir`, `echo`) typically generate files with null bytes and/or incorrect
-    encoding.
+    在Windows环境下执行后续步骤时，建议通过文件资源管理器或IDE创建Python文件，因为以下命令(`mkdir`，`echo`)生成的文件可能包含空字节或编码错误。
 
 ### `__init__.py`
 
-Now create an `__init__.py` file in the folder:
+现在在文件夹中创建 `__init__.py` 文件：
 
 ```shell
 echo "from . import agent" > multi_tool_agent/__init__.py
 ```
 
-Your `__init__.py` should now look like this:
+您的 `__init__.py` 现在应呈现如下结构：
 
 ```python title="multi_tool_agent/__init__.py"
 --8<-- "examples/python/snippets/get-started/multi_tool_agent/__init__.py"
@@ -71,13 +65,13 @@ Your `__init__.py` should now look like this:
 
 ### `agent.py`
 
-Create an `agent.py` file in the same folder:
+在同一文件夹创建 `agent.py` 文件：
 
 ```shell
 touch multi_tool_agent/agent.py
 ```
 
-Copy and paste the following code into `agent.py`:
+将以下代码复制到 `agent.py`：
 
 ```python title="multi_tool_agent/agent.py"
 --8<-- "examples/python/snippets/get-started/multi_tool_agent/agent.py"
@@ -85,59 +79,48 @@ Copy and paste the following code into `agent.py`:
 
 ### `.env`
 
-Create a `.env` file in the same folder:
+在同一文件夹创建 `.env` 文件：
 
 ```shell
 touch multi_tool_agent/.env
 ```
 
-More instructions about this file are describe in the next section on [Set up the model](#set-up-the-model).
+该文件的详细说明请参阅下一章节[模型配置](#set-up-the-model)。
 
 ![intro_components.png](../assets/quickstart-flow-tool.png)
 
-## 3. Set up the model {#set-up-the-model}
+## 3. 配置大模型 {#set-up-the-model}
 
-Your agent's ability to understand user requests and generate responses is
-powered by a Large Language Model (LLM). Your agent needs to make secure calls
-to this external LLM service, which requires authentication credentials. Without
-valid authentication, the LLM service will deny the agent's requests, and the
-agent will be unable to function.
+智能体理解用户请求和生成响应的能力依托于大模型(LLM)。需要通过安全认证调用外部LLM服务，否则服务将拒绝请求导致功能失效。
 
 === "Gemini - Google AI Studio"
-    1. Get an API key from [Google AI Studio](https://aistudio.google.com/apikey).
-    2. Open the **`.env`** file located inside (`multi_tool_agent/`) and copy-paste the following code.
+    1. 从[Google AI Studio](https://aistudio.google.com/apikey)获取API密钥
+    2. 打开位于(`multi_tool_agent/`)的**`.env`**文件，粘贴以下代码：
 
         ```env title="multi_tool_agent/.env"
         GOOGLE_GENAI_USE_VERTEXAI=FALSE
-        GOOGLE_API_KEY=PASTE_YOUR_ACTUAL_API_KEY_HERE
+        GOOGLE_API_KEY=在此粘贴实际API密钥
         ```
 
-    3. Replace `GOOGLE_API_KEY` with your actual `API KEY`.
+    3. 将 `GOOGLE_API_KEY` 替换为您的实际 `API KEY`
 
 === "Gemini - Google Cloud Vertex AI"
-    1. You need an existing
-       [Google Cloud](https://cloud.google.com/?e=48754805&hl=en) account and a
-       project.
-        * Set up a
-          [Google Cloud project](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#setup-gcp)
-        * Set up the
-          [gcloud CLI](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#setup-local)
-        * Authenticate to Google Cloud, from the terminal by running
-          `gcloud auth login`.
-        * [Enable the Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com).
-    2. Open the **`.env`** file located inside (`multi_tool_agent/`). Copy-paste
-       the following code and update the project ID and location.
+    1. 需具备[Google Cloud](https://cloud.google.com/?e=48754805&hl=en)账号和项目
+        * 配置[Google Cloud项目](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#setup-gcp)
+        * 安装[gcloud CLI](https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#setup-local)
+        * 在终端运行 `gcloud auth login` 完成认证
+        * [启用Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com)
+    2. 打开位于(`multi_tool_agent/`)的**`.env`**文件，粘贴以下代码并更新项目ID和位置：
 
         ```env title="multi_tool_agent/.env"
         GOOGLE_GENAI_USE_VERTEXAI=TRUE
-        GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-        GOOGLE_CLOUD_LOCATION=LOCATION
+        GOOGLE_CLOUD_PROJECT=您的项目ID
+        GOOGLE_CLOUD_LOCATION=区域
         ```
 
-## 4. Run Your Agent {#run-your-agent}
+## 4. 运行智能体 {#run-your-agent}
 
-Using the terminal, navigate to the parent directory of your agent project
-(e.g. using `cd ..`):
+在终端中导航至项目父目录(例如使用 `cd ..`)：
 
 ```console
 parent_folder/      <-- navigate to this directory
@@ -147,59 +130,53 @@ parent_folder/      <-- navigate to this directory
         .env
 ```
 
-There are multiple ways to interact with your agent:
+可通过多种方式与智能体交互：
 
-=== "Dev UI (adk web)"
-    Run the following command to launch the **dev UI**.
+=== "开发界面(adk web)"
+    运行以下命令启动**开发界面**：
 
     ```shell
     adk web
     ```
 
-    **Step 1:** Open the URL provided (usually `http://localhost:8000` or
-    `http://127.0.0.1:8000`) directly in your browser.
+    **步骤1：** 在浏览器中打开提供的URL(通常为 `http://localhost:8000` 或 `http://127.0.0.1:8000`)
 
-    **Step 2.** In the top-left corner of the UI, you can select your agent in
-    the dropdown. Select "multi_tool_agent".
+    **步骤2：** 在界面左上角下拉菜单中选择"multi_tool_agent"
 
-    !!!note "Troubleshooting"
+    !!!note "故障排查"
 
-        If you do not see "multi_tool_agent" in the dropdown menu, make sure you
-        are running `adk web` in the **parent folder** of your agent folder
-        (i.e. the parent folder of multi_tool_agent).
+        如果下拉菜单中未显示"multi_tool_agent"，请确认当前在项目父目录(即multi_tool_agent的上级目录)运行 `adk web`
 
-    **Step 3.** Now you can chat with your agent using the textbox:
+    **步骤3：** 现在可通过文本框与智能体对话：
 
     ![adk-web-dev-ui-chat.png](../assets/adk-web-dev-ui-chat.png)
 
-    **Step 4.** You can also inspect individual function calls, responses and
-    model responses by clicking on the actions:
+    **步骤4：** 点击操作可查看具体函数调用、响应和模型输出：
 
     ![adk-web-dev-ui-function-call.png](../assets/adk-web-dev-ui-function-call.png)
 
-    **Step 5.** You can also enable your microphone and talk to your agent:
+    **步骤5：** 还可启用麦克风进行语音交互：
     
-    !!!note "Model support for voice/video streaming"
+    !!!note "语音/视频流支持的模型"
     
-        In order to use voice/video streaming in ADK, you will need to use Gemini models that support the Live API. You can find the **model ID(s)** that supports the Gemini Live API in the documentation:
-
+        使用ADK的语音/视频流功能需要支持Live API的Gemini模型。可通过以下文档查询**模型ID**：
         - [Google AI Studio: Gemini Live API](https://ai.google.dev/gemini-api/docs/models#live-api)
         - [Vertex AI: Gemini Live API](https://cloud.google.com/vertex-ai/generative-ai/docs/live-api)
 
-        You can then replace the `model` string in `root_agent` in the `agent.py` file you created earlier ([jump to section](#agentpy)). Your code should look something like:
+        然后修改 `agent.py` 文件中 `root_agent` 的 `model` 字段，示例如下：
         
         ```py
         root_agent = Agent(
             name="weather_time_agent",
-            model="replace-me-with-model-id", #e.g. gemini-2.0-flash-live-001
+            model="替换为模型ID", #例如 gemini-2.0-flash-live-001
             ...
         ```
 
     ![adk-web-dev-ui-audio.png](../assets/adk-web-dev-ui-audio.png)
 
-=== "Terminal (adk run)"
+=== "终端(adk run)"
 
-    Run the following command, to chat with your Google Search agent.
+    运行以下命令与Google搜索智能体对话：
 
     ```
     adk run multi_tool_agent
@@ -207,38 +184,31 @@ There are multiple ways to interact with your agent:
 
     ![adk-run.png](../assets/adk-run.png)
 
-    To exit, use Cmd/Ctrl+C.
+    按Cmd/Ctrl+C退出
 
-=== "API Server (adk api_server)"
+=== "API服务(adk api_server)"
 
-    `adk api_server` enables you to create a local FastAPI server in a single
-    command, enabling you to test local cURL requests before you deploy your
-    agent.
+    `adk api_server` 可快速创建本地FastAPI服务，便于部署前测试cURL请求：
 
     ![adk-api-server.png](../assets/adk-api-server.png)
 
-    To learn how to use `adk api_server` for testing, refer to the
-    [documentation on testing](testing.md).
+    测试方法详见[测试文档](testing.md)
 
-### 📝 Example prompts to try
+### 📝 可尝试的提示词示例
 
-* What is the weather in New York?
-* What is the time in New York?
-* What is the weather in Paris?
-* What is the time in Paris?
+* 纽约天气如何？
+* 纽约现在几点？
+* 巴黎天气如何？
+* 巴黎现在几点？
 
-## 🎉 Congratulations!
+## 🎉 恭喜完成！
 
-You've successfully created and interacted with your first agent using ADK!
+您已成功使用ADK创建并运行了第一个智能体！
 
 ---
 
-## 🛣️ Next steps
+## 🛣️ 后续步骤
 
-* **Go to the tutorial**: Learn how to add memory, session, state to your agent:
-  [tutorial](tutorial.md).
-* **Delve into advanced configuration:** Explore the [setup](installation.md)
-  section for deeper dives into project structure, configuration, and other
-  interfaces.
-* **Understand Core Concepts:** Learn about
-  [agents concepts](../agents/index.md).
+* **教程学习**：了解如何为智能体添加记忆、会话和状态功能：[教程](tutorial.md)
+* **高级配置**：深入探索[配置指南](installation.md)了解项目结构与接口配置
+* **核心概念**：学习[智能体基础概念](../agents/index.md)

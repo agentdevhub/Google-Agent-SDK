@@ -1,20 +1,20 @@
-# LLM Agent
+# LLM 智能体
 
-The `LlmAgent` (often aliased simply as `Agent`) is a core component in ADK, acting as the "thinking" part of your application. It leverages the power of a Large Language Model (LLM) for reasoning, understanding natural language, making decisions, generating responses, and interacting with tools.
+`LlmAgent`（常简称为`Agent`）是ADK中的核心组件，作为应用程序的"思考中枢"。它借助大模型（LLM）的强大能力进行推理、理解自然语言、做出决策、生成响应以及与工具交互。
 
-Unlike deterministic [Workflow Agents](workflow-agents/index.md) that follow predefined execution paths, `LlmAgent` behavior is non-deterministic. It uses the LLM to interpret instructions and context, deciding dynamically how to proceed, which tools to use (if any), or whether to transfer control to another agent.
+与遵循预定义执行路径的确定性[工作流智能体](workflow-agents/index.md)不同，`LlmAgent`的行为具有非确定性。它利用大模型来解析指令和上下文，动态决定后续操作、选择使用哪些工具（如有需要）或是否将控制权转移给其他智能体。
 
-Building an effective `LlmAgent` involves defining its identity, clearly guiding its behavior through instructions, and equipping it with the necessary tools and capabilities.
+构建高效的`LlmAgent`需要定义其身份标识，通过指令明确引导其行为，并为其配备必要的工具和能力。
 
-## Defining the Agent's Identity and Purpose
+## 定义智能体身份与用途
 
-First, you need to establish what the agent *is* and what it's *for*.
+首先需要明确智能体*是什么*以及*用途*。
 
-* **`name` (Required):** Every agent needs a unique string identifier. This `name` is crucial for internal operations, especially in multi-agent systems where agents need to refer to or delegate tasks to each other. Choose a descriptive name that reflects the agent's function (e.g., `customer_support_router`, `billing_inquiry_agent`). Avoid reserved names like `user`.
+* **`name`（必填）：** 每个智能体都需要唯一的字符串标识符。该`name`对内部运作至关重要，特别是在多智能体系统中，智能体需要相互引用或委派任务时。选择能反映智能体功能的描述性名称（例如`customer_support_router`、`billing_inquiry_agent`）。避免使用`user`等保留名称。
 
-* **`description` (Optional, Recommended for Multi-Agent):** Provide a concise summary of the agent's capabilities. This description is primarily used by *other* LLM agents to determine if they should route a task to this agent. Make it specific enough to differentiate it from peers (e.g., "Handles inquiries about current billing statements," not just "Billing agent").
+* **`description`（可选，推荐用于多智能体系统）：** 提供智能体能力的简明摘要。该描述主要供*其他*大模型智能体判断是否应将任务路由到本智能体。描述需足够具体以区别于同类智能体（例如"处理当前账单查询"，而非简单的"账单智能体"）。
 
-* **`model` (Required):** Specify the underlying LLM that will power this agent's reasoning. This is a string identifier like `"gemini-2.0-flash"`. The choice of model impacts the agent's capabilities, cost, and performance. See the [Models](models.md) page for available options and considerations.
+* **`model`（必填）：** 指定支撑该智能体推理的基础大模型。这是一个字符串标识符，如`"gemini-2.0-flash"`。模型选择会影响智能体的能力、成本和性能。可用选项及考量因素请参阅[模型](models.md)页面。
 
 ```python
 # Example: Defining the basic identity
@@ -26,22 +26,22 @@ capital_agent = LlmAgent(
 )
 ```
 
-## Guiding the Agent: Instructions (`instruction`)
+## 引导智能体：指令（`instruction`）
 
-The `instruction` parameter is arguably the most critical for shaping an `LlmAgent`'s behavior. It's a string (or a function returning a string) that tells the agent:
+`instruction`参数可以说是塑造`LlmAgent`行为最关键的因素。这个字符串（或返回字符串的函数）用于告知智能体：
 
-* Its core task or goal.
-* Its personality or persona (e.g., "You are a helpful assistant," "You are a witty pirate").
-* Constraints on its behavior (e.g., "Only answer questions about X," "Never reveal Y").
-* How and when to use its `tools`. You should explain the purpose of each tool and the circumstances under which it should be called, supplementing any descriptions within the tool itself.
-* The desired format for its output (e.g., "Respond in JSON," "Provide a bulleted list").
+* 其核心任务或目标
+* 其个性或角色设定（例如"你是一个乐于助人的助手"、"你是个风趣的海盗"）
+* 行为约束（例如"仅回答关于X的问题"、"绝不透露Y"）
+* 如何使用其`tools`。应说明每个工具的用途及调用时机，补充工具自身的描述
+* 期望的输出格式（例如"以JSON格式响应"、"提供带项目符号的列表"）
 
-**Tips for Effective Instructions:**
+**有效指令的设计技巧：**
 
-* **Be Clear and Specific:** Avoid ambiguity. Clearly state the desired actions and outcomes.
-* **Use Markdown:** Improve readability for complex instructions using headings, lists, etc.
-* **Provide Examples (Few-Shot):** For complex tasks or specific output formats, include examples directly in the instruction.
-* **Guide Tool Use:** Don't just list tools; explain *when* and *why* the agent should use them.
+* **清晰具体：** 避免歧义，明确说明期望行为和结果
+* **使用Markdown：** 对复杂指令使用标题、列表等提高可读性
+* **提供示例（Few-Shot）：** 对于复杂任务或特定输出格式，直接在指令中包含示例
+* **引导工具使用：** 不仅列出工具，还要解释*何时*及*为何*使用它们
 
 ```python
 # Example: Adding instructions
@@ -61,18 +61,18 @@ Example Response: "The capital of France is Paris."
 )
 ```
 
-*(Note: For instructions that apply to *all* agents in a system, consider using `global_instruction` on the root agent, detailed further in the [Multi-Agents](multi-agents.md) section.)*
+*（注：对于适用于系统中*所有*智能体的指令，可考虑在根智能体上使用`global_instruction`，详见[多智能体](multi-agents.md)章节。）*
 
-## Equipping the Agent: Tools (`tools`)
+## 装备智能体：工具（`tools`）
 
-Tools give your `LlmAgent` capabilities beyond the LLM's built-in knowledge or reasoning. They allow the agent to interact with the outside world, perform calculations, fetch real-time data, or execute specific actions.
+工具赋予`LlmAgent`超越大模型内置知识或推理的能力。它们使智能体能够与外部世界交互、执行计算、获取实时数据或完成特定操作。
 
-* **`tools` (Optional):** Provide a list of tools the agent can use. Each item in the list can be:
-    * A Python function (automatically wrapped as a `FunctionTool`).
-    * An instance of a class inheriting from `BaseTool`.
-    * An instance of another agent (`AgentTool`, enabling agent-to-agent delegation - see [Multi-Agents](multi-agents.md)).
+* **`tools`（可选）：** 提供智能体可使用的工具列表。列表中的每个项目可以是：
+    * Python函数（自动包装为`FunctionTool`）
+    * 继承自`BaseTool`的类实例
+    * 其他智能体实例（`AgentTool`，实现智能体间委派——参见[多智能体](multi-agents.md)）
 
-The LLM uses the function/tool names, descriptions (from docstrings or the `description` field), and parameter schemas to decide which tool to call based on the conversation and its instructions.
+大模型会基于对话内容和指令，根据函数/工具名称、描述（来自文档字符串或`description`字段）及参数模式来决定调用哪个工具。
 
 ```python
 # Define a tool function
@@ -92,17 +92,17 @@ capital_agent = LlmAgent(
 )
 ```
 
-Learn more about Tools in the [Tools](../tools/index.md) section.
+更多工具相关信息请参阅[工具](../tools/index.md)章节。
 
-## Advanced Configuration & Control
+## 高级配置与控制
 
-Beyond the core parameters, `LlmAgent` offers several options for finer control:
+除核心参数外，`LlmAgent`还提供多个选项进行精细控制：
 
-### Fine-Tuning LLM Generation (`generate_content_config`)
+### 微调大模型生成（`generate_content_config`）
 
-You can adjust how the underlying LLM generates responses using `generate_content_config`.
+可通过`generate_content_config`调整底层大模型的响应生成方式。
 
-* **`generate_content_config` (Optional):** Pass an instance of `google.genai.types.GenerateContentConfig` to control parameters like `temperature` (randomness), `max_output_tokens` (response length), `top_p`, `top_k`, and safety settings.
+* **`generate_content_config`（可选）：** 传递`google.genai.types.GenerateContentConfig`实例以控制`temperature`（随机性）、`max_output_tokens`（响应长度）、`top_p`、`top_k`和安全设置等参数。
 
     ```python
     from google.genai import types
@@ -110,22 +110,22 @@ You can adjust how the underlying LLM generates responses using `generate_conten
     agent = LlmAgent(
         # ... other params
         generate_content_config=types.GenerateContentConfig(
-            temperature=0.2, # More deterministic output
+            temperature=0.2, # 更确定性的输出
             max_output_tokens=250
         )
     )
     ```
 
-### Structuring Data (`input_schema`, `output_schema`, `output_key`)
+### 结构化数据（`input_schema`、`output_schema`、`output_key`）
 
-For scenarios requiring structured data exchange, you can use Pydantic models.
+对于需要结构化数据交换的场景，可使用Pydantic模型。
 
-* **`input_schema` (Optional):** Define a Pydantic `BaseModel` class representing the expected input structure. If set, the user message content passed to this agent *must* be a JSON string conforming to this schema. Your instructions should guide the user or preceding agent accordingly.
+* **`input_schema`（可选）：** 定义表示预期输入结构的Pydantic `BaseModel`类。若设置，传递给该智能体的用户消息内容*必须*是符合此模式的JSON字符串。指令应相应引导用户或前置智能体。
 
-* **`output_schema` (Optional):** Define a Pydantic `BaseModel` class representing the desired output structure. If set, the agent's final response *must* be a JSON string conforming to this schema.
-    * **Constraint:** Using `output_schema` enables controlled generation within the LLM but **disables the agent's ability to use tools or transfer control to other agents**. Your instructions must guide the LLM to produce JSON matching the schema directly.
+* **`output_schema`（可选）：** 定义表示期望输出结构的Pydantic `BaseModel`类。若设置，智能体的最终响应*必须*是符合此模式的JSON字符串。
+    * **限制：** 使用`output_schema`可在大模型内实现受控生成，但*会禁用智能体使用工具或转移控制权的能力*。指令必须引导大模型直接生成符合模式的JSON。
 
-* **`output_key` (Optional):** Provide a string key. If set, the text content of the agent's *final* response will be automatically saved to the session's state dictionary under this key (e.g., `session.state[output_key] = agent_response_text`). This is useful for passing results between agents or steps in a workflow.
+* **`output_key`（可选）：** 提供字符串键。若设置，智能体*最终*响应的文本内容将自动保存到会话状态字典中的该键下（例如`session.state[output_key] = agent_response_text`）。这在智能体间或工作流步骤间传递结果时非常有用。
 
 ```python
 from pydantic import BaseModel, Field
@@ -142,13 +142,13 @@ structured_capital_agent = LlmAgent(
 )
 ```
 
-### Managing Context (`include_contents`)
+### 管理上下文（`include_contents`）
 
-Control whether the agent receives the prior conversation history.
+控制智能体是否接收先前的对话历史记录。
 
-* **`include_contents` (Optional, Default: `'default'`):** Determines if the `contents` (history) are sent to the LLM.
-    * `'default'`: The agent receives the relevant conversation history.
-    * `'none'`: The agent receives no prior `contents`. It operates based solely on its current instruction and any input provided in the *current* turn (useful for stateless tasks or enforcing specific contexts).
+* **`include_contents`（可选，默认：`'default'`）：** 决定是否向大模型发送`contents`（历史记录）。
+    * `'default'`：智能体接收相关对话历史记录
+    * `'none'`：智能体不接收任何先前`contents`。仅基于当前指令和*当前*轮次提供的输入进行操作（适用于无状态任务或强制特定上下文场景）
 
     ```python
     stateless_agent = LlmAgent(
@@ -157,28 +157,28 @@ Control whether the agent receives the prior conversation history.
     )
     ```
 
-### Planning & Code Execution
+### 规划与代码执行
 
-For more complex reasoning involving multiple steps or executing code:
+对于涉及多步推理或执行代码的复杂场景：
 
-* **`planner` (Optional):** Assign a `BasePlanner` instance to enable multi-step reasoning and planning before execution. (See [Multi-Agents](multi-agents.md) patterns).
-* **`code_executor` (Optional):** Provide a `BaseCodeExecutor` instance to allow the agent to execute code blocks (e.g., Python) found in the LLM's response. ([See Tools/Built-in tools](../tools/built-in-tools.md)).
+* **`planner`（可选）：** 分配`BasePlanner`实例以实现执行前的多步推理和规划（参见[多智能体](multi-agents.md)模式）
+* **`code_executor`（可选）：** 提供`BaseCodeExecutor`实例，允许智能体执行大模型响应中的代码块（如Python）（参见[工具/内置工具](../tools/built-in-tools.md)）
 
-## Putting It Together: Example
+## 完整示例
 
-??? "Code"
-    Here's the complete basic `capital_agent`:
+??? "代码"
+    以下是完整的`capital_agent`示例：
 
     ```python
-    # Full example code for the basic capital agent
+    # 基础首都智能体的完整示例代码
     --8<-- "examples/python/snippets/agents/llm-agent/capital_agent.py"
     ```
 
-_(This example demonstrates the core concepts. More complex agents might incorporate schemas, context control, planning, etc.)_
+*（此示例演示了核心概念。更复杂的智能体可能包含模式、上下文控制、规划等功能）*
 
-## Related Concepts (Deferred Topics)
+## 相关概念（延展主题）
 
-While this page covers the core configuration of `LlmAgent`, several related concepts provide more advanced control and are detailed elsewhere:
+虽然本文涵盖`LlmAgent`的核心配置，但以下几个相关概念提供更高级的控制，详见其他文档：
 
-* **Callbacks:** Intercepting execution points (before/after model calls, before/after tool calls) using `before_model_callback`, `after_model_callback`, etc. See [Callbacks](../callbacks/types-of-callbacks.md).
-* **Multi-Agent Control:** Advanced strategies for agent interaction, including planning (`planner`), controlling agent transfer (`disallow_transfer_to_parent`, `disallow_transfer_to_peers`), and system-wide instructions (`global_instruction`). See [Multi-Agents](multi-agents.md).
+* **回调函数：** 使用`before_model_callback`、`after_model_callback`等拦截执行点（模型调用前/后、工具调用前/后）。参见[回调函数](../callbacks/types-of-callbacks.md)
+* **多智能体控制：** 智能体交互的高级策略，包括规划（`planner`）、控制智能体转移（`disallow_transfer_to_parent`、`disallow_transfer_to_peers`）和系统级指令（`global_instruction`）。参见[多智能体](multi-agents.md)

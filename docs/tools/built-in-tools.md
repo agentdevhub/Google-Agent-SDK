@@ -1,57 +1,44 @@
-# Built-in tools
+# 内置工具
 
-These built-in tools provide ready-to-use functionality such as Google Search or
-code executors that provide agents with common capabilities. For instance, an
-agent that needs to retrieve information from the web can directly use the
-**google\_search** tool without any additional setup.
+这些内置工具提供开箱即用的功能（例如Google搜索或代码执行器），为智能体赋予通用能力。例如，需要从网络获取信息的智能体可以直接使用**google_search**工具，无需额外配置。
 
-## How to Use
+## 使用方法
 
-1. **Import:** Import the desired tool from the `agents.tools` module.
-2. **Configure:** Initialize the tool, providing required parameters if any.
-3. **Register:** Add the initialized tool to the **tools** list of your Agent.
+1. **导入**：从`agents.tools`模块导入所需工具
+2. **配置**：初始化工具，按需提供必要参数
+3. **注册**：将初始化后的工具添加到智能体的**tools**列表中
 
-Once added to an agent, the agent can decide to use the tool based on the **user
-prompt** and its **instructions**. The framework handles the execution of the
-tool when the agent calls it.
+工具注册后，智能体会根据**用户提示词**和其**指令**决定是否调用该工具。框架会在智能体调用时自动处理工具的执行流程。
 
-## Available Built-in tools
+## 可用内置工具
 
-### Google Search
+### Google搜索
 
-The `google_search` tool allows the agent to perform web searches using Google
-Search. It is compatible with Gemini 2 models, and you can add this tool to the
-agent's tools list.
+`google_search`工具允许智能体通过Google Search执行网络搜索。该工具兼容Gemini 2模型，可直接添加到智能体工具列表。
 
 ```py
 --8<-- "examples/python/snippets/tools/built-in-tools/google_search.py"
 ```
 
-### Code Execution
+### 代码执行
 
-The `built_in_code_execution` tool enables the agent to execute code,
-specifically when using Gemini 2 models. This allows the model to perform tasks
-like calculations, data manipulation, or running small scripts.
+`built_in_code_execution`工具支持智能体执行代码（需配合Gemini 2模型使用），可实现计算、数据处理或运行小型脚本等任务。
 
 ````py
 --8<-- "examples/python/snippets/tools/built-in-tools/code_execution.py"
 ````
 
-### Vertex AI Search
+### Vertex AI搜索
 
-The `vertex_ai_search_tool` uses Google Cloud's Vertex AI Search, enabling the
-agent to search across your private, configured data stores (e.g., internal
-documents, company policies, knowledge bases). This built-in tool requires you
-to provide the specific data store ID during configuration.
+`vertex_ai_search_tool`工具基于Google Cloud的Vertex AI Search技术，支持在私有配置的数据存储（如内部文档、公司政策、知识库）中进行检索。使用此内置工具需在配置时提供特定数据存储ID。
 
 ```py
 --8<-- "examples/python/snippets/tools/built-in-tools/vertexai_search.py"
 ```
 
-## Use Built-in tools with other tools
+## 组合使用内置工具
 
-The following code sample demonstrates how to use multiple built-in tools or how
-to use built-in tools with other tools by using multiple agents:
+以下代码示例演示如何组合多个内置工具，或通过多智能体模式将内置工具与其他工具配合使用：
 
 ```py
 from google.adk.tools import agent_tool
@@ -82,15 +69,13 @@ root_agent = Agent(
 )
 ```
 
-### Limitations
+### 使用限制
 
 !!! warning
 
-    Currently, for each root agent or single agent, only one built-in tool is
-    supported.
-
- For example, the following approach that uses two or more built-in tools within
- a root agent (or a single agent) is **not** currently supported:
+    当前每个根智能体或独立智能体仅支持一个内置工具
+    
+例如以下在根智能体（或独立智能体）中使用两个及以上内置工具的方式**暂不支持**：
 
 ```py
 root_agent = Agent(
@@ -103,10 +88,9 @@ root_agent = Agent(
 
 !!! warning
 
-    Built-in tools cannot be used within a sub-agent.
-
-For example, the following approach that uses built-in tools within sub-agents
-is **not** currently supported:
+    内置工具无法在子智能体中使用
+    
+例如以下在子智能体中使用内置工具的方式**暂不支持**：
 
 ```py
 search_agent = Agent(

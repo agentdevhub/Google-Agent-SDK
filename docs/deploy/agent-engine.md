@@ -1,10 +1,6 @@
-# Deploy to Vertex AI Agent Engine
+# 部署至 Vertex AI Agent Engine
 
-[Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview)
-is a fully managed Google Cloud service enabling developers to deploy, manage,
-and scale AI agents in production. Agent Engine handles the infrastructure to
-scale agents in production so you can focus on creating intelligent and
-impactful applications.
+[Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview) 是 Google Cloud 提供的全托管服务，可帮助开发者在生产环境中部署、管理和扩展 AI 代理。该服务负责处理生产环境的基础设施扩展，让开发者能专注于构建智能高效的应用系统。
 
 ```python
 from vertexai import agent_engines
@@ -17,20 +13,20 @@ remote_app = agent_engines.create(
 )
 ```
 
-## Install Vertex AI SDK
+## 安装 Vertex AI SDK
 
-Agent Engine is part of the Vertex AI SDK for Python. For more information, you can review the [Agent Engine quickstart documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart).
+Agent Engine 是 Vertex AI Python SDK 的组成部分。更多信息请参阅 [Agent Engine 快速入门文档](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart)。
 
-### Install the Vertex AI SDK
+### 安装 Vertex AI SDK
 
 ```shell
 pip install google-cloud-aiplatform[adk,agent_engines]
 ```
 
 !!!info
-    Agent Engine only supported Python version >=3.9 and <=3.12.
+    Agent Engine 仅支持 Python 3.9 至 3.12 版本
 
-### Initialization
+### 初始化配置
 
 ```py
 import vertexai
@@ -46,19 +42,19 @@ vertexai.init(
 )
 ```
 
-For `LOCATION`, you can check out the list of [supported regions in Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview#supported-regions).
+关于 `LOCATION`，可查阅 [Agent Engine 支持区域列表](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview#supported-regions)。
 
-### Create your agent
+### 创建代理
 
-You can use the sample agent below, which has two tools (to get weather or retrieve the time in a specified city):
+以下示例代理包含两个工具（获取天气和查询指定城市时间）：
 
 ```python
 --8<-- "examples/python/snippets/get-started/multi_tool_agent/agent.py"
 ```
 
-### Prepare your agent for Agent Engine
+### 适配 Agent Engine 部署
 
-Use `reasoning_engines.AdkApp()` to wrap your agent to make it deployable to Agent Engine
+使用 `reasoning_engines.AdkApp()` 封装代理以实现可部署性：
 
 ```py
 from vertexai.preview import reasoning_engines
@@ -69,49 +65,49 @@ app = reasoning_engines.AdkApp(
 )
 ```
 
-### Try your agent locally
+### 本地测试代理
 
-You can try it locally before deploying to Agent Engine.
+部署前可先在本地验证功能。
 
-#### Create session (local)
+#### 创建会话（本地）
 
 ```py
 session = app.create_session(user_id="u_123")
 session
 ```
 
-Expected output for `create_session` (local):
+`create_session` 的预期输出（本地）：
 
 ```console
 Session(id='c6a33dae-26ef-410c-9135-b434a528291f', app_name='default-app-name', user_id='u_123', state={}, events=[], last_update_time=1743440392.8689594)
 ```
 
-#### List sessions (local)
+#### 列出会话（本地）
 
 ```py
 app.list_sessions(user_id="u_123")
 ```
 
-Expected output for `list_sessions` (local):
+`list_sessions` 的预期输出（本地）：
 
 ```console
 ListSessionsResponse(session_ids=['c6a33dae-26ef-410c-9135-b434a528291f'])
 ```
 
-#### Get a specific session (local)
+#### 获取特定会话（本地）
 
 ```py
 session = app.get_session(user_id="u_123", session_id=session.id)
 session
 ```
 
-Expected output for `get_session` (local):
+`get_session` 的预期输出（本地）：
 
 ```console
 Session(id='c6a33dae-26ef-410c-9135-b434a528291f', app_name='default-app-name', user_id='u_123', state={}, events=[], last_update_time=1743681991.95696)
 ```
 
-#### Send queries to your agent (local)
+#### 向代理发送查询（本地）
 
 ```py
 for event in app.stream_query(
@@ -122,7 +118,7 @@ for event in app.stream_query(
 print(event)
 ```
 
-Expected output for `stream_query` (local):
+`stream_query` 的预期输出（本地）：
 
 ```console
 {'parts': [{'function_call': {'id': 'af-a33fedb0-29e6-4d0c-9eb3-00c402969395', 'args': {'city': 'new york'}, 'name': 'get_weather'}}], 'role': 'model'}
@@ -130,7 +126,7 @@ Expected output for `stream_query` (local):
 {'parts': [{'text': 'The weather in New York is sunny with a temperature of 25 degrees Celsius (41 degrees Fahrenheit).'}], 'role': 'model'}
 ```
 
-### Deploy your agent to Agent Engine
+### 部署至 Agent Engine
 
 ```python
 from vertexai import agent_engines
@@ -143,26 +139,26 @@ remote_app = agent_engines.create(
 )
 ```
 
-This step may take several minutes to finish.
+此步骤可能需要数分钟完成。
 
-## Grant the deployed agent permissions
+## 授予部署代理权限
 
-Before proceeding to query your agent on Agent Engine, your deployed agent must first be granted additional permissions before it can use managed sessions. Managed sessions are a built-in component of Agent Engine that enables agents to keep track of the state of a conversation. Without granting the deploy agent the permissions below, you may see errors when querying your deployed agent.
+在 Agent Engine 上查询代理前，需先授予托管会话使用权限。托管会话是 Agent Engine 的内置组件，用于维护对话状态。若未授予以下权限，查询时可能出现错误。
 
-You can follow the instructions in [Set up your service agent permissions](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/set-up#service-agent) to grant the following permissions via the [IAM admin page](https://console.cloud.google.com/iam-admin/iam):
+按照 [设置服务代理权限](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/set-up#service-agent) 指南，通过 [IAM 管理页面](https://console.cloud.google.com/iam-admin/iam) 授予：
 
-*  Vertex AI User (`roles/aiplatform.user`) to your `service-PROJECT_NUMBER@gcp-sa-aiplatform-re.iam.gserviceaccount.com` service account
+*  将 Vertex AI 用户权限（`roles/aiplatform.user`）授予您的 `service-PROJECT_NUMBER@gcp-sa-aiplatform-re.iam.gserviceaccount.com` 服务账号
 
-### Try your agent on Agent Engine
+### 在 Agent Engine 上测试代理
 
-#### Create session (remote)
+#### 创建会话（远程）
 
 ```py
 remote_session = remote_app.create_session(user_id="u_456")
 remote_session
 ```
 
-Expected output for `create_session` (remote):
+`create_session` 的预期输出（远程）：
 
 ```console
 {'events': [],
@@ -173,24 +169,24 @@ Expected output for `create_session` (remote):
 'last_update_time': 1743683353.030133}
 ```
 
-`id` is the session ID, and `app_name` is the resource ID of the deployed agent on Agent Engine.
+其中 `id` 为会话 ID，`app_name` 是 Agent Engine 上的代理资源 ID。
 
-#### List sessions (remote)
+#### 列出会话（远程）
 
 ```py
 remote_app.list_sessions(user_id="u_456")
 ```
 
-#### Get a specific session (remote)
+#### 获取特定会话（远程）
 
 ```py
 remote_app.get_session(user_id="u_456", session_id=remote_session["id"])
 ```
 
 !!!note
-    While using your agent locally, session ID is stored in `session.id`, when using your agent remotely on Agent Engine, session ID is stored in `remote_session["id"]`.
+    本地使用时会话 ID 存储在 `session.id`，远程使用时则存储在 `remote_session["id"]`。
 
-#### Send queries to your agent (remote)
+#### 向代理发送查询（远程）
 
 ```py
 for event in remote_app.stream_query(
@@ -201,7 +197,7 @@ for event in remote_app.stream_query(
     print(event)
 ```
 
-Expected output for `stream_query` (remote):
+`stream_query` 的预期输出（远程）：
 
 ```console
 {'parts': [{'function_call': {'id': 'af-f1906423-a531-4ecf-a1ef-723b05e85321', 'args': {'city': 'new york'}, 'name': 'get_weather'}}], 'role': 'model'}
@@ -209,16 +205,12 @@ Expected output for `stream_query` (remote):
 {'parts': [{'text': 'The weather in New York is sunny with a temperature of 25 degrees Celsius (41 degrees Fahrenheit).'}], 'role': 'model'}
 ```
 
+## 资源清理
 
-
-## Clean up
-
-After you've finished, it's a good practice to clean up your cloud resources.
-You can delete the deployed Agent Engine instance to avoid any unexpected
-charges on your Google Cloud account.
+使用完毕后建议清理云资源。删除已部署的 Agent Engine 实例可避免产生意外费用。
 
 ```python
 remote_app.delete(force=True)
 ```
 
-`force=True` will also delete any child resources that were generated from the deployed agent, such as sessions.
+`force=True` 将同时删除该代理衍生的所有子资源（如会话记录）。

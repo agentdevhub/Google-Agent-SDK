@@ -1,24 +1,24 @@
-# Agents
+# 智能体
 
-In the Agent Development Kit (ADK), an **Agent** is a self-contained execution unit designed to act autonomously to achieve specific goals. Agents can perform tasks, interact with users, utilize external tools, and coordinate with other agents.
+在智能体开发套件（ADK）中，**智能体**是一个独立的执行单元，能够自主行动以实现特定目标。智能体可以执行任务、与用户交互、使用外部工具，并与其他智能体协同工作。
 
-The foundation for all agents in ADK is the `BaseAgent` class. It serves as the fundamental blueprint. To create functional agents, you typically extend `BaseAgent` in one of three main ways, catering to different needs – from intelligent reasoning to structured process control.
+ADK中所有智能体的基础是`BaseAgent`类，它作为基础蓝图存在。要创建功能性智能体，通常需要通过以下三种主要方式扩展`BaseAgent`类，以满足从智能推理到结构化流程控制等不同需求。
 
-<img src="../assets/agent-types.png" alt="Types of agents in ADK">
+<img src="../assets/agent-types.png" alt="ADK中的智能体类型">
 
-## Core Agent Categories
+## 核心智能体类别
 
-ADK provides distinct agent categories to build sophisticated applications:
+ADK提供以下不同类别的智能体来构建复杂应用：
 
-1. [**LLM Agents (`LlmAgent`, `Agent`)**](llm-agents.md): These agents utilize Large Language Models (LLMs) as their core engine to understand natural language, reason, plan, generate responses, and dynamically decide how to proceed or which tools to use, making them ideal for flexible, language-centric tasks. [Learn more about LLM Agents...](llm-agents.md)
+1. [**大模型智能体（`LlmAgent`, `Agent`）**](llm-agents.md)：这类智能体以大模型（LLM）为核心引擎，能够理解自然语言、进行推理规划、生成响应，并动态决定后续操作或工具使用，非常适合需要灵活处理语言相关任务的场景。[了解更多大模型智能体...](llm-agents.md)
 
-2. [**Workflow Agents (`SequentialAgent`, `ParallelAgent`, `LoopAgent`)**](workflow-agents/index.md): These specialized agents control the execution flow of other agents in predefined, deterministic patterns (sequence, parallel, or loop) without using an LLM for the flow control itself, perfect for structured processes needing predictable execution. [Explore Workflow Agents...](workflow-agents/index.md)
+2. [**工作流智能体（`SequentialAgent`, `ParallelAgent`, `LoopAgent`）**](workflow-agents/index.md)：这类专用智能体按照预定义的确定性模式（顺序、并行或循环）控制其他智能体的执行流程，其流程控制本身不使用大模型，非常适合需要可预测执行的结构化流程。[探索工作流智能体...](workflow-agents/index.md)
 
-3. [**Custom Agents**](custom-agents.md): Created by extending `BaseAgent` directly, these agents allow you to implement unique operational logic, specific control flows, or specialized integrations not covered by the standard types, catering to highly tailored application requirements. [Discover how to build Custom Agents...](custom-agents.md)
+3. [**自定义智能体**](custom-agents.md)：通过直接扩展`BaseAgent`类创建，这类智能体允许实现独特的操作逻辑、特定控制流程或标准类型未涵盖的专用集成，可满足高度定制化的应用需求。[了解如何构建自定义智能体...](custom-agents.md)
 
-## Choosing the Right Agent Type
+## 选择合适的智能体类型
 
-The following table provides a high-level comparison to help distinguish between the agent types. As you explore each type in more detail in the subsequent sections, these distinctions will become clearer.
+下表提供了高层次对比以帮助区分智能体类型。随着后续章节对各类别的深入探讨，这些差异将更加清晰。
 
 | Feature              | LLM Agent (`LlmAgent`)              | Workflow Agent                              | Custom Agent (`BaseAgent` subclass)      |
 | :------------------- | :---------------------------------- | :------------------------------------------ | :--------------------------------------- |
@@ -27,24 +27,24 @@ The following table provides a high-level comparison to help distinguish between
 | **Determinism**  | Non-deterministic (Flexible)        | Deterministic (Predictable)                 | Can be either, based on implementation |
 | **Primary Use**  | Language tasks, Dynamic decisions   | Structured processes, Orchestration         | Tailored requirements, Specific workflows|
 
-## Agents Working Together: Multi-Agent Systems
+## 协同工作的智能体：多智能体系统
 
-While each agent type serves a distinct purpose, the true power often comes from combining them. Complex applications frequently employ [multi-agent architectures](multi-agents.md) where:
+虽然每类智能体都有其独特用途，但真正的威力往往来自它们的组合。复杂应用常采用[多智能体架构](multi-agents.md)，其中：
 
-* **LLM Agents** handle intelligent, language-based task execution.
-* **Workflow Agents** manage the overall process flow using standard patterns.
-* **Custom Agents** provide specialized capabilities or rules needed for unique integrations.
+* **大模型智能体**负责基于语言的智能任务执行
+* **工作流智能体**使用标准模式管理整体流程
+* **自定义智能体**提供特殊能力或独特集成所需的规则
 
-Understanding these core types is the first step toward building sophisticated, capable AI applications with ADK.
+理解这些核心类型是使用ADK构建复杂、强大AI应用的第一步。
 
 ---
 
-## What's Next?
+## 后续步骤
 
-Now that you have an overview of the different agent types available in ADK, dive deeper into how they work and how to use them effectively:
+现在您已了解ADK中可用的不同智能体类型，接下来可以深入探索它们的工作原理和有效使用方法：
 
-* [**LLM Agents:**](llm-agents.md) Explore how to configure agents powered by large language models, including setting instructions, providing tools, and enabling advanced features like planning and code execution.
-* [**Workflow Agents:**](workflow-agents/index.md) Learn how to orchestrate tasks using `SequentialAgent`, `ParallelAgent`, and `LoopAgent` for structured and predictable processes.
-* [**Custom Agents:**](custom-agents.md) Discover the principles of extending `BaseAgent` to build agents with unique logic and integrations tailored to your specific needs.
-* [**Multi-Agents:**](multi-agents.md) Understand how to combine different agent types to create sophisticated, collaborative systems capable of tackling complex problems.
-* [**Models:**](models.md) Learn about the different LLM integrations available and how to select the right model for your agents.
+* [**大模型智能体**](llm-agents.md)：了解如何配置基于大模型的智能体，包括设置提示词、提供工具以及启用规划和代码执行等高级功能
+* [**工作流智能体**](workflow-agents/index.md)：学习如何使用`SequentialAgent`、`ParallelAgent`和`LoopAgent`来编排任务，实现结构化且可预测的流程
+* [**自定义智能体**](custom-agents.md)：探索扩展`BaseAgent`类的原则，构建具有独特逻辑和集成的智能体以满足特定需求
+* [**多智能体系统**](multi-agents.md)：理解如何组合不同类型的智能体来创建能够解决复杂问题的协同系统
+* [**模型**](models.md)：了解可用的大模型集成选项，以及如何为智能体选择合适的模型

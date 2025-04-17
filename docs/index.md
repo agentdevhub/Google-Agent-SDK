@@ -3,7 +3,6 @@ hide:
   - toc
 ---
 
-<div style="text-align: center;">
   <div class="centered-logo-text-group">
     <img src="assets/agent-development-kit.png" alt="Agent Development Kit Logo" width="100">
     <h1>Agent Development Kit</h1>
@@ -11,18 +10,12 @@ hide:
 </div>
 
 <p style="text-align:center; font-size: 1.2em;">
-  <b>An open-source AI agent framework integrated with Gemini and Google</b><br/>
+  <b>一个与Gemini和Google深度集成的开源AI智能体框架</b><br/>
 </p>
 
-## What is Agent Development Kit?
+## 什么是Agent Development Kit？
 
-Agent Development Kit (ADK) is a flexible and modular framework for **developing
-and deploying AI agents**. ADK can be used with popular LLMs and open-source
-generative AI tools and is designed with a focus on **tight integration with the
-Google ecosystem and Gemini models**. ADK makes it **easy to get started with
-simple agents** powered by Gemini models and Google AI tools while providing the
-control and structure needed for **more complex agent architectures and
-orchestration**.
+Agent Development Kit（ADK）是一个灵活模块化的框架，用于**开发和部署AI智能体**。ADK可与主流大模型及开源生成式AI工具配合使用，其设计重点在于**与Google生态系统及Gemini模型的深度集成**。该框架既能**轻松构建基于Gemini模型和Google AI工具的简易智能体**，又能为**复杂智能体架构与编排**提供所需的控制力和结构化支持。
 
 <div class="install-command-container">
   <p style="text-align:center;">
@@ -33,16 +26,16 @@ orchestration**.
 </div>
 
 <p style="text-align:center;">
-  <a href="get-started/quickstart/" class="md-button">Quickstart</a>
-  <a href="get-started/tutorial/" class="md-button">Tutorial</a>
-  <a href="http://github.com/google/adk-samples" class="md-button" target="_blank">Sample Agents</a>
-  <a href="api-reference/" class="md-button">API Reference</a>
-  <a href="contributing-guide/" class="md-button">Contribute ❤️</a>
+  <a href="get-started/quickstart/" class="md-button">快速开始</a>
+  <a href="get-started/tutorial/" class="md-button">教程</a>
+  <a href="http://github.com/google/adk-samples" class="md-button" target="_blank">示例智能体</a>
+  <a href="api-reference/" class="md-button">API参考</a>
+  <a href="contributing-guide/" class="md-button">贡献 ❤️</a>
 </p>
 
 ---
 
-## Learn more
+## 了解更多
 
 <div class="grid cards" markdown>
 
@@ -106,13 +99,9 @@ orchestration**.
 
 </div>
 
-!!! Preview
+!!! 预览版说明
 
-    This feature is subject to the "Pre-GA Offerings Terms" in the General
-    Service Terms section of the
-    [Service Specific Terms](https://cloud.google.com/terms/service-terms#1).
-    Pre-GA features are available "as is" and might have limited support. For
-    more information, see the
-    [launch stage descriptions](https://cloud.google.com/products#product-launch-stages).
-
-<div class="footer"></div>
+    本功能适用《通用服务条款》中"预GA产品条款"的规定，详见
+    [服务专项条款](https://cloud.google.com/terms/service-terms#1)。
+    预GA功能按"现状"提供，可能仅获得有限支持。更多信息请参阅
+    [产品发布阶段说明](https://cloud.google.com/products#product-launch-stages)。

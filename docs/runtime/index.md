@@ -1,44 +1,44 @@
-# Runtime
+# 运行时系统
 
-## What is runtime?
+## 什么是运行时？
 
-The ADK Runtime is the underlying engine that powers your agent application during user interactions. It's the system that takes your defined agents, tools, and callbacks and orchestrates their execution in response to user input, managing the flow of information, state changes, and interactions with external services like LLMs or storage.
+ADK Runtime 是支撑智能体应用在用户交互过程中运行的核心引擎。这个系统负责调度您定义的智能体、工具和回调函数，响应用户输入来协调执行流程，管理信息流转、状态变更以及与外部服务（如大模型或存储系统）的交互。
 
-Think of the Runtime as the **"engine"** of your agentic application. You define the parts (agents, tools), and the Runtime handles how they connect and run together to fulfill a user's request.
+您可以将 Runtime 视为智能体应用的**"发动机"**。您负责定义各个组件（智能体、工具），而 Runtime 则处理它们之间的协作运行机制以满足用户请求。
 
-## Core Idea: The Event Loop
+## 核心概念：事件循环
 
-At its heart, the ADK Runtime operates on an **Event Loop**. This loop facilitates a back-and-forth communication between the `Runner` component and your defined "Execution Logic" (which includes your Agents, the LLM calls they make, Callbacks, and Tools).
+ADK Runtime 的核心运行机制是**事件循环**。这个循环在 `Runner` 组件与您定义的"执行逻辑"（包括智能体、大模型调用、回调和工具）之间建立双向通信通道。
 
 ![intro_components.png](../assets/event-loop.png)
 
-In simple terms:
+简单来说：
 
-1. The `Runner` receives a user query and asks the main `Agent` to start processing.
-2. The `Agent` (and its associated logic) runs until it has something to report (like a response, a request to use a tool, or a state change) – it then **yields** an `Event`.
-3. The `Runner` receives this `Event`, processes any associated actions (like saving state changes via `Services`), and forwards the event onwards (e.g., to the user interface).
-4. Only *after* the `Runner` has processed the event does the `Agent`'s logic **resume** from where it paused, now potentially seeing the effects of the changes committed by the Runner.
-5. This cycle repeats until the agent has no more events to yield for the current user query.
+1. `Runner` 接收用户查询后，请求主 `Agent` 开始处理
+2. `Agent`（及其关联逻辑）持续运行直到需要报告结果（如生成响应、调用工具请求或状态变更）——此时会**产出**一个 `Event`
+3. `Runner` 接收该 `Event` 后，处理相关操作（如通过 `Services` 保存状态变更），并将事件转发（例如到用户界面）
+4. 只有当 `Runner` 完成事件处理后，`Agent` 的逻辑才会从暂停处**恢复**执行，此时可能已观察到 Runner 提交的变更效果
+5. 该循环持续进行，直到智能体对当前用户查询不再产出新事件
 
-This event-driven loop is the fundamental pattern governing how ADK executes your agent code.
+这种事件驱动的循环机制是 ADK 执行智能体代码的基础模式。
 
-## The Heartbeat: The Event Loop - Inner workings
+## 核心机制：事件循环详解
 
-The Event Loop is the core operational pattern defining the interaction between the `Runner` and your custom code (Agents, Tools, Callbacks, collectively referred to as "Execution Logic" or "Logic Components" in the design document). It establishes a clear division of responsibilities:
+事件循环定义了 `Runner` 与自定义代码（智能体、工具、回调，在设计文档中统称为"执行逻辑"或"逻辑组件"）之间的交互范式，明确划分了职责边界：
 
-### Runner's Role (Orchestrator)
+### Runner 的角色（协调中枢）
 
-The `Runner` acts as the central coordinator for a single user invocation. Its responsibilities in the loop are:
+`Runner` 作为单次用户调用的中央协调器，在循环中承担以下职责：
 
-1. **Initiation:** Receives the end user's query (`new_message`) and typically appends it to the session history via the `SessionService`.
-2. **Kick-off:** Starts the event generation process by calling the main agent's execution method (e.g., `agent_to_run.run_async(...)`).
-3. **Receive & Process:** Waits for the agent logic to `yield` an `Event`. Upon receiving an event, the Runner **promptly processes** it. This involves:
-      * Using configured `Services` (`SessionService`, `ArtifactService`, `MemoryService`) to commit changes indicated in `event.actions` (like `state_delta`, `artifact_delta`).
-      * Performing other internal bookkeeping.
-4. **Yield Upstream:** Forwards the processed event onwards (e.g., to the calling application or UI for rendering).
-5. **Iterate:** Signals the agent logic that processing is complete for the yielded event, allowing it to resume and generate the *next* event.
+1. **初始化**：接收终端用户查询（`new_message`），通常通过 `SessionService` 将其追加到会话历史
+2. **启动**：调用主智能体的执行方法（如 `agent_to_run.run_async(...)`）启动事件生成流程
+3. **接收与处理**：等待智能体逻辑 `yield` 产出 `Event`。收到事件后立即处理：
+      * 使用配置的 `Services`（`SessionService`、`ArtifactService`、`MemoryService`）提交 `event.actions` 中的变更（如 `state_delta`、`artifact_delta`）
+      * 执行其他内部簿记操作
+4. **向上传递**：将处理完成的事件转发（如传递给调用应用或界面渲染）
+5. **迭代**：通知智能体逻辑已完成当前事件处理，允许其恢复执行并产出*下一个*事件
 
-*Conceptual Runner Loop:*
+*Runner 循环概念示意：*
 
 ```py
 # Simplified view of Runner's main loop logic
@@ -60,17 +60,17 @@ def run(new_query, ...) -> Generator[Event]:
         # Runner implicitly signals agent generator can continue after yielding
 ```
 
-### Execution Logic's Role (Agent, Tool, Callback)
+### 执行逻辑的角色（智能体、工具、回调）
 
-Your code within agents, tools, and callbacks is responsible for the actual computation and decision-making. Its interaction with the loop involves:
+智能体、工具和回调中的代码负责实际计算和决策制定，其与循环的交互包括：
 
-1. **Execute:** Runs its logic based on the current `InvocationContext`, including the session state *as it was when execution resumed*.
-2. **Yield:** When the logic needs to communicate (send a message, call a tool, report a state change), it constructs an `Event` containing the relevant content and actions, and then `yield`s this event back to the `Runner`.
-3. **Pause:** Crucially, execution of the agent logic **pauses immediately** after the `yield` statement. It waits for the `Runner` to complete step 3 (processing and committing).
-4. **Resume:** *Only after* the `Runner` has processed the yielded event does the agent logic resume execution from the statement immediately following the `yield`.
-5. **See Updated State:** Upon resumption, the agent logic can now reliably access the session state (`ctx.session.state`) reflecting the changes that were committed by the `Runner` from the *previously yielded* event.
+1. **执行**：基于当前 `InvocationContext`（包括恢复执行时的会话状态）运行逻辑
+2. **产出**：当需要通信时（发送消息、调用工具、报告状态变更），构建包含相关内容和操作的 `Event`，然后通过 `yield` 将事件传回 `Runner`
+3. **暂停**：关键的是，智能体逻辑在 `yield` 语句后**立即暂停**，等待 `Runner` 完成步骤3（处理与提交）
+4. **恢复**：只有当 `Runner` 处理完产出的事件后，智能体逻辑才从 `yield` 后的语句继续执行
+5. **观察更新状态**：恢复后，智能体逻辑可以可靠访问反映先前产出事件所提交变更的会话状态（`ctx.session.state`）
 
-*Conceptual Execution Logic:*
+*执行逻辑概念示意：*
 
 ```py
 # Simplified view of logic inside Agent.run_async, callbacks, or tools
@@ -104,92 +104,92 @@ print(f"Resumed execution. Value of field_1 is now: {val}")
 # Maybe yield another event later...
 ```
 
-This cooperative yield/pause/resume cycle between the `Runner` and your Execution Logic, mediated by `Event` objects, forms the core of the ADK Runtime.
+这种由 `Event` 对象协调的、`Runner` 与执行逻辑之间的产出/暂停/恢复协作循环，构成了 ADK Runtime 的核心架构。
 
-## Key components of the Runtime
+## 运行时关键组件
 
-Several components work together within the ADK Runtime to execute an agent invocation. Understanding their roles clarifies how the event loop functions:
+ADK Runtime 中多个组件协同工作来执行智能体调用，理解它们的角色有助于厘清事件循环的运作机制：
 
 1. ### `Runner`
 
-      * **Role:** The main entry point and orchestrator for a single user query (`run_async`).
-      * **Function:** Manages the overall Event Loop, receives events yielded by the Execution Logic, coordinates with Services to process and commit event actions (state/artifact changes), and forwards processed events upstream (e.g., to the UI). It essentially drives the conversation turn by turn based on yielded events. (Defined in `google.adk.runners.runner.py`).
+      * **角色**：单次用户查询（`run_async`）的主入口和协调器
+      * **功能**：管理整体事件循环，接收执行逻辑产出的事件，协调服务处理并提交事件操作（状态/产物变更），将处理完成的事件向上传递（如到UI）。本质上是基于产出事件驱动逐轮对话（定义于 `google.adk.runners.runner.py`）
 
-2. ### Execution Logic Components
+2. ### 执行逻辑组件
 
-      * **Role:** The parts containing your custom code and the core agent capabilities.
-      * **Components:**
-      * `Agent` (`BaseAgent`, `LlmAgent`, etc.): Your primary logic units that process information and decide on actions. They implement the `_run_async_impl` method which yields events.
-      * `Tools` (`BaseTool`, `FunctionTool`, `AgentTool`, etc.): External functions or capabilities used by agents (often `LlmAgent`) to interact with the outside world or perform specific tasks. They execute and return results, which are then wrapped in events.
-      * `Callbacks` (Functions): User-defined functions attached to agents (e.g., `before_agent_callback`, `after_model_callback`) that hook into specific points in the execution flow, potentially modifying behavior or state, whose effects are captured in events.
-      * **Function:** Perform the actual thinking, calculation, or external interaction. They communicate their results or needs by **yielding `Event` objects** and pausing until the Runner processes them.
+      * **角色**：包含自定义代码和智能体核心能力的部分
+      * **组成**：
+      * `Agent`（`BaseAgent`、`LlmAgent` 等）：处理信息并决策行动的主逻辑单元，实现产出事件的 `_run_async_impl` 方法
+      * `Tools`（`BaseTool`、`FunctionTool`、`AgentTool` 等）：智能体（通常通过 `LlmAgent`）与外界交互或执行特定任务的外部功能，执行后返回结果并包装为事件
+      * `Callbacks`（函数）：附加到智能体的用户定义函数（如 `before_agent_callback`、`after_model_callback`），挂钩到执行流特定节点，可能修改行为或状态，其效果通过事件捕获
+      * **功能**：执行实际思考、计算或外部交互，通过**产出 `Event` 对象**来通信结果或需求，并暂停直到 Runner 处理完成
 
 3. ### `Event`
 
-      * **Role:** The message passed back and forth between the `Runner` and the Execution Logic.
-      * **Function:** Represents an atomic occurrence (user input, agent text, tool call/result, state change request, control signal). It carries both the content of the occurrence and the intended side effects (`actions` like `state_delta`). (Defined in `google.adk.events.event.py`).
+      * **角色**：`Runner` 与执行逻辑间传递的消息载体
+      * **功能**：表示原子事件（用户输入、智能体文本、工具调用/结果、状态变更请求、控制信号），既携带事件内容也包含预期副作用（`actions` 如 `state_delta`）（定义于 `google.adk.events.event.py`）
 
 4. ### `Services`
 
-      * **Role:** Backend components responsible for managing persistent or shared resources. Used primarily by the `Runner` during event processing.
-      * **Components:**
-      * `SessionService` (`BaseSessionService`, `InMemorySessionService`, etc.): Manages `Session` objects, including saving/loading them, applying `state_delta` to the session state, and appending events to the `event history`.
-      * `ArtifactService` (`BaseArtifactService`, `InMemoryArtifactService`, `GcsArtifactService`, etc.): Manages the storage and retrieval of binary artifact data. Although `save_artifact` is called via context during execution logic, the `artifact_delta` in the event confirms the action for the Runner/SessionService.
-      * `MemoryService` (`BaseMemoryService`, etc.): (Optional) Manages long-term semantic memory across sessions for a user.
-      * **Function:** Provide the persistence layer. The `Runner` interacts with them to ensure changes signaled by `event.actions` are reliably stored *before* the Execution Logic resumes.
+      * **角色**：管理持久化或共享资源的后端组件，主要由 `Runner` 在事件处理时使用
+      * **组成**：
+      * `SessionService`（`BaseSessionService`、`InMemorySessionService` 等）：管理 `Session` 对象，包括保存/加载、对会话状态应用 `state_delta`、将事件追加到 `event history`
+      * `ArtifactService`（`BaseArtifactService`、`InMemoryArtifactService`、`GcsArtifactService` 等）：管理二进制产物数据的存储检索。虽然 `save_artifact` 通过上下文在执行逻辑中调用，但事件中的 `artifact_delta` 向Runner/SessionService确认操作
+      * `MemoryService`（`BaseMemoryService` 等）：（可选）管理用户跨会话的长期语义记忆
+      * **功能**：提供持久化层。`Runner` 与之交互以确保 `event.actions` 信号的变化在*执行逻辑恢复前*可靠存储
 
 5. ### `Session`
 
-      * **Role:** A data container holding the state and history for *one specific conversation* between a user and the application.
-      * **Function:** Stores the current `state` dictionary, the list of all past `events` (`event history`), and references to associated artifacts. It's the primary record of the interaction, managed by the `SessionService`. (Defined in `google.adk.sessions.session.py`).
+      * **角色**：存储用户与应用间*特定对话*状态与历史的数据容器
+      * **功能**：存储当前 `state` 字典、所有历史 `events`（`event history`）列表及相关产物引用，是由 `SessionService` 管理的主要交互记录（定义于 `google.adk.sessions.session.py`）
 
 6. ### `Invocation`
 
-      * **Role:** A conceptual term representing everything that happens in response to a *single* user query, from the moment the `Runner` receives it until the agent logic finishes yielding events for that query.
-      * **Function:** An invocation might involve multiple agent runs (if using agent transfer or `AgentTool`), multiple LLM calls, tool executions, and callback executions, all tied together by a single `invocation_id` within the `InvocationContext`.
+      * **角色**：表示从 `Runner` 接收*单次*用户查询到智能体逻辑停止产出事件期间所有发生的概念术语
+      * **功能**：一次调用可能涉及多次智能体运行（如使用智能体转移或 `AgentTool`）、多次大模型调用、工具执行和回调执行，全部通过 `InvocationContext` 中的单个 `invocation_id` 关联
 
-These players interact continuously through the Event Loop to process a user's request.
+这些参与者通过事件循环持续交互来处理用户请求。
 
-## How It Works: A Simplified Invocation
+## 运作机制：简化调用流程
 
-Let's trace a simplified flow for a typical user query that involves an LLM agent calling a tool:
+以下展示涉及大模型智能体调用工具的典型用户查询简化流程：
 
 ![intro_components.png](../assets/invocation-flow.png)
 
-### Step-by-Step Breakdown
+### 逐步解析
 
-1. **User Input:** The User sends a query (e.g., "What's the capital of France?").
-2. **Runner Starts:** `Runner.run_async` begins. It interacts with the `SessionService` to load the relevant `Session` and adds the user query as the first `Event` to the session history. An `InvocationContext` (`ctx`) is prepared.
-3. **Agent Execution:** The `Runner` calls `agent.run_async(ctx)` on the designated root agent (e.g., an `LlmAgent`).
-4. **LLM Call (Example):** The `Agent_Llm` determines it needs information, perhaps by calling a tool. It prepares a request for the `LLM`. Let's assume the LLM decides to call `MyTool`.
-5. **Yield FunctionCall Event:** The `Agent_Llm` receives the `FunctionCall` response from the LLM, wraps it in an `Event(author='Agent_Llm', content=Content(parts=[Part(function_call=...)]))`, and `yield`s this event.
-6. **Agent Pauses:** The `Agent_Llm`'s execution pauses immediately after the `yield`.
-7. **Runner Processes:** The `Runner` receives the FunctionCall event. It passes it to the `SessionService` to record it in the history. The `Runner` then yields the event upstream to the `User` (or application).
-8. **Agent Resumes:** The `Runner` signals that the event is processed, and `Agent_Llm` resumes execution.
-9. **Tool Execution:** The `Agent_Llm`'s internal flow now proceeds to execute the requested `MyTool`. It calls `tool.run_async(...)`.
-10. **Tool Returns Result:** `MyTool` executes and returns its result (e.g., `{'result': 'Paris'}`).
-11. **Yield FunctionResponse Event:** The agent (`Agent_Llm`) wraps the tool result into an `Event` containing a `FunctionResponse` part (e.g., `Event(author='Agent_Llm', content=Content(role='user', parts=[Part(function_response=...)]))`). This event might also contain `actions` if the tool modified state (`state_delta`) or saved artifacts (`artifact_delta`). The agent `yield`s this event.
-12. **Agent Pauses:** `Agent_Llm` pauses again.
-13. **Runner Processes:** `Runner` receives the FunctionResponse event. It passes it to `SessionService` which applies any `state_delta`/`artifact_delta` and adds the event to history. `Runner` yields the event upstream.
-14. **Agent Resumes:** `Agent_Llm` resumes, now knowing the tool result and any state changes are committed.
-15. **Final LLM Call (Example):** `Agent_Llm` sends the tool result back to the `LLM` to generate a natural language response.
-16. **Yield Final Text Event:** `Agent_Llm` receives the final text from the `LLM`, wraps it in an `Event(author='Agent_Llm', content=Content(parts=[Part(text=...)]))`, and `yield`s it.
-17. **Agent Pauses:** `Agent_Llm` pauses.
-18. **Runner Processes:** `Runner` receives the final text event, passes it to `SessionService` for history, and yields it upstream to the `User`. This is likely marked as the `is_final_response()`.
-19. **Agent Resumes & Finishes:** `Agent_Llm` resumes. Having completed its task for this invocation, its `run_async` generator finishes.
-20. **Runner Completes:** The `Runner` sees the agent's generator is exhausted and finishes its loop for this invocation.
+1. **用户输入**：用户发送查询（如"法国首都是哪里？"）
+2. **Runner启动**：`Runner.run_async` 开始运行，与 `SessionService` 交互加载相关 `Session`，将用户查询作为首个 `Event` 加入会话历史，准备 `InvocationContext`（`ctx`）
+3. **智能体执行**：`Runner` 调用指定根智能体（如 `LlmAgent`）的 `agent.run_async(ctx)`
+4. **大模型调用（示例）**：`Agent_Llm` 判断需要信息（可能通过调用工具），准备 `LLM` 请求。假设大模型决定调用 `MyTool`
+5. **产出函数调用事件**：`Agent_Llm` 接收大模型的 `FunctionCall` 响应，包装为 `Event(author='Agent_Llm', content=Content(parts=[Part(function_call=...)]))` 后 `yield` 该事件
+6. **智能体暂停**：`Agent_Llm` 在 `yield` 后立即暂停执行
+7. **Runner处理**：`Runner` 接收函数调用事件，传递给 `SessionService` 记录历史，`Runner` 将事件向上传递给 `User`（或应用）
+8. **智能体恢复**：`Runner` 通知事件处理完成，`Agent_Llm` 恢复执行
+9. **工具执行**：`Agent_Llm` 内部流程继续执行请求的 `MyTool`，调用 `tool.run_async(...)`
+10. **工具返回结果**：`MyTool` 执行并返回结果（如 `{'result': 'Paris'}`）
+11. **产出函数响应事件**：智能体（`Agent_Llm`）将工具结果包装为包含 `FunctionResponse`（如 `Event(author='Agent_Llm', content=Content(role='user', parts=[Part(function_response=...)]))`）的 `Event`。若工具修改状态（`state_delta`）或保存产物（`artifact_delta`），事件可能还包含 `actions`。智能体 `yield` 该事件
+12. **智能体暂停**：`Agent_Llm` 再次暂停
+13. **Runner处理**：`Runner` 接收函数响应事件，传递给 `SessionService` 应用 `state_delta`/`artifact_delta` 并加入历史，`Runner` 向上传递事件
+14. **智能体恢复**：`Agent_Llm` 恢复执行，此时工具结果和状态变更已确认提交
+15. **最终大模型调用（示例）**：`Agent_Llm` 将工具结果返回 `LLM` 生成自然语言响应
+16. **产出最终文本事件**：`Agent_Llm` 接收大模型的最终文本，包装为 `Event(author='Agent_Llm', content=Content(parts=[Part(text=...)]))` 后 `yield` 产出
+17. **智能体暂停**：`Agent_Llm` 暂停
+18. **Runner处理**：`Runner` 接收最终文本事件，传递给 `SessionService` 记录历史，向上传递给 `User`，通常标记为 `is_final_response()`
+19. **智能体恢复并结束**：`Agent_Llm` 恢复，完成本次调用任务后其 `run_async` 生成器终止
+20. **Runner完成**：`Runner` 检测智能体生成器耗尽，结束本次调用的循环
 
-This yield/pause/process/resume cycle ensures that state changes are consistently applied and that the execution logic always operates on the most recently committed state after yielding an event.
+这种产出/暂停/处理/恢复的循环机制确保状态变更被一致应用，且执行逻辑在产出事件后总是基于最新提交的状态运行。
 
-## Important Runtime Behaviors
+## 重要运行时行为
 
-Understanding a few key aspects of how the ADK Runtime handles state, streaming, and asynchronous operations is crucial for building predictable and efficient agents.
+理解 ADK Runtime 处理状态、流式输出和异步操作的关键特性，对于构建稳定高效的智能体至关重要。
 
-### State Updates & Commitment Timing
+### 状态更新与提交时机
 
-* **The Rule:** When your code (in an agent, tool, or callback) modifies the session state (e.g., `context.state['my_key'] = 'new_value'`), this change is initially recorded locally within the current `InvocationContext`. The change is only **guaranteed to be persisted** (saved by the `SessionService`) *after* the `Event` carrying the corresponding `state_delta` in its `actions` has been `yield`\-ed by your code and subsequently processed by the `Runner`.
+* **规则**：当代码（在智能体、工具或回调中）修改会话状态（如 `context.state['my_key'] = 'new_value'`）时，变更最初记录在当前 `InvocationContext` 的本地副本中。只有当中包含对应 `state_delta` 的 `Event` 被代码 `yield` 产出且经 `Runner` 处理后，变更才**保证被持久化**（由 `SessionService` 保存）
 
-* **Implication:** Code that runs *after* resuming from a `yield` can reliably assume that the state changes signaled in the *yielded event* have been committed.
+* **影响**：从 `yield` 恢复后运行的代码可以可靠假定*产出事件*中的状态变更已提交
 
 ```py
 # Inside agent logic (conceptual)
@@ -208,10 +208,10 @@ current_status = ctx.session.state['status'] # Guaranteed to be 'processing'
 print(f"Status after resuming: {current_status}")
 ```
 
-### "Dirty Reads" of Session State
+### 会话状态的"脏读"
 
-* **Definition:** While commitment happens *after* the yield, code running *later within the same invocation*, but *before* the state-changing event is actually yielded and processed, **can often see the local, uncommitted changes**. This is sometimes called a "dirty read".
-* **Example:**
+* **定义**：虽然提交发生在产出*之后*，但在*同次调用内*后续运行（且*状态变更事件尚未实际产出和处理前*）的代码**常可观察到本地未提交的变更**，这种现象称为"脏读"
+* **示例**：
 
 ```py
 # Code in before_agent_callback
@@ -229,28 +229,28 @@ print(f"Dirty read value in tool: {val}")
 # is yielded *after* this tool runs and is processed by the Runner.
 ```
 
-* **Implications:**
-  * **Benefit:** Allows different parts of your logic within a single complex step (e.g., multiple callbacks or tool calls before the next LLM turn) to coordinate using state without waiting for a full yield/commit cycle.
-  * **Caveat:** Relying heavily on dirty reads for critical logic can be risky. If the invocation fails *before* the event carrying the `state_delta` is yielded and processed by the `Runner`, the uncommitted state change will be lost. For critical state transitions, ensure they are associated with an event that gets successfully processed.
+* **影响**：
+  * **优势**：允许复杂步骤中不同逻辑部分（如多次回调或工具调用）无需等待完整产出/提交周期即可通过状态协调
+  * **注意**：关键逻辑过度依赖脏读存在风险。若调用在携带 `state_delta` 的事件被 `Runner` 处理前失败，未提交的变更将丢失。关键状态转换应确保关联事件能被成功处理
 
-### Streaming vs. Non-Streaming Output (`partial=True`)
+### 流式与非流式输出（`partial=True`）
 
-This primarily relates to how responses from the LLM are handled, especially when using streaming generation APIs.
+这主要涉及大模型响应处理方式，特别是使用流式生成API时：
 
-* **Streaming:** The LLM generates its response token-by-token or in small chunks.
-  * The framework (often within `BaseLlmFlow`) yields multiple `Event` objects for a single conceptual response. Most of these events will have `partial=True`.
-  * The `Runner`, upon receiving an event with `partial=True`, typically **forwards it immediately** upstream (for UI display) but **skips processing its `actions`** (like `state_delta`).
-  * Eventually, the framework yields a final event for that response, marked as non-partial (`partial=False` or implicitly via `turn_complete=True`).
-  * The `Runner` **fully processes only this final event**, committing any associated `state_delta` or `artifact_delta`.
-* **Non-Streaming:** The LLM generates the entire response at once. The framework yields a single event marked as non-partial, which the `Runner` processes fully.
-* **Why it Matters:** Ensures that state changes are applied atomically and only once based on the *complete* response from the LLM, while still allowing the UI to display text progressively as it's generated.
+* **流式**：大模型逐令牌或分块生成响应
+  * 框架（通常在 `BaseLlmFlow` 内）为单个概念响应产出多个 `Event` 对象，多数事件带 `partial=True` 标记
+  * `Runner` 收到含 `partial=True` 标记的事件时通常**立即向上传递**（供UI显示）但**跳过处理其 `actions`**（如 `state_delta`）
+  * 最终框架会为该响应产出标记为非分块（`partial=False` 或通过 `turn_complete=True` 隐式标记）的结束事件
+  * `Runner` **仅完整处理该结束事件**，提交关联的 `state_delta` 或 `artifact_delta`
+* **非流式**：大模型一次性生成完整响应。框架产出单个非分块标记事件，`Runner` 完整处理
+* **意义**：确保基于大模型*完整*响应原子性应用状态变更，同时允许UI在生成过程中渐进显示文本
 
-## Async is Primary (`run_async`)
+## 异步优先（`run_async`）
 
-* **Core Design:** The ADK Runtime is fundamentally built on Python's `asyncio` library to handle concurrent operations (like waiting for LLM responses or tool executions) efficiently without blocking.
-* **Main Entry Point:** `Runner.run_async` is the primary method for executing agent invocations. All core runnable components (Agents, specific flows) use `async def` methods internally.
-* **Synchronous Convenience (`run`):** A synchronous `Runner.run` method exists mainly for convenience (e.g., in simple scripts or testing environments). However, internally, `Runner.run` typically just calls `Runner.run_async` and manages the async event loop execution for you.
-* **Developer Experience:** You should generally design your application logic (e.g., web servers using ADK) using `asyncio`.
-* **Sync Callbacks/Tools:** The framework aims to handle both `async def` and regular `def` functions provided as tools or callbacks seamlessly. Long-running *synchronous* tools or callbacks, especially those performing blocking I/O, can potentially block the main `asyncio` event loop. The framework might use mechanisms like `asyncio.to_thread` to mitigate this by running such blocking synchronous code in a separate thread pool, preventing it from stalling other asynchronous tasks. CPU-bound synchronous code, however, will still block the thread it runs on.
+* **核心设计**：ADK Runtime 基于 Python 的 `asyncio` 库构建，高效处理并发操作（如等待大模型响应或工具执行）而不阻塞
+* **主入口**：`Runner.run_async` 是执行智能体调用的主要方法，所有核心可运行组件（智能体、特定流程）内部均使用 `async def` 方法
+* **同步便捷接口（`run`）**：同步方法 `Runner.run` 主要为便捷性存在（如简单脚本或测试环境），内部通常只是调用 `Runner.run_async` 并管理异步事件循环执行
+* **开发体验**：建议应用逻辑（如使用 ADK 的 web 服务器）采用 `asyncio` 设计
+* **同步回调/工具**：框架可无缝处理 `async def` 和常规 `def` 函数形式的工具或回调。长时间运行的*同步*工具或回调（特别是阻塞I/O操作）可能阻塞主 `asyncio` 事件循环。框架可能通过 `asyncio.to_thread` 等机制在独立线程池运行此类阻塞代码以避免影响其他异步任务。但CPU密集型同步代码仍会阻塞所在线程
 
-Understanding these behaviors helps you write more robust ADK applications and debug issues related to state consistency, streaming updates, and asynchronous execution.
+理解这些行为有助于编写更健壮的 ADK 应用，并调试与状态一致性、流式更新和异步执行相关的问题。

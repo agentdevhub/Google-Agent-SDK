@@ -1,13 +1,12 @@
 # Project information
-site_name: Agent Development Kit
-site_url: https://google.github.io/adk-docs
-site_description: >-
-  Build powerful multi-agent systems with Agent Development Kit
+site_name: Google ADK(Agent Development Kit ) 中文文档
+site_url: https://google-agent-sdk.agentdevhub.com/
+site_description: Google ADK(Agent Development Kit ) 是由谷歌开源的 AI 代理框架，专为开发和部署 AI 代理而设计，支持 Gemini 模型和 Google AI 工具的紧密集成，一个开源的、代码优先的Python工具包，用于灵活可控地构建、评估和部署复杂AI智能体。
 site_dir: site
 
 # Repository
-repo_name: adk-python
-repo_url: https://github.com/google/adk-python
+repo_name: Google-Agent-SDK
+repo_url: https://github.com/agentdevhub/Google-Agent-SDK
 
 # Copyright
 copyright: Copyright Google 2025
@@ -88,60 +87,60 @@ plugins:
 
 # Navigation
 nav:
-  - Home: index.md
-  - Get Started:
+  - 首页: index.md
+  - 入门指南:
     - get-started/index.md
-    - Installation: get-started/installation.md
-    - Quickstart: get-started/quickstart.md
-    - Quickstart (streaming): get-started/quickstart-streaming.md
-    - Tutorial: get-started/tutorial.md
-    - Testing: get-started/testing.md
-    - Sample agents: https://github.com/google/adk-samples
-    - About ADK: get-started/about.md
-  - Agents:
+    - 安装指南: get-started/installation.md
+    - 快速入门: get-started/quickstart.md
+    - 快速入门 (streaming): get-started/quickstart-streaming.md
+    - 教程: get-started/tutorial.md
+    - 测试方法: get-started/testing.md
+    - 示例代理: https://github.com/google/adk-samples
+    - 关于 ADK: get-started/about.md
+  - 代理系统:
     - agents/index.md
-    - LLM agents: agents/llm-agents.md
-    - Workflow agents:
+    - LLM 代理: agents/llm-agents.md
+    - 工作流代理:
       - agents/workflow-agents/index.md
-      - Sequential agents: agents/workflow-agents/sequential-agents.md
-      - Loop agents: agents/workflow-agents/loop-agents.md
-      - Parallel agents: agents/workflow-agents/parallel-agents.md
-    - Custom agents: agents/custom-agents.md
-    - Multi-agent systems: agents/multi-agents.md
-    - Models: agents/models.md
-  - Tools:
+      - 顺序代理: agents/workflow-agents/sequential-agents.md
+      - 循环代理: agents/workflow-agents/loop-agents.md
+      - 并行代理: agents/workflow-agents/parallel-agents.md
+    - 自定义代理: agents/custom-agents.md
+    - 多代理系统: agents/multi-agents.md
+    - 模型: agents/models.md
+  - 工具集:
     - tools/index.md
-    - Function tools: tools/function-tools.md
-    - Built-in tools: tools/built-in-tools.md
-    - Third party tools: tools/third-party-tools.md
-    - Google Cloud tools: tools/google-cloud-tools.md
-    - MCP tools: tools/mcp-tools.md
-    - OpenAPI tools: tools/openapi-tools.md
-    - Authentication: tools/authentication.md
-  - Deploy:
+    - 函数工具: tools/function-tools.md
+    - 内置工具: tools/built-in-tools.md
+    - 第三方工具: tools/third-party-tools.md
+    - Google Cloud 工具: tools/google-cloud-tools.md
+    - MCP 工具: tools/mcp-tools.md
+    - OpenAPI 工具: tools/openapi-tools.md
+    - 身份验证: tools/authentication.md
+  - 部署:
     - deploy/index.md
     - Agent Engine: deploy/agent-engine.md
     - Cloud Run: deploy/cloud-run.md
-  - Sessions & Memory:
+  - 会话与记忆:
     - sessions/index.md
-    - Session: sessions/session.md
-    - State: sessions/state.md
-    - Memory: sessions/memory.md
-  - Artifacts:
+    - 会话: sessions/session.md
+    - 状态: sessions/state.md
+    - 记忆机制: sessions/memory.md
+  - 制品:
     - artifacts/index.md
-  - Callbacks:
+  - 回调函数:
     - callbacks/index.md
-    - Types of callbacks: callbacks/types-of-callbacks.md
-    - Callback patterns: callbacks/design-patterns-and-best-practices.md
-  - Runtime:
+    - 回调类型: callbacks/types-of-callbacks.md
+    - 回调模式: callbacks/design-patterns-and-best-practices.md
+  - 运行时:
     - runtime/index.md
-  - Events:
+  - 事件:
     - events/index.md
-  - Context:
+  - 上下文:
     - context/index.md
-  - Evaluate:
+  - 评估:
     - evaluate/index.md
-  - Guides:
-    - Responsible Agents: guides/responsible-agents.md
-  - Contributing Guide: contributing-guide.md
-  - API Reference: api-reference/index.html
+  - 指南:
+    - 负责任代理指南: guides/responsible-agents.md
+  - 贡献指南: contributing-guide.md
+  - API 参考: api-reference/index.html

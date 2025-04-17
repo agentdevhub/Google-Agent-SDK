@@ -1,70 +1,71 @@
-# Authenticating with Tools
+# 工具认证指南
 
-## Core Concepts
+## 核心概念
 
-Many tools need to access protected resources (like user data in Google Calendar, Salesforce records, etc.) and require authentication. ADK provides a system to handle various authentication methods securely.
+许多工具需要访问受保护资源（如Google Calendar中的用户数据、Salesforce记录等），因此需要进行身份验证。ADK提供了一套系统来安全处理各种认证方式。
 
-The key components involved are:
+关键组件包括：
 
-1. **`AuthScheme`**: Defines *how* an API expects authentication credentials (e.g., as an API Key in a header, an OAuth 2.0 Bearer token). ADK supports the same types of authentication schemes as OpenAPI 3.0. To know more about what each type of credential is, refer to [OpenAPI doc: Authentication](https://swagger.io/docs/specification/v3_0/authentication/). ADK uses specific classes like `APIKey`, `HTTPBearer`, `OAuth2`, `OpenIdConnectWithConfig`.  
-2. **`AuthCredential`**: Holds the *initial* information needed to *start* the authentication process (e.g., your application's OAuth Client ID/Secret, an API key value). It includes an `auth_type` (like `API_KEY`, `OAUTH2`, `SERVICE_ACCOUNT`) specifying the credential type.
+1. **`AuthScheme`**：定义API期望的认证凭证方式（例如在请求头中的API Key、OAuth 2.0 Bearer令牌等）。ADK支持与OpenAPI 3.0相同的认证方案类型。要了解每种凭证类型的详细信息，请参阅[OpenAPI文档：认证](https://swagger.io/docs/specification/v3_0/authentication/)。ADK使用特定类如`APIKey`、`HTTPBearer`、`OAuth2`、`OpenIdConnectWithConfig`。  
+2. **`AuthCredential`**：保存启动认证流程所需的初始信息（例如应用的OAuth客户端ID/密钥、API密钥值）。它包含一个`auth_type`（如`API_KEY`、`OAUTH2`、`SERVICE_ACCOUNT`）用于指定凭证类型。
 
-The general flow involves providing these details when configuring a tool. ADK then attempts to automatically exchange the initial credential for a usable one (like an access token) before the tool makes an API call. For flows requiring user interaction (like OAuth consent), a specific interactive process involving the Agent Client application is triggered.
+通用流程是在配置工具时提供这些详细信息。ADK会在工具发起API调用前，自动尝试将初始凭证交换为可用凭证（如访问令牌）。对于需要用户交互的流程（如OAuth授权），会触发一个涉及Agent Client应用的特定交互流程。
 
-## Supported Initial Credential Types
+## 支持的初始凭证类型
 
-* **API\_KEY:** For simple key/value authentication. Usually requires no exchange.  
-* **HTTP:** Can represent Basic Auth (not recommended/supported for exchange) or already obtained Bearer tokens. If it's a Bearer token, no exchange is needed.  
-* **OAUTH2:** For standard OAuth 2.0 flows. Requires configuration (client ID, secret, scopes) and often triggers the interactive flow for user consent.  
-* **OPEN\_ID\_CONNECT:** For authentication based on OpenID Connect. Similar to OAuth2, often requires configuration and user interaction.  
-* **SERVICE\_ACCOUNT:** For Google Cloud Service Account credentials (JSON key or Application Default Credentials). Typically exchanged for a Bearer token.
+* **API_KEY**：用于简单的键值对认证，通常无需交换  
+* **HTTP**：可表示Basic Auth（不建议/不支持交换）或已获取的Bearer令牌。如果是Bearer令牌则无需交换  
+* **OAUTH2**：用于标准OAuth 2.0流程，需要配置（客户端ID、密钥、作用域）并常触发用户授权的交互流程  
+* **OPEN_ID_CONNECT**：基于OpenID Connect的认证，类似OAuth2，常需配置和用户交互  
+* **SERVICE_ACCOUNT**：用于Google云服务账户凭证（JSON密钥或应用默认凭证），通常交换为Bearer令牌
 
-## Configuring Authentication on Tools
+## 在工具上配置认证
 
-You set up authentication when defining your tool:
+定义工具时设置认证：
 
-* **RestApiTool / OpenAPIToolset**: Pass `auth_scheme` and `auth_credential` during initialization
+* **RestApiTool/OpenAPIToolset**：在初始化时传入`auth_scheme`和`auth_credential`
 
-* **GoogleApiToolSet Tools**: ADK has built-in 1st party tools like Google Calendar, BigQuery etc,. Use the toolset's specific method.
+* **GoogleApiToolSet工具**：ADK内置了一方工具如Google Calendar、BigQuery等，使用工具集的特定方法
 
-* **APIHubToolset / ApplicationIntegrationToolset**: Pass `auth_scheme` and `auth_credential`during initialization, if the API managed in API Hub / provided by Application Integration requires authentication.
+* **APIHubToolset/ApplicationIntegrationToolset**：如果API Hub管理的API或应用集成提供的API需要认证，在初始化时传入`auth_scheme`和`auth_credential`
 
-!!! tip "WARNING" 
-    Storing sensitive credentials like access tokens and especially refresh tokens directly in the session state might pose security risks depending on your session storage backend (`SessionService`) and overall application security posture.
+!!! tip "警告" 
+    根据会话存储后端（`SessionService`）和整体应用安全状况，直接存储敏感凭证如访问令牌（特别是刷新令牌）可能存在安全风险。
 
-    *   **`InMemorySessionService`:** Suitable for testing and development, but data is lost when the process ends. Less risk as it's transient.
-    *   **Database/Persistent Storage:** **Strongly consider encrypting** the token data before storing it in the database using a robust encryption library (like `cryptography`) and managing encryption keys securely (e.g., using a key management service).
-    *   **Secure Secret Stores:** For production environments, storing sensitive credentials in a dedicated secret manager (like Google Cloud Secret Manager or HashiCorp Vault) is the **most recommended approach**. Your tool could potentially store only short-lived access tokens or secure references (not the refresh token itself) in the session state, fetching the necessary secrets from the secure store when needed.
+    *   **`InMemorySessionService`**：适合测试开发，但进程结束时数据会丢失，风险较低因为是临时性的
+    *   **数据库/持久存储**：强烈建议在使用强大加密库（如`cryptography`）存储到数据库前加密令牌数据，并安全管理加密密钥（如使用密钥管理服务）
+    *   **安全密钥存储**：生产环境中最推荐的方式是将敏感凭证存储在专用密钥管理器（如Google云密钥管理器或HashiCorp Vault）中。工具可能只在会话状态中存储短期有效的访问令牌或安全引用（而非刷新令牌本身），需要时从安全存储获取必要密钥
 
 ---
 
-## Journey 1: Building Agentic Applications with Authenticated Tools
+## 旅程1：使用认证工具构建智能体应用
 
-This section focuses on using pre-existing tools (like those from `RestApiTool/ OpenAPIToolset`, `APIHubToolset`, `GoogleApiToolSet`, or custom `FunctionTools`) that require authentication within your agentic application. Your main responsibility is configuring the tools and handling the client-side part of interactive authentication flows (if required by the tool).
+本节重点介绍如何在智能体应用中使用需要认证的现有工具（来自`RestApiTool/ OpenAPIToolset`、`APIHubToolset`、`GoogleApiToolSet`或自定义`FunctionTools`）。主要职责是配置工具并处理交互式认证流程的客户端部分（如果工具需要）。
 
 ![Authentication](../assets/auth_part1.svg)
 
-### 1. Configuring Tools with Authentication
+### 1. 配置带认证的工具
 
-When adding an authenticated tool to your agent, you need to provide its required `AuthScheme` and your application's initial `AuthCredential`.
+向智能体添加认证工具时，需提供其所需的`AuthScheme`和应用的初始`AuthCredential`。
 
-**A. Using OpenAPI-based Toolsets (`OpenAPIToolset`, `APIHubToolset`, etc.)**
+**A. 使用基于OpenAPI的工具集（`OpenAPIToolset`、`APIHubToolset`等）**
 
-Pass the scheme and credential during toolset initialization. The toolset applies them to all generated tools. Here are few ways to create tools with authentication in ADK.
+在工具集初始化时传入认证方案和凭证。工具集会将其应用于所有生成的工具。以下是ADK中创建带认证工具的几种方式：
 
-=== "API Key"
+=== "API密钥"
 
-      Create a tool requiring an API Key.
+      创建需要API密钥的工具：
 
       ```py
       from google.adk.tools.openapi_tool.auth.auth_helpers import token_to_scheme_credential
-      from google.adk.tools.apihub_tool.apihub_toolset import APIHubToolset
+      from google.adk.tools.apihub_tool.apihub_toolset import APIHubToolset
+
       auth_scheme, auth_credential = token_to_scheme_credential(
          "apikey", "query", "apikey", YOUR_API_KEY_STRING
       )
       sample_api_toolset = APIHubToolset(
          name="sample-api-requiring-api-key",
-         description="A tool using an API protected by API Key",
+         description="使用API密钥保护的API工具",
          apihub_resource_name="...",
          auth_scheme=auth_scheme,
          auth_credential=auth_credential,
@@ -73,7 +74,7 @@ Pass the scheme and credential during toolset initialization. The toolset applie
 
 === "OAuth2"
 
-      Create a tool requiring OAuth2.
+      创建需要OAuth2的工具：
 
       ```py
       from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import OpenAPIToolset
@@ -90,7 +91,7 @@ Pass the scheme and credential during toolset initialization. The toolset applie
                   authorizationUrl="https://accounts.google.com/o/oauth2/auth",
                   tokenUrl="https://oauth2.googleapis.com/token",
                   scopes={
-                     "https://www.googleapis.com/auth/calendar": "calendar scope"
+                     "https://www.googleapis.com/auth/calendar": "日历作用域"
                   },
             )
          )
@@ -104,36 +105,38 @@ Pass the scheme and credential during toolset initialization. The toolset applie
       )
 
       calendar_api_toolset = OpenAPIToolset(
-         spec_str=google_calendar_openapi_spec_str, # Fill this with an openapi spec
+         spec_str=google_calendar_openapi_spec_str, # 填入openapi规范
          spec_str_type='yaml',
          auth_scheme=auth_scheme,
          auth_credential=auth_credential,
       )
       ```
 
-=== "Service Account"
+=== "服务账户"
 
-      Create a tool requiring Service Account.
+      创建需要服务账户的工具：
 
       ```py
       from google.adk.tools.openapi_tool.auth.auth_helpers import service_account_dict_to_scheme_credential
       from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import OpenAPIToolset
 
-      service_account_cred = json.loads(service_account_json_str)auth_scheme, auth_credential = service_account_dict_to_scheme_credential(
+      service_account_cred = json.loads(service_account_json_str)
+
+auth_scheme, auth_credential = service_account_dict_to_scheme_credential(
          config=service_account_cred,
          scopes=["https://www.googleapis.com/auth/cloud-platform"],
       )
       sample_toolset = OpenAPIToolset(
-         spec_str=sa_openapi_spec_str, # Fill this with an openapi spec
+         spec_str=sa_openapi_spec_str, # 填入openapi规范
          spec_str_type='json',
          auth_scheme=auth_scheme,
          auth_credential=auth_credential,
       )
       ```
 
-=== "OpenID connect"
+=== "OpenID连接"
 
-      Create a tool requiring OpenID connect.
+      创建需要OpenID连接的工具：
 
       ```py
       from google.adk.auth.auth_schemes import OpenIdConnectWithConfig
@@ -154,18 +157,18 @@ Pass the scheme and credential during toolset initialization. The toolset applie
       )
 
       userinfo_toolset = OpenAPIToolset(
-         spec_str=content, # Fill in an actual spec
+         spec_str=content, # 填入实际规范
          spec_str_type='yaml',
          auth_scheme=auth_scheme,
          auth_credential=auth_credential,
       )
       ```
 
-**B. Using Google API Toolsets (e.g., `calendar_tool_set`)**
+**B. 使用Google API工具集（如`calendar_tool_set`）**
 
-These toolsets often have dedicated configuration methods.
+这些工具集通常有专用配置方法。
 
-Tip: For how to create a Google OAuth Client ID & Secret, see this guide: [Get your Google API Client ID](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#get_your_google_api_client_id)
+提示：创建Google OAuth客户端ID和密钥的方法参见：[获取Google API客户端ID](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#get_your_google_api_client_id)
 
 ```py
 # Example: Configuring Google Calendar Tools
@@ -182,17 +185,17 @@ for tool in calendar_tools:
 # agent = LlmAgent(..., tools=calendar_tools)
 ```
 
-### 2. Handling the Interactive OAuth/OIDC Flow (Client-Side)
+### 2. 处理交互式OAuth/OIDC流程（客户端）
 
-If a tool requires user login/consent (typically OAuth 2.0 or OIDC), the ADK framework pauses execution and signals your **Agent Client** application (the code calling `runner.run_async`, like your UI backend, CLI app, or Spark job) to handle the user interaction.
+如果工具需要用户登录/授权（通常是OAuth 2.0或OIDC），ADK框架会暂停执行并通知Agent Client应用（调用`runner.run_async`的代码，如UI后端、CLI应用或Spark作业）处理用户交互。
 
-Here's the step-by-step process for your client application:
+以下是客户端应用的逐步流程：
 
-**Step 1: Run Agent & Detect Auth Request**
+**步骤1：运行智能体并检测认证请求**
 
-* Initiate the agent interaction using `runner.run_async`.  
-* Iterate through the yielded events.  
-* Look for a specific event where the agent calls the special function `adk_request_credential`. This event signals that user interaction is needed. Use helper functions to identify this event and extract necessary information.
+* 使用`runner.run_async`启动智能体交互  
+* 遍历产生的事件  
+* 查找智能体调用特殊函数`adk_request_credential`的特定事件，该事件表示需要用户交互。使用辅助函数识别该事件并提取必要信息
 
 ```py
 
@@ -223,7 +226,7 @@ if not auth_request_event_id:
 
 ```
 
-*Helper functions `helpers.py`:*
+*辅助函数`helpers.py`：*
 
 ```py
 from google.adk.events import Event
@@ -262,11 +265,11 @@ def get_function_call_auth_config(event: Event) -> AuthConfig:
 
 ```
 
-**Step 2: Redirect User for Authorization**
+**步骤2：重定向用户进行授权**
 
-* Get the authorization URL (`auth_uri`) from the `auth_config` extracted in the previous step.  
-* **Crucially, append your application's**  redirect\_uri as a query parameter to this `auth_uri`. This `redirect_uri` must be pre-registered with your OAuth provider (e.g., [Google Cloud Console](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred), [Okta admin panel](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/spring-boot/main/#create-an-app-integration-in-the-admin-console)).  
-* Direct the user to this complete URL (e.g., open it in their browser).
+* 从上一步提取的`auth_config`中获取授权URL（`auth_uri`）  
+* 关键是将应用的重定向URI（`redirect_uri`）作为查询参数附加到此`auth_uri`。该URI必须预先在OAuth提供商处注册（如[Google云控制台](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred)、[Okta管理面板](https://developer.okta.com/docs/guides/sign-into-web-app-redirect/spring-boot/main/#create-an-app-integration-in-the-admin-console)）  
+* 将用户定向到此完整URL（如在浏览器中打开）
 
 ```py
 # (Continuing after detecting auth needed)
@@ -294,22 +297,22 @@ if auth_request_event_id and auth_config:
 
 ![Authentication](../assets/auth_part2.svg)
 
-**Step 3. Handle the Redirect Callback (Client):**
+**步骤3：处理重定向回调（客户端）**
 
-* Your application must have a mechanism (e.g., a web server route at the `redirect_uri`) to receive the user after they authorize the application with the provider.  
-* The provider redirects the user to your `redirect_uri` and appends an `authorization_code` (and potentially `state`, `scope`) as query parameters to the URL.  
-* Capture the **full callback URL** from this incoming request.  
-* (This step happens outside the main agent execution loop, in your web server or equivalent callback handler.)
+* 应用必须有机制（如在`redirect_uri`的Web服务器路由）接收用户在提供商处授权后的返回  
+* 提供商将用户重定向到`redirect_uri`并在URL后附加`authorization_code`（可能还有`state`、`scope`）作为查询参数  
+* 从此传入请求中捕获完整回调URL  
+* （此步骤发生在主智能体执行循环之外，在Web服务器或等效回调处理程序中）
 
-**Step 4. Send Authentication Result Back to ADK (Client):**
+**步骤4：将认证结果发送回ADK（客户端）**
 
-* Once you have the full callback URL (containing the authorization code), retrieve the `auth_request_event_id` and the `AuthConfig` object saved in Client Step 1\.  
-* **Update the**  Set the captured callback URL into the `exchanged_auth_credential.oauth2.auth_response_uri` field. Also ensure `exchanged_auth_credential.oauth2.redirect_uri` contains the redirect URI you used.  
-* **Construct a**  Create a `types.Content` object containing a `types.Part` with a `types.FunctionResponse`.  
-      * Set `name` to `"adk_request_credential"`. (Note: This is a special name for ADK to proceed with authentication. Do not use other names.)  
-      * Set `id` to the `auth_request_event_id` you saved.  
-      * Set `response` to the *serialized* (e.g., `.model_dump()`) updated `AuthConfig` object.  
-* Call `runner.run_async` **again** for the same session, passing this `FunctionResponse` content as the `new_message`.
+* 获得包含授权代码的完整回调URL后，检索`auth_request_event_id`和步骤1保存的`AuthConfig`对象  
+* 将捕获的回调URL设置到`exchanged_auth_credential.oauth2.auth_response_uri`字段，并确保`exchanged_auth_credential.oauth2.redirect_uri`包含使用的重定向URI  
+* 创建包含`types.Part`的`types.Content`对象，其中`types.FunctionResponse`：  
+      * 设置`name`为`"adk_request_credential"`（这是ADK继续认证的特殊名称，勿用其他名称）  
+      * 设置`id`为保存的`auth_request_event_id`  
+      * 设置`response`为更新后的`AuthConfig`对象的序列化形式（如`.model_dump()`）  
+* 再次调用`runner.run_async`（同一会话），传入此`FunctionResponse`内容作为`new_message`
 
 ```py
 # (Continuing after user interaction)
@@ -359,24 +362,24 @@ if auth_request_event_id and auth_config:
 
 ```
 
-**Step 5: ADK Handles Token Exchange & Tool Retry and gets Tool result**
+**步骤5：ADK处理令牌交换并重试工具调用获取结果**
 
-* ADK receives the `FunctionResponse` for `adk_request_credential`.  
-* It uses the information in the updated `AuthConfig` (including the callback URL containing the code) to perform the OAuth **token exchange** with the provider's token endpoint, obtaining the access token (and possibly refresh token).  
-* ADK internally makes these tokens available (often via `tool_context.get_auth_response()` or by updating session state).  
-* ADK **automatically retries** the original tool call (the one that initially failed due to missing auth).  
-* This time, the tool finds the valid tokens and successfully executes the authenticated API call.  
-* The agent receives the actual result from the tool and generates its final response to the user.
+* ADK接收`FunctionResponse`以进行`adk_request_credential`  
+* 使用更新后的`AuthConfig`中的信息（包含授权代码的回调URL）与提供商的令牌端点执行OAuth令牌交换，获取访问令牌（可能还有刷新令牌）  
+* ADK内部通过`tool_context.get_auth_response()`或更新会话状态使这些令牌可用  
+* ADK自动重试原始工具调用（最初因缺少认证而失败的调用）  
+* 这次工具找到有效令牌并成功执行认证API调用  
+* 智能体接收工具的实际结果并生成最终用户响应
 
 ---
 
-## Journey 2: Building Custom Tools (`FunctionTool`) Requiring Authentication
+## 旅程2：构建需要认证的自定义工具（`FunctionTool`）
 
-This section focuses on implementing the authentication logic *inside* your custom Python function when creating a new ADK Tool. We will implement a `FunctionTool` as an example.
+本节重点介绍在创建新ADK工具时，如何在Python函数内部实现认证逻辑。我们将以实现`FunctionTool`为例。
 
-### Prerequisites
+### 前提条件
 
-Your function signature *must* include [`tool_context: ToolContext`](../tools/index.md#tool-context). ADK automatically injects this object, providing access to state and auth mechanisms.
+函数签名必须包含[`tool_context: ToolContext`](../tools/index.md#tool-context)。ADK自动注入此对象，提供对状态和认证机制的访问。
 
 ```py
 from google.adk.tools import FunctionTool, ToolContext
@@ -390,13 +393,13 @@ my_tool = FunctionTool(func=my_authenticated_tool_function)
 
 ```
 
-### Authentication Logic within the Tool Function
+### 工具函数内的认证逻辑
 
-Implement the following steps inside your function:
+在函数内实现以下步骤：
 
-**Step 1: Check for Cached & Valid Credentials:**
+**步骤1：检查缓存的有效凭证**
 
-Inside your tool function, first check if valid credentials (e.g., access/refresh tokens) are already stored from a previous run in this session. Credentials for the current sessions should be stored in `tool_context.invocation_context.session.state` (a dictionary of state) Check existence of existing credentials by checking `tool_context.invocation_context.session.state.get(credential_name, None)`.
+在工具函数中，首先检查会话中是否已存储先前运行的有效凭证（如访问/刷新令牌）。当前会话的凭证应存储在`tool_context.invocation_context.session.state`（状态字典）中，通过检查`tool_context.invocation_context.session.state.get(credential_name, None)`确认现有凭证是否存在。
 
 ```py
 # Inside your tool function
@@ -428,10 +431,10 @@ else:
 
 ```
 
-**Step 2: Check for Auth Response from Client**
+**步骤2：检查客户端的认证响应**
 
-* If Step 1 didn't yield valid credentials, check if the client just completed the interactive flow by calling `auth_response_config = tool_context.get_auth_response()`.  
-* This returns the updated `AuthConfig` object sent back by the client (containing the callback URL in `auth_response_uri`).
+* 如果步骤1未找到有效凭证，检查客户端是否刚完成交互流程（调用`auth_response_config = tool_context.get_auth_response()`）  
+* 这将返回客户端发回的更新后的`AuthConfig`对象（包含`auth_response_uri`中的回调URL）
 
 ```py
 # Use auth_scheme and auth_credential configured in the tool.
@@ -444,9 +447,9 @@ exchanged_credential = tool_context.get_auth_response(AuthConfig(
 # If exchanged_credential is not None, then there is already an exchanged credetial from the auth response. Use it instea, and skip to step 5
 ```
 
-**Step 3: Initiate Authentication Request**
+**步骤3：发起认证请求**
 
-If no valid credentials (Step 1.) and no auth response (Step 2.) are found, the tool needs to start the OAuth flow. Define the AuthScheme and initial AuthCredential and call `tool_context.request_credential()`. Return a status indicating authorization is needed.
+如果未找到有效凭证（步骤1）和认证响应（步骤2），工具需要启动OAuth流程。定义AuthScheme和初始AuthCredential并调用`tool_context.request_credential()`。返回表示需要授权的状态。
 
 ```py
 # Use auth_scheme and auth_credential configured in the tool.
@@ -460,13 +463,13 @@ If no valid credentials (Step 1.) and no auth response (Step 2.) are found, the 
 # By setting request_credential, ADK detects a pending authentication event. It pauses execution and ask end user to login.
 ```
 
-**Step 4: Exchange Authorization Code for Tokens**
+**步骤4：将授权代码交换为令牌**
 
-ADK automatically generates oauth authorization URL and presents it to your Agent Client application. Once a user completes the login flow following the authorization URL, ADK extracts the authentication callback url from Agent Client applications, automatically parses the auth code, and generates auth token. At the next Tool call, `tool_context.get_auth_response` in step 2 will contain a valid credential to use in subsequent API calls.
+ADK自动生成oauth授权URL并呈现给Agent Client应用。用户完成授权URL的登录流程后，ADK从Agent Client应用中提取认证回调URL，自动解析授权代码并生成认证令牌。在下次工具调用时，步骤2中的`tool_context.get_auth_response`将包含用于后续API调用的有效凭证。
 
-**Step 5: Cache Obtained Credentials**
+**步骤5：缓存获取的凭证**
 
-After successfully obtaining the token from ADK (Step 2\) or if the token is still valid (Step 1), **immediately store** the new `Credentials` object in `tool_context.state` (serialized, e.g., as JSON) using your cache key.
+从ADK成功获取令牌后（步骤2）或令牌仍有效时（步骤1），立即使用缓存键将新的`Credentials`对象存储到`tool_context.state`中（序列化为JSON等格式）。
 
 ```py
 # Inside your tool function, after obtaining 'creds' (either refreshed or newly exchanged)
@@ -477,10 +480,10 @@ print(f"DEBUG: Cached/updated tokens under key: {TOKEN_CACHE_KEY}")
 
 ```
 
-**Step 6: Make Authenticated API Call**
+**步骤6：执行认证API调用**
 
-* Once you have a valid `Credentials` object (`creds` from Step 1 or Step 4), use it to make the actual call to the protected API using the appropriate client library (e.g., `googleapiclient`, `requests`). Pass the `credentials=creds` argument.  
-* Include error handling, especially for `HttpError` 401/403, which might mean the token expired or was revoked between calls. If you get such an error, consider clearing the cached token (`tool_context.state.pop(...)`) and potentially returning the `auth_required` status again to force re-authentication.
+* 获得有效的`Credentials`对象（来自步骤1或步骤4的`creds`）后，使用适当客户端库（如`googleapiclient`、`requests`）实际调用受保护API。传递`credentials=creds`参数  
+* 包含错误处理，特别是`HttpError` 401/403错误（可能表示令牌在调用间过期或被撤销）。遇到此类错误时考虑清除缓存令牌（`tool_context.state.pop(...)`）并可能再次返回`auth_required`状态以强制重新认证
 
 ```py
 # Inside your tool function, using the valid 'creds' object
@@ -498,10 +501,10 @@ except Exception as e:
    return {"status": "error", "error_message": f"API call failed: {e}"}
 ```
 
-**Step 7: Return Tool Result**
+**步骤7：返回工具结果**
 
-* After a successful API call, process the result into a dictionary format that is useful for the LLM.  
-* **Crucially, include a**  along with the data.
+* 成功API调用后，将结果处理为对大模型有用的字典格式  
+* 关键要包含数据的同时返回
 
 ```py
 # Inside your tool function, after successful API call
@@ -510,48 +513,48 @@ except Exception as e:
 
 ```
 
-??? "Full Code"
+??? "完整代码"
 
-    === "Tools and Agent"
+    === "工具和智能体"
 
          ```py title="tools_and_agent.py"
          --8<-- "examples/python/snippets/tools/auth/agent_cli.py"
          ```
-    === "Agent CLI"
+    === "智能体CLI"
 
          ```py title="agent_cli.py"
          --8<-- "examples/python/snippets/tools/auth/agent_cli.py"
          ```
-    === "Helper"
+    === "辅助函数"
 
          ```py title="helpers.py"
          --8<-- "examples/python/snippets/tools/auth/helpers.py"
          ```
-    === "Spec"
+    === "规范"
 
          ```yaml
          openapi: 3.0.1
          info:
-         title: Okta User Info API
+         title: Okta用户信息API
          version: 1.0.0
          description: |-
-            API to retrieve user profile information based on a valid Okta OIDC Access Token.
-            Authentication is handled via OpenID Connect with Okta.
+            基于有效Okta OIDC访问令牌获取用户个人资料的API。
+            认证通过Okta的OpenID Connect处理。
          contact:
-            name: API Support
-            email: support@example.com # Replace with actual contact if available
+            name: API支持
+            email: support@example.com # 替换为实际联系方式
          servers:
-         - url: <substitute with your server name>
-            description: Production Environment
+         - url: <替换为你的服务器名称>
+            description: 生产环境
          paths:
          /okta-jwt-user-api:
             get:
-               summary: Get Authenticated User Info
+               summary: 获取认证用户信息
                description: |-
-               Fetches profile details for the user
+               获取用户个人资料详情
                operationId: getUserInfo
                tags:
-               - User Profile
+               - 用户个人资料
                security:
                - okta_oidc:
                      - openid
@@ -559,7 +562,7 @@ except Exception as e:
                      - profile
                responses:
                '200':
-                  description: Successfully retrieved user information.
+                  description: 成功获取用户信息
                   content:
                      application/json:
                      schema:
@@ -567,45 +570,45 @@ except Exception as e:
                         properties:
                            sub:
                            type: string
-                           description: Subject identifier for the user.
+                           description: 用户主题标识符
                            example: "abcdefg"
                            name:
                            type: string
-                           description: Full name of the user.
-                           example: "Example LastName"
+                           description: 用户全名
+                           example: "示例 姓氏"
                            locale:
                            type: string
-                           description: User's locale, e.g., en-US or en_US.
+                           description: 用户区域设置，如en-US或en_US
                            example: "en_US"
                            email:
                            type: string
                            format: email
-                           description: User's primary email address.
+                           description: 用户主要电子邮件地址
                            example: "username@example.com"
                            preferred_username:
                            type: string
-                           description: Preferred username of the user (often the email).
+                           description: 用户首选用户名（通常是邮箱）
                            example: "username@example.com"
                            given_name:
                            type: string
-                           description: Given name (first name) of the user.
-                           example: "Example"
+                           description: 用户名（名字）
+                           example: "示例"
                            family_name:
                            type: string
-                           description: Family name (last name) of the user.
-                           example: "LastName"
+                           description: 用户姓氏
+                           example: "姓氏"
                            zoneinfo:
                            type: string
-                           description: User's timezone, e.g., America/Los_Angeles.
+                           description: 用户时区，如America/Los_Angeles
                            example: "America/Los_Angeles"
                            updated_at:
                            type: integer
-                           format: int64 # Using int64 for Unix timestamp
-                           description: Timestamp when the user's profile was last updated (Unix epoch time).
+                           format: int64 # 使用int64表示Unix时间戳
+                           description: 用户资料最后更新时间戳（Unix纪元时间）
                            example: 1743617719
                            email_verified:
                            type: boolean
-                           description: Indicates if the user's email address has been verified.
+                           description: 表示用户邮箱是否已验证
                            example: true
                         required:
                            - sub
@@ -619,13 +622,13 @@ except Exception as e:
                            - updated_at
                            - email_verified
                '401':
-                  description: Unauthorized. The provided Bearer token is missing, invalid, or expired.
+                  description: 未授权。提供的Bearer令牌缺失、无效或过期
                   content:
                      application/json:
                      schema:
                         $ref: '#/components/schemas/Error'
                '403':
-                  description: Forbidden. The provided token does not have the required scopes or permissions to access this resource.
+                  description: 禁止访问。提供的令牌无所需作用域或权限
                   content:
                      application/json:
                      schema:
@@ -634,7 +637,7 @@ except Exception as e:
          securitySchemes:
             okta_oidc:
                type: openIdConnect
-               description: Authentication via Okta using OpenID Connect. Requires a Bearer Access Token.
+               description: 通过Okta使用OpenID Connect认证。需要Bearer访问令牌
                openIdConnectUrl: https://your-endpoint.okta.com/.well-known/openid-configuration
          schemas:
             Error:
@@ -642,10 +645,10 @@ except Exception as e:
                properties:
                code:
                   type: string
-                  description: An error code.
+                  description: 错误代码
                message:
                   type: string
-                  description: A human-readable error message.
+                  description: 人类可读的错误信息
                required:
                   - code
                   - message

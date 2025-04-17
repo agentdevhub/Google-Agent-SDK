@@ -1,29 +1,21 @@
-# Deploying Your Agent
+# 部署您的智能体
 
-Once you've built and tested your agent using ADK,
-the next step is to deploy it so it can be accessed, queried, and used in
-production or integrated with other applications. Deployment moves your agent
-from your local development machine to a scalable and reliable environment.
+使用 ADK 完成智能体的构建和测试后，下一步就是将其部署到生产环境，使其能够被访问、查询并与其它应用程序集成。部署过程会将智能体从本地开发环境迁移至可扩展且可靠的运行环境。
 
-<img src="../assets/deploy-agent.png" alt="Deploying your agent">
+<img src="../assets/deploy-agent.png" alt="部署智能体">
 
-## Deployment Options
+## 部署选项
 
-Your ADK agent can be deployed to a range of different environments based
-on your needs for production readiness or custom flexibility:
+根据生产就绪需求或定制化灵活性的不同，您可以将 ADK 智能体部署到多种环境中：
 
-### Agent Engine in Vertex AI
+### Vertex AI 的 Agent Engine 服务
 
-[Agent Engine](agent-engine.md) is a fully managed auto-scaling service on Google Cloud
-specifically designed for deploying, managing, and scaling AI agents built with
-frameworks such as ADK.
+[Agent Engine](agent-engine.md) 是 Google Cloud 上全托管的自动扩展服务，专为部署、管理和扩展基于 ADK 等框架构建的 AI 智能体而设计。
 
-Learn more about [deploying your agent to Vertex AI Agent Engine](agent-engine.md).
+了解更多关于[将智能体部署至 Vertex AI Agent Engine](agent-engine.md) 的信息。
 
 ### Cloud Run
 
-[Cloud Run](https://cloud.google.com/run) is a managed auto-scaling compute platform on
-Google Cloud that enables you to run your agent as a container-based
-application.
+[Cloud Run](https://cloud.google.com/run) 是 Google Cloud 上托管的自动扩展计算平台，支持您以容器化应用的形式运行智能体。
 
-Learn more about [deploying your agent to Cloud Run](cloud-run.md).
+了解更多关于[将智能体部署至 Cloud Run](cloud-run.md) 的信息。

@@ -1,10 +1,6 @@
-# Build Your First Intelligent Agent Team: A Progressive Weather Bot with ADK
+# 构建你的第一个智能体团队：基于ADK的渐进式天气机器人
 
-<!-- Optional outer container for overall padding/spacing -->
-<div style="padding: 10px 0;">
-
-  <!-- Line 1: Open in Colab -->
-  <!-- This div ensures the link takes up its own line and adds space below -->
+<!-- 可选的外层容器，用于整体内边距/间距控制 -->
   <div style="margin-bottom: 10px;">
     <a href="https://colab.research.google.com/github/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; text-decoration: none; color: #4285F4;">
       <img width="32px" src="https://www.gstatic.com/pantheon/images/bigquery/welcome_page/colab-logo.svg" alt="Google Colaboratory logo">
@@ -12,8 +8,8 @@
     </a>
   </div>
 
-  <!-- Line 2: Share Links -->
-  <!-- This div acts as a flex container for the "Share to" text and icons -->
+  <!-- 第二行：分享链接 -->
+  <!-- 这个div作为"分享到"文本和图标的弹性容器 -->
   <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
     <!-- Share Text -->
     <span style="font-weight: bold;">Share to:</span>
@@ -22,63 +18,63 @@
     <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="Share on LinkedIn">
       <img width="20px" src="https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg" alt="LinkedIn logo" style="vertical-align: middle;">
     </a>
-    <a href="https://bsky.app/intent/compose?text=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="Share on Bluesky">
+    <a href="https://bsky.app/intent/compose?text=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="分享至Bluesky">
       <img width="20px" src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Bluesky_Logo.svg" alt="Bluesky logo" style="vertical-align: middle;">
     </a>
-    <a href="https://twitter.com/intent/tweet?url=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="Share on X (Twitter)">
+    <a href="https://twitter.com/intent/tweet?url=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="分享至X（推特）">
       <img width="20px" src="https://upload.wikimedia.org/wikipedia/commons/5/5a/X_icon_2.svg" alt="X logo" style="vertical-align: middle;">
     </a>
-    <a href="https://reddit.com/submit?url=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="Share on Reddit">
+    <a href="https://reddit.com/submit?url=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="分享至Reddit">
       <img width="20px" src="https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Logo.png" alt="Reddit logo" style="vertical-align: middle;">
     </a>
-    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="Share on Facebook">
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//github.com/google/adk-docs/blob/main/examples/python/notebooks/adk_tutorial.ipynb" target="_blank" title="分享至Facebook">
       <img width="20px" src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook logo" style="vertical-align: middle;">
     </a>
   </div>
 
 </div>
-This tutorial extends from the [Quickstart example](https://google.github.io/adk-docs/get-started/quickstart/) for [Agent Development Kit](https://google.github.io/adk-docs/get-started/). Now, you're ready to dive deeper and construct a more sophisticated, **multi-agent system**.
+本教程基于[Agent Development Kit](https://google.github.io/adk-docs/get-started/)的[快速入门示例](https://google.github.io/adk-docs/get-started/quickstart/)扩展而来。现在，你已经准备好深入探索并构建一个更复杂的**多智能体系统**了。
 
-We'll embark on building a **Weather Bot agent team**, progressively layering advanced features onto a simple foundation. Starting with a single agent that can look up weather, we will incrementally add capabilities like:
+我们将着手构建一个**天气机器人智能体团队**，在简单基础上逐步叠加高级功能。从一个能查询天气的单一智能体开始，我们将逐步添加以下能力：
 
-* Leveraging different AI models (Gemini, GPT, Claude).  
-* Designing specialized sub-agents for distinct tasks (like greetings and farewells).  
-* Enabling intelligent delegation between agents.  
-* Giving agents memory using persistent session state.  
-* Implementing crucial safety guardrails using callbacks.
+* 利用不同AI模型（Gemini、GPT、Claude）  
+* 为不同任务设计专用子智能体（如问候和告别）  
+* 实现智能体间的智能委派  
+* 通过持久会话状态赋予智能体记忆能力  
+* 使用回调函数实现关键安全防护机制  
 
-**Why a Weather Bot Team?**
+**为什么选择天气机器人团队？**
 
-This use case, while seemingly simple, provides a practical and relatable canvas to explore core ADK concepts essential for building complex, real-world agentic applications. You'll learn how to structure interactions, manage state, ensure safety, and orchestrate multiple AI "brains" working together.
+这个看似简单的用例，提供了一个实用且易于理解的场景，来探索构建复杂现实世界智能应用所需的核心ADK概念。你将学习如何构建交互结构、管理状态、确保安全性，以及协调多个AI"大脑"协同工作。
 
-**What is ADK Again?**
+**再认识一下ADK**
 
-As a reminder, ADK is a Python framework designed to streamline the development of applications powered by Large Language Models (LLMs). It offers robust building blocks for creating agents that can reason, plan, utilize tools, interact dynamically with users, and collaborate effectively within a team.
+ADK是一个Python框架，旨在简化基于大模型(LLMs)的应用开发。它提供了强大的构建模块，用于创建能够推理、规划、使用工具、与用户动态交互，并在团队中有效协作的智能体。
 
-**In this advanced tutorial, you will master:**
+**在本进阶教程中，你将掌握：**
 
-* ✅ **Tool Definition & Usage:** Crafting Python functions (`tools`) that grant agents specific abilities (like fetching data) and instructing agents on how to use them effectively.  
-* ✅ **Multi-LLM Flexibility:** Configuring agents to utilize various leading LLMs (Gemini, GPT-4o, Claude Sonnet) via LiteLLM integration, allowing you to choose the best model for each task.  
-* ✅ **Agent Delegation & Collaboration:** Designing specialized sub-agents and enabling automatic routing (`auto flow`) of user requests to the most appropriate agent within a team.  
-* ✅ **Session State for Memory:** Utilizing `Session State` and `ToolContext` to enable agents to remember information across conversational turns, leading to more contextual interactions.  
-* ✅ **Safety Guardrails with Callbacks:** Implementing `before_model_callback` and `before_tool_callback` to inspect, modify, or block requests/tool usage based on predefined rules, enhancing application safety and control.  
+* ✅ **工具定义与使用**：编写Python函数(`tools`)，赋予智能体特定能力（如获取数据），并指导智能体如何有效使用它们  
+* ✅ **多模型灵活性**：通过LiteLLM集成配置智能体使用各种主流大模型（Gemini、GPT-4o、Claude Sonnet），让你能为每项任务选择最佳模型  
+* ✅ **智能体委派与协作**：设计专用子智能体，实现用户请求在团队内自动路由(`auto flow`)到最合适的智能体  
+* ✅ **会话状态记忆**：使用`Session State`和`ToolContext`让智能体记住跨对话轮次的信息，实现更具上下文感知的交互  
+* ✅ **回调安全防护**：实现`before_model_callback`和`before_tool_callback`来检查、修改或基于预定义规则阻止请求/工具使用，增强应用安全性和控制力  
 
-**End State Expectation:**
+**最终成果预期：**
 
-By completing this tutorial, you will have built a functional multi-agent Weather Bot system. This system will not only provide weather information but also handle conversational niceties, remember the last city checked, and operate within defined safety boundaries, all orchestrated using ADK.
+完成本教程后，你将构建一个功能完善的多智能体天气机器人系统。该系统不仅能提供天气信息，还能处理礼貌对话、记住上次查询的城市，并在定义的安全边界内运行，所有功能都通过ADK协调实现。
 
-**Prerequisites:**
+**先决条件：**
 
-* ✅ **Solid understanding of Python programming.**  
-* ✅ **Familiarity with Large Language Models (LLMs), APIs, and the concept of agents.**  
-* ❗ **Crucially: Completion of the ADK Quickstart tutorial(s) or equivalent foundational knowledge of ADK basics (Agent, Runner, SessionService, basic Tool usage).** This tutorial builds directly upon those concepts.  
-* ✅ **API Keys** for the LLMs you intend to use (e.g., Google AI Studio for Gemini, OpenAI Platform, Anthropic Console).
+* ✅ **扎实的Python编程基础**  
+* ✅ **熟悉大模型(LLMs)、API和智能体概念**  
+* ❗ **关键要求：完成ADK快速入门教程或具备同等ADK基础知识（Agent、Runner、SessionService、基本工具使用）**。本教程直接基于这些概念构建  
+* ✅ **计划使用的大模型API密钥**（如Google AI Studio的Gemini、OpenAI Platform、Anthropic Console）
 
-**Ready to build your agent team? Let's dive in\!**
+**准备好构建你的智能体团队了吗？让我们开始吧！**
 
-## Step 0: Setup and Installation
+## 第0步：设置与安装
 
-### Library Installation
+### 库安装
 
 ```
 
@@ -88,7 +84,7 @@ By completing this tutorial, you will have built a functional multi-agent Weathe
 print("Installation complete.")
 ```
 
-### Import Library
+### 导入库
 
 ```
 import os
@@ -109,7 +105,7 @@ logging.basicConfig(level=logging.ERROR)
 print("Libraries imported.")
 ```
 
-### Setup API Keys
+### 设置API密钥
 
 ```
 
@@ -139,7 +135,7 @@ os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
 
 ```
 
-### Define Model Constants for easier use
+### 定义模型常量以便使用
 
 ```
 MODEL_GEMINI_2_0_FLASH = "gemini-2.0-flash"
@@ -152,29 +148,29 @@ MODEL_CLAUDE_SONNET = "anthropic/claude-3-sonnet-20240229"
 print("\nEnvironment configured.")
 ```
 
-## Step 1: Your First Agent \- Basic Weather Lookup
+## 第1步：你的第一个智能体 - 基础天气查询
 
-Let's begin by building the fundamental component of our Weather Bot: a single agent capable of performing a specific task – looking up weather information. This involves creating two core pieces:
+让我们从构建天气机器人的基础组件开始：一个能执行特定任务（查询天气信息）的单一智能体。这需要创建两个核心部分：
 
-1. **A Tool:** A Python function that equips the agent with the *ability* to fetch weather data.  
-2. **An Agent:** The AI "brain" that understands the user's request, knows it has a weather tool, and decides when and how to use it.
+1. **工具**：一个Python函数，赋予智能体获取天气数据的*能力*  
+2. **智能体**：理解用户请求、知道自己有天气工具，并决定何时及如何使用该工具的AI"大脑"
 
 ---
 
-### **1\. Define the Tool**
+### **1. 定义工具**
 
-In ADK, **Tools** are the building blocks that give agents concrete capabilities beyond just text generation. They are typically regular Python functions that perform specific actions, like calling an API, querying a database, or performing calculations.
+在ADK中，**工具**是赋予智能体超越文本生成的具体能力的构建块。它们通常是执行特定操作的常规Python函数，如调用API、查询数据库或执行计算。
 
-Our first tool will provide a *mock* weather report. This allows us to focus on the agent structure without needing external API keys yet. Later, you could easily swap this mock function with one that calls a real weather service.
+我们的第一个工具将提供*模拟*天气报告。这让我们可以专注于智能体结构，而无需外部API密钥。之后，你可以轻松将这个模拟函数替换为调用真实天气服务的函数。
 
-**Key Concept: Docstrings are Crucial\!** The agent's LLM relies heavily on the function's **docstring** to understand:
+**关键概念：文档字符串至关重要！** 智能体的大模型严重依赖函数的**文档字符串**来理解：
 
-* *What* the tool does.  
-* *When* to use it.  
-* *What arguments* it requires (`city: str`).  
-* *What information* it returns.
+* 工具*做什么*  
+* *何时*使用它  
+* 它需要*什么参数*(`city: str`)  
+* 它返回*什么信息*
 
-**Best Practice:** Write clear, descriptive, and accurate docstrings for your tools. This is essential for the LLM to use the tool correctly.
+**最佳实践**：为工具编写清晰、描述性强且准确的文档字符串。这对大模型正确使用工具至关重要。
 
 ```py
 # @title Define the get_weather Tool
@@ -214,21 +210,21 @@ print(get_weather("Paris"))
 
 ---
 
-### **2\. Define the Agent**
+### **2. 定义智能体**
 
-Now, let's create the **Agent** itself. An `Agent` in ADK orchestrates the interaction between the user, the LLM, and the available tools.
+现在，让我们创建**智能体**本身。ADK中的`Agent`协调用户、大模型和可用工具之间的交互。
 
-We configure it with several key parameters:
+我们通过几个关键参数配置它：
 
-* `name`: A unique identifier for this agent (e.g., "weather\_agent\_v1").  
-* `model`: Specifies which LLM to use (e.g., `MODEL_GEMINI_2_5_PRO`). We'll start with a specific Gemini model.  
-* `description`: A concise summary of the agent's overall purpose. This becomes crucial later when other agents need to decide whether to delegate tasks to *this* agent.  
-* `instruction`: Detailed guidance for the LLM on how to behave, its persona, its goals, and specifically *how and when* to utilize its assigned `tools`.  
-* `tools`: A list containing the actual Python tool functions the agent is allowed to use (e.g., `[get_weather]`).
+* `name`：该智能体的唯一标识符（如"weather_agent_v1"）  
+* `model`：指定使用哪个大模型（如`MODEL_GEMINI_2_5_PRO`）。我们从特定的Gemini模型开始  
+* `description`：智能体整体用途的简明摘要。这在其他智能体需要决定是否将任务委派给*此*智能体时变得至关重要  
+* `instruction`：详细指导大模型如何行为、其角色、目标，特别是*如何及何时*使用其分配的`tools`  
+* `tools`：包含智能体允许使用的实际Python工具函数的列表（如`[get_weather]`）
 
-**Best Practice:** Provide clear and specific `instruction` prompts. The more detailed the instructions, the better the LLM can understand its role and how to use its tools effectively. Be explicit about error handling if needed.
+**最佳实践**：提供清晰具体的`instruction`提示。指令越详细，大模型越能理解其角色和如何有效使用工具。如果需要，明确说明错误处理。
 
-**Best Practice:** Choose descriptive `name` and `description` values. These are used internally by ADK and are vital for features like automatic delegation (covered later).
+**最佳实践**：选择描述性的`name`和`description`值。这些由ADK内部使用，对自动委派等功能至关重要（稍后介绍）。
 
 ```py
 # @title Define the Weather Agent
@@ -253,12 +249,12 @@ print(f"Agent '{weather_agent.name}' created using model '{AGENT_MODEL}'.")
 
 ---
 
-### **3\. Setup Runner and Session Service**
+### **3. 设置Runner和Session Service**
 
-To manage conversations and execute the agent, we need two more components:
+为了管理对话和执行智能体，我们还需要两个组件：
 
-* `SessionService`: Responsible for managing conversation history and state for different users and sessions. The `InMemorySessionService` is a simple implementation that stores everything in memory, suitable for testing and simple applications. It keeps track of the messages exchanged. We'll explore state persistence more in Step 4\.  
-* `Runner`: The engine that orchestrates the interaction flow. It takes user input, routes it to the appropriate agent, manages calls to the LLM and tools based on the agent's logic, handles session updates via the `SessionService`, and yields events representing the progress of the interaction.
+* `SessionService`：负责管理不同用户和会话的对话历史和状态。`InMemorySessionService`是一个简单实现，将所有内容存储在内存中，适合测试和简单应用。它跟踪交换的消息。我们将在第4步进一步探索状态持久化  
+* `Runner`：协调交互流程的引擎。它接收用户输入，将其路由到适当的智能体，根据智能体逻辑管理对大模型和工具的调用，通过`SessionService`处理会话更新，并生成表示交互进度的事件
 
 ```py
 # @title Setup Session Service and Runner
@@ -293,19 +289,19 @@ print(f"Runner created for agent '{runner.agent.name}'.")
 
 ---
 
-### **4\. Interact with the Agent**
+### **4. 与智能体交互**
 
-We need a way to send messages to our agent and receive its responses. Since LLM calls and tool executions can take time, ADK's `Runner` operates asynchronously.
+我们需要一种向智能体发送消息并接收其响应的方法。由于大模型调用和工具执行可能需要时间，ADK的`Runner`异步运行。
 
-We'll define an `async` helper function (`call_agent_async`) that:
+我们将定义一个`async`辅助函数(`call_agent_async`)，该函数：
 
-1. Takes a user query string.  
-2. Packages it into the ADK `Content` format.  
-3. Calls `runner.run_async`, providing the user/session context and the new message.  
-4. Iterates through the **Events** yielded by the runner. Events represent steps in the agent's execution (e.g., tool call requested, tool result received, intermediate LLM thought, final response).  
-5. Identifies and prints the **final response** event using `event.is_final_response()`.
+1. 接收用户查询字符串  
+2. 将其打包为ADK `Content`格式  
+3. 调用`runner.run_async`，提供用户/会话上下文和新消息  
+4. 遍历runner生成的**事件**。事件表示智能体执行中的步骤（如请求工具调用、接收工具结果、中间大模型思考、最终响应）  
+5. 使用`event.is_final_response()`识别并打印**最终响应**事件
 
-**Why `async`?** Interactions with LLMs and potentially tools (like external APIs) are I/O-bound operations. Using `asyncio` allows the program to handle these operations efficiently without blocking execution.
+**为什么使用`async`？** 与大模型和潜在工具（如外部API）的交互是I/O密集型操作。使用`asyncio`允许程序高效处理这些操作而不会阻塞执行。
 
 ```py
 # @title Define Agent Interaction Function
@@ -343,15 +339,15 @@ async def call_agent_async(query: str):
 
 ---
 
-### **5\. Run the Conversation**
+### **5. 运行对话**
 
-Finally, let's test our setup by sending a few queries to the agent. We wrap our `async` calls in a main `async` function and run it using `await`.
+最后，让我们通过向智能体发送几个查询来测试我们的设置。我们将`async`调用包装在主要的`async`函数中，并使用`await`运行它。
 
-Watch the output:
+观察输出：
 
-* See the user queries.  
-* Notice the `--- Tool: get_weather called... ---` logs when the agent uses the tool.  
-* Observe the agent's final responses, including how it handles the case where weather data isn't available (for Paris).
+* 查看用户查询  
+* 注意智能体使用工具时的`--- Tool: get_weather called... ---`日志  
+* 观察智能体的最终响应，包括它如何处理巴黎天气数据不可用的情况
 
 ```py
 # @title Run the Initial Conversation
@@ -366,7 +362,7 @@ async def run_conversation():
 await run_conversation()
 ```
 
-**Expected Output:**
+**预期输出：**
 
 ```console
 >>> User Query: What is the weather like in London?
@@ -389,32 +385,32 @@ await run_conversation()
 
 ---
 
-Congratulations\! You've successfully built and interacted with your first ADK agent. It understands the user's request, uses a tool to find information, and responds appropriately based on the tool's result.
+恭喜！你已成功构建并与你的第一个ADK智能体进行了交互。它能理解用户请求，使用工具查找信息，并根据工具结果做出适当响应。
 
-In the next step, we'll explore how to easily switch the underlying Language Model powering this agent.
+下一步，我们将探索如何轻松切换支撑该智能体的底层语言模型。
 
-## Step 2: Going Multi-Model with LiteLLM
+## 第2步：使用LiteLLM实现多模型支持
 
-In Step 1, we built a functional Weather Agent powered by a specific Gemini model. While effective, real-world applications often benefit from the flexibility to use *different* Large Language Models (LLMs). Why?
+在第1步中，我们构建了一个由特定Gemini模型驱动的功能性天气智能体。虽然有效，但现实世界的应用通常受益于使用*不同*大模型(LLMs)的灵活性。为什么？
 
-* **Performance:** Some models excel at specific tasks (e.g., coding, reasoning, creative writing).
-* **Cost:** Different models have varying price points.
-* **Capabilities:** Models offer diverse features, context window sizes, and fine-tuning options.
-* **Availability/Redundancy:** Having alternatives ensures your application remains functional even if one provider experiences issues.
+* **性能**：某些模型擅长特定任务（如编码、推理、创意写作）  
+* **成本**：不同模型有不同价格点  
+* **能力**：模型提供多样化功能、上下文窗口大小和微调选项  
+* **可用性/冗余**：拥有备选方案确保即使一个提供商出现问题，你的应用仍能正常运行  
 
-ADK makes switching between models seamless through its integration with the [**LiteLLM**](https://github.com/BerriAI/litellm) library. LiteLLM acts as a consistent interface to over 100 different LLMs.
+ADK通过与[**LiteLLM**](https://github.com/BerriAI/litellm)库的集成，使模型切换变得无缝。LiteLLM作为100多种不同大模型的一致接口。
 
-**In this step, we will:**
+**在本步骤中，我们将：**
 
-1. Learn how to configure an ADK `Agent` to use models from providers like OpenAI (GPT) and Anthropic (Claude) using the `LiteLlm` wrapper.
-2. Define, configure (with their own sessions and runners), and immediately test instances of our Weather Agent, each backed by a different LLM.
-3. Interact with these different agents to observe potential variations in their responses, even when using the same underlying tool.
+1. 学习如何配置ADK `Agent`使用OpenAI(GPT)和Anthropic(Claude)等提供商的模型，使用`LiteLlm`包装器  
+2. 定义、配置（使用它们自己的会话和runner）并立即测试我们的天气智能体实例，每个实例由不同大模型支持  
+3. 与这些不同智能体交互，观察即使使用相同底层工具，它们的响应也可能存在差异  
 
 ---
 
-### **1\. Import `LiteLlm`**
+### **1. 导入`LiteLlm`**
 
-We imported this during the initial setup (Step 0), but it's the key component for multi-model support:
+我们在初始设置（第0步）中已导入此组件，但它是多模型支持的关键：
 
 ```py
 # Ensure this import is present from your setup cells
@@ -423,25 +419,25 @@ from google.adk.models.lite_llm import LiteLlm
 
 ---
 
-### **2\. Define and Test Multi-Model Agents**
+### **2. 定义并测试多模型智能体**
 
-Instead of passing only a model name string (which defaults to Google's Gemini models), we wrap the desired model identifier string within the `LiteLlm` class.
+我们不再仅传递模型名称字符串（默认为Google的Gemini模型），而是将所需的模型标识符字符串包装在`LiteLlm`类中。
 
-* **Key Concept: `LiteLlm` Wrapper:** The `LiteLlm(model="provider/model_name")` syntax tells ADK to route requests for this agent through the LiteLLM library to the specified model provider.
+* **关键概念：`LiteLlm`包装器**：`LiteLlm(model="provider/model_name")`语法告诉ADK通过LiteLLM库将该智能体的请求路由到指定的模型提供商  
 
-Make sure you have configured the necessary API keys for OpenAI and Anthropic in Step 0. We'll use the `call_agent_async` function (defined earlier, which now accepts `runner`, `user_id`, and `session_id`) to interact with each agent immediately after its setup.
+确保你已在第0步配置了OpenAI和Anthropic的必要API密钥。我们将使用之前定义的`call_agent_async`函数（现在接受`runner`、`user_id`和`session_id`）在设置后立即与每个智能体交互。
 
-Each block below will:
-* Define the agent using a specific LiteLLM model (`MODEL_GPT_4O` or `MODEL_CLAUDE_SONNET`).
-* Create a *new, separate* `InMemorySessionService` and session specifically for that agent's test run. This keeps the conversation histories isolated for this demonstration.
-* Create a `Runner` configured for the specific agent and its session service.
-* Immediately call `call_agent_async` to send a query and test the agent.
+下面的每个代码块将：
+* 使用特定的LiteLLM模型(`MODEL_GPT_4O`或`MODEL_CLAUDE_SONNET`)定义智能体  
+* 为该智能体的测试运行创建*新的独立*`InMemorySessionService`和会话。这为本次演示保持对话历史的隔离  
+* 创建配置给特定智能体及其会话服务的`Runner`  
+* 立即调用`call_agent_async`发送查询并测试智能体  
 
-**Best Practice:** Use constants for model names (like `MODEL_GPT_4O`, `MODEL_CLAUDE_SONNET` defined in Step 0) to avoid typos and make code easier to manage.
+**最佳实践**：使用常量表示模型名称（如第0步定义的`MODEL_GPT_4O`、`MODEL_CLAUDE_SONNET`），避免拼写错误并使代码更易管理  
 
-**Error Handling:** We wrap the agent definitions in `try...except` blocks. This prevents the entire code cell from failing if an API key for a specific provider is missing or invalid, allowing the tutorial to proceed with the models that *are* configured.
+**错误处理**：我们将智能体定义包装在`try...except`块中。这防止整个代码单元因特定提供商的API密钥缺失或无效而失败，允许教程继续使用*已配置*的模型进行  
 
-First, let's create and test the agent using OpenAI's GPT-4o.
+首先，让我们创建并测试使用OpenAI的GPT-4o的智能体。
 
 ```py
 # @title Define and Test GPT Agent
@@ -503,7 +499,7 @@ except Exception as e:
 
 ```
 
-Next, we'll do the same for Anthropic's Claude Sonnet.
+接下来，我们对Anthropic的Claude Sonnet做同样操作。
 
 ```py
 # @title Define and Test Claude Agent
@@ -565,50 +561,50 @@ except Exception as e:
     print(f"❌ Could not create or run Claude agent '{MODEL_CLAUDE_SONNET}'. Check API Key and model name. Error: {e}")
 ```
 
-Observe the output carefully from both code blocks. You should see:
+仔细观察两个代码块的输出。你应该看到：
 
-1. Each agent (`weather_agent_gpt`, `weather_agent_claude`) is created successfully (if API keys are valid).
-2. A dedicated session and runner are set up for each.
-3. Each agent correctly identifies the need to use the `get_weather` tool when processing the query (you'll see the `--- Tool: get_weather called... ---` log).
-4. The *underlying tool logic* remains identical, always returning our mock data.
-5. However, the **final textual response** generated by each agent might differ slightly in phrasing, tone, or formatting. This is because the instruction prompt is interpreted and executed by different LLMs (GPT-4o vs. Claude Sonnet).
+1. 每个智能体(`weather_agent_gpt`、`weather_agent_claude`)成功创建（如果API密钥有效）  
+2. 为每个智能体设置了专用会话和runner  
+3. 每个智能体在处理查询时正确识别需要使用`get_weather`工具（你会看到`--- Tool: get_weather called... ---`日志）  
+4. *底层工具逻辑*保持相同，始终返回我们的模拟数据  
+5. 但每个智能体生成的**最终文本响应**可能在措辞、语气或格式上略有不同。这是因为指令提示由不同大模型(GPT-4o vs Claude Sonnet)解释执行  
 
-This step demonstrates the power and flexibility ADK + LiteLLM provide. You can easily experiment with and deploy agents using various LLMs while keeping your core application logic (tools, fundamental agent structure) consistent.
+这一步展示了ADK + LiteLLM提供的强大功能和灵活性。你可以轻松尝试和部署使用各种大模型的智能体，同时保持核心应用逻辑（工具、基本智能体结构）一致。
 
-In the next step, we'll move beyond a single agent and build a small team where agents can delegate tasks to each other!
-
----
-
-## Step 3: Building an Agent Team \- Delegation for Greetings & Farewells
-
-In Steps 1 and 2, we built and experimented with a single agent focused solely on weather lookups. While effective for its specific task, real-world applications often involve handling a wider variety of user interactions. We *could* keep adding more tools and complex instructions to our single weather agent, but this can quickly become unmanageable and less efficient.
-
-A more robust approach is to build an **Agent Team**. This involves:
-
-1. Creating multiple, **specialized agents**, each designed for a specific capability (e.g., one for weather, one for greetings, one for calculations).  
-2. Designating a **root agent** (or orchestrator) that receives the initial user request.  
-3. Enabling the root agent to **delegate** the request to the most appropriate specialized sub-agent based on the user's intent.
-
-**Why build an Agent Team?**
-
-* **Modularity:** Easier to develop, test, and maintain individual agents.  
-* **Specialization:** Each agent can be fine-tuned (instructions, model choice) for its specific task.  
-* **Scalability:** Simpler to add new capabilities by adding new agents.  
-* **Efficiency:** Allows using potentially simpler/cheaper models for simpler tasks (like greetings).
-
-**In this step, we will:**
-
-1. Define simple tools for handling greetings (`say_hello`) and farewells (`say_goodbye`).  
-2. Create two new specialized sub-agents: `greeting_agent` and `farewell_agent`.  
-3. Update our main weather agent (`weather_agent_v2`) to act as the **root agent**.  
-4. Configure the root agent with its sub-agents, enabling **automatic delegation**.  
-5. Test the delegation flow by sending different types of requests to the root agent.
+下一步，我们将超越单一智能体，构建一个小型团队，让智能体可以相互委派任务！
 
 ---
 
-### **1\. Define Tools for Sub-Agents**
+## 第3步：构建智能体团队 - 问候与告别的委派
 
-First, let's create the simple Python functions that will serve as tools for our new specialist agents. Remember, clear docstrings are vital for the agents that will use them.
+在第1和2步中，我们构建并实验了一个专注于天气查询的单一智能体。虽然对其特定任务有效，但现实世界的应用通常涉及处理更广泛的用户交互。我们可以继续向单一天气智能体添加更多工具和复杂指令，但这很快就会变得难以管理且效率低下。
+
+更稳健的方法是构建一个**智能体团队**。这涉及：
+
+1. 创建多个**专用智能体**，每个智能体设计用于特定能力（如一个处理天气，一个处理问候，一个处理计算）  
+2. 指定一个**根智能体**（或协调器）接收初始用户请求  
+3. 使根智能体能够基于用户意图将请求**委派**给最合适的专用子智能体  
+
+**为什么要构建智能体团队？**
+
+* **模块化**：更易于开发、测试和维护单个智能体  
+* **专业化**：每个智能体可以针对其特定任务进行微调（指令、模型选择）  
+* **可扩展性**：通过添加新智能体更简单地增加新能力  
+* **效率**：允许对简单任务（如问候）使用可能更简单/更便宜的模型  
+
+**在本步骤中，我们将：**
+
+1. 定义处理问候(`say_hello`)和告别(`say_goodbye`)的简单工具  
+2. 创建两个新的专用子智能体：`greeting_agent`和`farewell_agent`  
+3. 更新我们的主天气智能体(`weather_agent_v2`)作为**根智能体**  
+4. 用其子智能体配置根智能体，实现**自动委派**  
+5. 通过向根智能体发送不同类型的请求测试委派流程  
+
+---
+
+### **1. 为子智能体定义工具**
+
+首先，让我们创建将作为新专家智能体工具的简单Python函数。记住，清晰的文档字符串对将使用它们的智能体至关重要。
 
 ```py
 # @title Define Tools for Greeting and Farewell Agents
@@ -642,15 +638,15 @@ print(say_goodbye())
 
 ---
 
-### **2\. Define the Sub-Agents (Greeting & Farewell)**
+### **2. 定义子智能体（问候与告别）**
 
-Now, create the `Agent` instances for our specialists. Notice their highly focused `instruction` and, critically, their clear `description`. The `description` is the primary information the *root agent* uses to decide *when* to delegate to these sub-agents.
+现在，为我们的专家创建`Agent`实例。注意它们高度聚焦的`instruction`，以及关键的清晰`description`。`description`是*根智能体*用来决定*何时*委派给这些子智能体的主要信息。
 
-We can even use different LLMs for these sub-agents\! Let's assign GPT-4o to the Greeting Agent and keep the Farewell Agent using GPT-4o as well (you could easily switch one to Claude or Gemini if desired and API keys are set).
+我们甚至可以为这些子智能体使用不同的大模型！让我们为问候智能体分配GPT-4o，并保持告别智能体也使用GPT-4o（如果愿意且API密钥已设置，你可以轻松切换其中一个使用Claude或Gemini）。
 
-**Best Practice:** Sub-agent `description` fields should accurately and concisely summarize their specific capability. This is crucial for effective automatic delegation.
+**最佳实践**：子智能体的`description`字段应准确简洁地总结其特定能力。这对有效的自动委派至关重要。
 
-**Best Practice:** Sub-agent `instruction` fields should be tailored to their limited scope, telling them exactly what to do and *what not* to do (e.g., "Your *only* task is...").
+**最佳实践**：子智能体的`instruction`字段应针对其有限范围定制，明确告诉它们该做什么和*不该*做什么（如"你的*唯一*任务是..."）。
 
 ```py
 # @title Define Greeting and Farewell Sub-Agents
@@ -699,16 +695,16 @@ except Exception as e:
 
 ---
 
-### **3\. Define the Root Agent with Sub-Agents**
+### **3. 定义带子智能体的根智能体**
 
-Now, we upgrade our `weather_agent`. The key changes are:
+现在，我们升级`weather_agent`。关键变化是：
 
-* Adding the `sub_agents` parameter: We pass a list containing the `greeting_agent` and `farewell_agent` instances we just created.  
-* Updating the `instruction`: We explicitly tell the root agent *about* its sub-agents and *when* it should delegate tasks to them.
+* 添加`sub_agents`参数：我们传递包含刚创建的`greeting_agent`和`farewell_agent`实例的列表  
+* 更新`instruction`：我们明确告诉根智能体*关于*其子智能体以及*何时*应将任务委派给它们  
 
-**Key Concept: Automatic Delegation (Auto Flow)** By providing the `sub_agents` list, ADK enables automatic delegation. When the root agent receives a user query, its LLM considers not only its own instructions and tools but also the `description` of each sub-agent. If the LLM determines that a query aligns better with a sub-agent's described capability (e.g., "Handles simple greetings"), it will automatically generate a special internal action to *transfer control* to that sub-agent for that turn. The sub-agent then processes the query using its own model, instructions, and tools.
+**关键概念：自动委派（Auto Flow）** 通过提供`sub_agents`列表，ADK启用自动委派。当根智能体收到用户查询时，其大模型不仅考虑自己的指令和工具，还考虑每个子智能体的`description`。如果大模型确定查询更符合子智能体的描述能力（如"处理简单问候"），它将自动生成特殊内部动作以*转移控制*给该子智能体处理该轮次。子智能体然后使用自己的模型、指令和工具处理查询。
 
-**Best Practice:** Ensure the root agent's instructions clearly guide its delegation decisions. Mention the sub-agents by name and describe the conditions under which delegation should occur.
+**最佳实践**：确保根智能体的指令明确指导其委派决策。按名称提及子智能体，并描述应发生委派的条件。
 
 ```py
 # @title Define the Root Agent with Sub-Agents
@@ -752,26 +748,25 @@ else:
 
 ---
 
-### **4\. Interact with the Agent Team**
+### **4. 与智能体团队交互**
 
-Now that we've defined our root agent (`weather_agent_team` - *Note: Ensure this variable name matches the one defined in the previous code block, likely `# @title Define the Root Agent with Sub-Agents`, which might have named it `root_agent`*) with its specialized sub-agents, let's test the delegation mechanism.
+现在我们已经定义了根智能体(`weather_agent_team` - *注意：确保此变量名与之前代码块中定义的匹配，可能是`# @title Define the Root Agent with Sub-Agents`，可能命名为`root_agent`*)及其专用子智能体，让我们测试委派机制。
 
-The following code block will:
+以下代码块将：
 
-1. Define an `async` function `run_team_conversation`.
-2. Inside this function, create a *new, dedicated* `InMemorySessionService` and a specific session (`session_001_agent_team`) just for this test run. This isolates the conversation history for testing the team dynamics.
-3. Create a `Runner` (`runner_agent_team`) configured to use our `weather_agent_team` (the root agent) and the dedicated session service.
-4. Use our updated `call_agent_async` function to send different types of queries (greeting, weather request, farewell) to the `runner_agent_team`. We explicitly pass the runner, user ID, and session ID for this specific test.
-5. Immediately execute the `run_team_conversation` function.
+1. 定义`async`函数`run_team_conversation`  
+2. 在此函数内，为此次测试运行创建*新的专用*`InMemorySessionService`和特定会话(`session_001_agent_team`)。这隔离了测试团队动态的对话历史  
+3. 创建`Runner`(`runner_agent_team`)，配置为使用我们的`weather_agent_team`（根智能体）和专用会话服务  
+4. 使用更新后的`call_agent_async`函数向`runner_agent_team`发送不同类型的查询（问候、天气请求、告别）。我们明确传递此特定测试的runner、用户ID和会话ID  
+5. 立即执行`run_team_conversation`函数  
 
-We expect the following flow:
+我们预期以下流程：
 
-1. The "Hello there!" query goes to `runner_agent_team`.
-2. The root agent (`weather_agent_team`) receives it and, based on its instructions and the `greeting_agent`'s description, delegates the task.
-3. `greeting_agent` handles the query, calls its `say_hello` tool, and generates the response.
-4. The "What is the weather in New York?" query is *not* delegated and is handled directly by the root agent using its `get_weather` tool.
-5. The "Thanks, bye!" query is delegated to the `farewell_agent`, which uses its `say_goodbye` tool.
-
+1. "Hello there!"查询交给`runner_agent_team`  
+2. 根智能体(`weather_agent_team`)接收它，基于其指令和`greeting_agent`的描述委派任务  
+3. `greeting_agent`处理查询，调用其`say_hello`工具并生成响应  
+4. "What is the weather in New York?"查询*不*委派，由根智能体直接使用其`get_weather`工具处理  
+5. "Thanks, bye!"查询委派给`farewell_agent`，它使用其`say_goodbye`工具  
 
 ```py
 # @title Interact with the Agent Team
@@ -844,45 +839,44 @@ else:
 
 ---
 
-Look closely at the output logs, especially the `--- Tool: ... called ---` messages. You should observe:
+仔细观察输出日志，特别是`--- Tool: ... called ---`消息。你应该观察到：
 
-* For "Hello there!", the `say_hello` tool was called (indicating `greeting_agent` handled it).
-* For "What is the weather in New York?", the `get_weather` tool was called (indicating the root agent handled it).
-* For "Thanks, bye!", the `say_goodbye` tool was called (indicating `farewell_agent` handled it).
+* 对于"Hello there!"，调用了`say_hello`工具（表明`greeting_agent`处理了它）  
+* 对于"What is the weather in New York?"，调用了`get_weather`工具（表明根智能体处理了它）  
+* 对于"Thanks, bye!"，调用了`say_goodbye`工具（表明`farewell_agent`处理了它）  
 
-This confirms successful **automatic delegation**! The root agent, guided by its instructions and the `description`s of its `sub_agents`, correctly routed user requests to the appropriate specialist agent within the team.
+这确认了成功的**自动委派**！根智能体在其指令和`sub_agents`的`description`指导下，正确将用户请求路由到团队内适当的专家智能体。
 
-You've now structured your application with multiple collaborating agents. This modular design is fundamental for building more complex and capable agent systems. In the next step, we'll give our agents the ability to remember information across turns using session state.
+你现在已用多个协作智能体构建了你的应用。这种模块化设计是构建更复杂、更有能力的智能体系统的基础。下一步，我们将使用会话状态赋予智能体跨轮次记忆信息的能力。
 
+## 第4步：通过会话状态添加记忆与个性化
 
-## Step 4: Adding Memory and Personalization with Session State
+到目前为止，我们的智能体团队可以通过委派处理不同任务，但每次交互都是全新的——智能体没有记忆过去对话或会话中的用户偏好。要创建更复杂和上下文感知的体验，智能体需要**记忆**。ADK通过**会话状态**提供这一点。
 
-So far, our agent team can handle different tasks through delegation, but each interaction starts fresh – the agents have no memory of past conversations or user preferences within a session. To create more sophisticated and context-aware experiences, agents need **memory**. ADK provides this through **Session State**.
+**什么是会话状态？**
 
-**What is Session State?**
+* 它是绑定到特定用户会话（由`APP_NAME`、`USER_ID`、`SESSION_ID`标识）的Python字典(`session.state`)  
+* 它在会话内*跨多个对话轮次*持久保存信息  
+* 智能体和工具可以读取和写入此状态，使它们能记住细节、调整行为并个性化响应  
 
-* It's a Python dictionary (`session.state`) tied to a specific user session (identified by `APP_NAME`, `USER_ID`, `SESSION_ID`).  
-* It persists information *across multiple conversational turns* within that session.  
-* Agents and Tools can read from and write to this state, allowing them to remember details, adapt behavior, and personalize responses.
+**智能体如何与状态交互：**
 
-**How Agents Interact with State:**
+1. **`ToolContext`（主要方法）**：工具可以接受`ToolContext`对象（如果声明为最后一个参数，ADK会自动提供）。此对象通过`tool_context.state`提供对会话状态的直接访问，允许工具在执行*期间*读取偏好或保存结果  
+2. **`output_key`（自动保存智能体响应）**：可以配置`Agent`带有`output_key="your_key"`。ADK然后将自动保存智能体每轮次的最终文本响应到`session.state["your_key"]`  
 
-1. **`ToolContext` (Primary Method):** Tools can accept a `ToolContext` object (automatically provided by ADK if declared as the last argument). This object gives direct access to the session state via `tool_context.state`, allowing tools to read preferences or save results *during* execution.  
-2. **`output_key` (Auto-Save Agent Response):** An `Agent` can be configured with an `output_key="your_key"`. ADK will then automatically save the agent's final textual response for a turn into `session.state["your_key"]`.
+**在本步骤中，我们将增强天气机器人团队：**
 
-**In this step, we will enhance our Weather Bot team by:**
-
-1. Using a **new** `InMemorySessionService` to demonstrate state in isolation.  
-2. Initializing session state with a user preference for `temperature_unit`.  
-3. Creating a state-aware version of the weather tool (`get_weather_stateful`) that reads this preference via `ToolContext` and adjusts its output format (Celsius/Fahrenheit).  
-4. Updating the root agent to use this stateful tool and configuring it with an `output_key` to automatically save its final weather report to the session state.  
-5. Running a conversation to observe how the initial state affects the tool, how manual state changes alter subsequent behavior, and how `output_key` persists the agent's response.
+1. 使用**新**`InMemorySessionService`隔离演示状态  
+2. 用用户对`temperature_unit`的偏好初始化会话状态  
+3. 创建天气工具的状态感知版本(`get_weather_stateful`)，通过`ToolContext`读取此偏好并调整其输出格式（摄氏度/华氏度）  
+4. 更新根智能体使用此状态感知工具，并配置`output_key`自动将其最终天气报告保存到会话状态  
+5. 运行对话观察初始状态如何影响工具，手动状态更改如何改变后续行为，以及`output_key`如何持久保存智能体响应  
 
 ---
 
-### **1\. Initialize New Session Service and State**
+### **1. 初始化新会话服务和状态**
 
-To clearly demonstrate state management without interference from prior steps, we'll instantiate a new `InMemorySessionService`. We'll also create a session with an initial state defining the user's preferred temperature unit.
+为了清晰演示状态管理而不受之前步骤干扰，我们将实例化新的`InMemorySessionService`。我们还将创建一个会话，其初始状态定义用户的温度单位偏好。
 
 ```py
 # @title 1. Initialize New Session Service and State
@@ -926,13 +920,13 @@ else:
 
 ---
 
-### **2. Create State-Aware Weather Tool**
+### **2. 创建状态感知天气工具**
 
-Now, we create a new version of the weather tool. Its key feature is accepting `tool_context: ToolContext` which allows it to access `tool_context.state`. It will read the `user_preference_temperature_unit` and format the temperature accordingly.
+现在，我们创建天气工具的新版本。其关键特性是接受`tool_context: ToolContext`，这允许它访问`tool_context.state`。它将读取`user_preference_temperature_unit`并相应格式化温度。
 
-**Key Concept: `ToolContext`** This object is the bridge allowing your tool logic to interact with the session's context, including reading and writing state variables. ADK injects it automatically if defined as the last parameter of your tool function.
+**关键概念：`ToolContext`** 此对象是你的工具逻辑与会话上下文交互的桥梁，包括读取和写入状态变量。如果定义为工具函数的最后一个参数，ADK会自动注入它。
 
-**Best Practice:** When reading from state, use `dictionary.get('key', default_value)` to handle cases where the key might not exist yet, ensuring your tool doesn't crash.
+**最佳实践**：从状态读取时，使用`dictionary.get('key', default_value)`处理键可能尚不存在的情况，确保你的工具不会崩溃。
 
 ```py
 # @title 2. Create State-Aware Weather Tool
@@ -989,13 +983,13 @@ print("✅ State-aware 'get_weather_stateful' tool defined.")
 
 ---
 
-### **3\. Redefine Sub-Agents and Update Root Agent**
+### **3. 重新定义子智能体并更新根智能体**
 
-To ensure this step is self-contained and builds correctly, we first redefine the `greeting_agent` and `farewell_agent` exactly as they were in Step 3\. Then, we define our new root agent (`weather_agent_v4_stateful`):
+为确保此步骤自包含并正确构建，我们首先完全按照第3步中的定义重新定义`greeting_agent`和`farewell_agent`。然后定义我们的新根智能体(`weather_agent_v4_stateful`)：
 
-* It uses the new `get_weather_stateful` tool.  
-* It includes the greeting and farewell sub-agents for delegation.  
-* **Crucially**, it sets `output_key="last_weather_report"` which automatically saves its final weather response to the session state.
+* 它使用新的`get_weather_stateful`工具  
+* 它包含问候和告别子智能体用于委派  
+* **关键**是设置`output_key="last_weather_report"`自动将其最终天气响应保存到会话状态  
 
 ```py
 # @title 3. Redefine Sub-Agents and Update Root Agent with output_key
@@ -1076,18 +1070,18 @@ else:
 
 ---
 
-### **4\. Interact and Test State Flow**
+### **4. 交互并测试状态流**
 
-Now, let's execute a conversation designed to test the state interactions using the `runner_root_stateful` (associated with our stateful agent and the `session_service_stateful`). We'll use the `call_agent_async` function defined earlier, ensuring we pass the correct runner, user ID (`USER_ID_STATEFUL`), and session ID (`SESSION_ID_STATEFUL`).
+现在，让我们执行一个对话，设计用于使用`runner_root_stateful`（关联我们的状态感知智能体和`session_service_stateful`）测试状态交互。我们将使用之前定义的`call_agent_async`函数，确保传递正确的runner、用户ID(`USER_ID_STATEFUL`)和会话ID(`SESSION_ID_STATEFUL`)。
 
-The conversation flow will be:
+对话流程将是：
 
-1. **Check weather (London):** The `get_weather_stateful` tool should read the initial "Celsius" preference from the session state initialized in Section 1. The root agent's final response (the weather report in Celsius) should get saved to `state['last_weather_report']` via the `output_key` configuration.
-2. **Manually update state:** We will *directly modify* the state stored within the `InMemorySessionService` instance (`session_service_stateful`).
-    * **Why direct modification?** The `session_service.get_session()` method returns a *copy* of the session. Modifying that copy wouldn't affect the state used in subsequent agent runs. For this testing scenario with `InMemorySessionService`, we access the internal `sessions` dictionary to change the *actual* stored state value for `user_preference_temperature_unit` to "Fahrenheit". *Note: In real applications, state changes are typically triggered by tools or agent logic returning `EventActions(state_delta=...)`, not direct manual updates.*
-3. **Check weather again (New York):** The `get_weather_stateful` tool should now read the updated "Fahrenheit" preference from the state and convert the temperature accordingly. The root agent's *new* response (weather in Fahrenheit) will overwrite the previous value in `state['last_weather_report']` due to the `output_key`.
-4. **Greet the agent:** Verify that delegation to the `greeting_agent` still works correctly alongside the stateful operations. This interaction will become the *last* response saved by `output_key` in this specific sequence.
-5. **Inspect final state:** After the conversation, we retrieve the session one last time (getting a copy) and print its state to confirm the `user_preference_temperature_unit` is indeed "Fahrenheit", observe the final value saved by `output_key` (which will be the greeting in this run), and see the `last_city_checked_stateful` value written by the tool.
+1. **检查天气（伦敦）**：`get_weather_stateful`工具应从第1节初始化的会话状态读取初始"摄氏度"偏好。根智能体的最终响应（摄氏度的天气报告）应通过`output_key`配置保存到`state['last_weather_report']`  
+2. **手动更新状态**：我们将*直接修改*存储在`InMemorySessionService`实例(`session_service_stateful`)中的状态  
+    * **为什么直接修改？** `session_service.get_session()`方法返回会话的*副本*。修改该副本不会影响后续智能体运行中使用的状态。对于使用`InMemorySessionService`的测试场景，我们访问内部`sessions`字典来更改`user_preference_temperature_unit`的实际存储状态值为"华氏度"。*注意：在实际应用中，状态更改通常由工具或智能体逻辑返回`EventActions(state_delta=...)`触发，而非直接手动更新*  
+3. **再次检查天气（纽约）**：`get_weather_stateful`工具现在应从状态读取更新的"华氏度"偏好并相应转换温度。根智能体的*新*响应（华氏度的天气）将由于`output_key`覆盖`state['last_weather_report']`中的先前值  
+4. **问候智能体**：验证委派给`greeting_agent`在状态感知操作旁边仍正常工作。此交互将成为`output_key`在此特定序列中保存的*最后*响应  
+5. **检查最终状态**：对话后，我们最后一次检索会话（获取副本）并打印其状态，确认`user_preference_temperature_unit`确实是"华氏度"，观察`output_key`保存的最终值（在此运行中将是问候），并查看工具写入的`last_city_checked_stateful`值  
 
 ```py
 # Ensure the stateful runner (runner_root_stateful) is available from the previous cell
@@ -1162,60 +1156,60 @@ else:
 
 ---
 
-By reviewing the conversation flow and the final session state printout, you can confirm:
+通过回顾对话流程和最终会话状态打印，你可以确认：
 
-* **State Read:** The weather tool (`get_weather_stateful`) correctly read `user_preference_temperature_unit` from state, initially using "Celsius" for London.
-* **State Update:** The direct modification successfully changed the stored preference to "Fahrenheit".
-* **State Read (Updated):** The tool subsequently read "Fahrenheit" when asked for New York's weather and performed the conversion.
-* **Tool State Write:** The tool successfully wrote the `last_city_checked_stateful` ("New York" after the second weather check) into the state via `tool_context.state`.
-* **Delegation:** The delegation to the `greeting_agent` for "Hi!" functioned correctly even after state modifications.
-* **`output_key`:** The `output_key="last_weather_report"` successfully saved the root agent's *final* response for *each turn* where the root agent was the one ultimately responding. In this sequence, the last response was the greeting ("Hello, there!"), so that overwrote the weather report in the state key.
-* **Final State:** The final check confirms the preference persisted as "Fahrenheit".
+* **状态读取**：天气工具(`get_weather_stateful`)正确从状态读取`user_preference_temperature_unit`，最初对伦敦使用"摄氏度"  
+* **状态更新**：直接修改成功将存储偏好更改为"华氏度"  
+* **状态读取（更新后）**：当询问纽约天气时，工具随后读取"华氏度"并执行转换  
+* **工具状态写入**：工具通过`tool_context.state`成功将`last_city_checked_stateful`（第二次天气检查后的"纽约"）写入状态  
+* **委派**：对"Hi!"的`greeting_agent`委派在状态修改后仍正确运行  
+* **`output_key`**：`output_key="last_weather_report"`成功保存根智能体*每轮次*的*最终*响应（根智能体最终响应的轮次）。在此序列中，最后响应是问候（"Hello, there!"），因此它覆盖了状态键中的天气报告  
+* **最终状态**：最终检查确认偏好持久保存为"华氏度"  
 
-You've now successfully integrated session state to personalize agent behavior using `ToolContext`, manually manipulated state for testing `InMemorySessionService`, and observed how `output_key` provides a simple mechanism for saving the agent's last response to state. This foundational understanding of state management is key as we proceed to implement safety guardrails using callbacks in the next steps.
-
----
-
-## Step 5: Adding Safety \- Input Guardrail with `before_model_callback`
-
-Our agent team is becoming more capable, remembering preferences and using tools effectively. However, in real-world scenarios, we often need safety mechanisms to control the agent's behavior *before* potentially problematic requests even reach the core Large Language Model (LLM).
-
-ADK provides **Callbacks** – functions that allow you to hook into specific points in the agent's execution lifecycle. The `before_model_callback` is particularly useful for input safety.
-
-**What is `before_model_callback`?**
-
-* It's a Python function you define that ADK executes *just before* an agent sends its compiled request (including conversation history, instructions, and the latest user message) to the underlying LLM.  
-* **Purpose:** Inspect the request, modify it if necessary, or block it entirely based on predefined rules.
-
-**Common Use Cases:**
-
-* **Input Validation/Filtering:** Check if user input meets criteria or contains disallowed content (like PII or keywords).  
-* **Guardrails:** Prevent harmful, off-topic, or policy-violating requests from being processed by the LLM.  
-* **Dynamic Prompt Modification:** Add timely information (e.g., from session state) to the LLM request context just before sending.
-
-**How it Works:**
-
-1. Define a function accepting `callback_context: CallbackContext` and `llm_request: LlmRequest`.  
-   * `callback_context`: Provides access to agent info, session state (`callback_context.state`), etc.  
-   * `llm_request`: Contains the full payload intended for the LLM (`contents`, `config`).  
-2. Inside the function:  
-   * **Inspect:** Examine `llm_request.contents` (especially the last user message).  
-   * **Modify (Use Caution):** You *can* change parts of `llm_request`.  
-   * **Block (Guardrail):** Return an `LlmResponse` object. ADK will send this response back immediately, *skipping* the LLM call for that turn.  
-   * **Allow:** Return `None`. ADK proceeds to call the LLM with the (potentially modified) request.
-
-**In this step, we will:**
-
-1. Define a `before_model_callback` function (`block_keyword_guardrail`) that checks the user's input for a specific keyword ("BLOCK").  
-2. Update our stateful root agent (`weather_agent_v4_stateful` from Step 4\) to use this callback.  
-3. Create a new runner associated with this updated agent but using the *same stateful session service* to maintain state continuity.  
-4. Test the guardrail by sending both normal and keyword-containing requests.
+你现在已成功集成会话状态，使用`ToolContext`个性化智能体行为，为测试`InMemorySessionService`手动操作状态，并观察`output_key`如何提供简单机制将智能体的最后响应保存到状态。这种状态管理的基础理解是关键，因为我们将在下一步使用回调实现安全防护机制。
 
 ---
 
-### **1\. Define the Guardrail Callback Function**
+## 第5步：添加安全性 - 使用`before_model_callback`的输入防护
 
-This function will inspect the last user message within the `llm_request` content. If it finds "BLOCK" (case-insensitive), it constructs and returns an `LlmResponse` to block the flow; otherwise, it returns `None`.
+我们的智能体团队正变得更强大，能记住偏好并有效使用工具。然而，在现实场景中，我们经常需要安全机制来控制智能体行为，*在*潜在问题请求甚至到达核心大模型(LLM)之前。
+
+ADK提供**回调**——允许你挂钩到智能体执行生命周期特定点的函数。`before_model_callback`特别适用于输入安全。
+
+**什么是`before_model_callback`？**
+
+* 它是你定义的Python函数，ADK*刚好在*智能体将其编译的请求（包括对话历史、指令和最新用户消息）发送到底层大模型之前执行  
+* **目的**：检查请求，必要时修改它，或基于预定义规则完全阻止它  
+
+**常见用例：**
+
+* **输入验证/过滤**：检查用户输入是否符合标准或包含不允许的内容（如PII或关键词）  
+* **防护**：防止有害、离题或违反策略的请求被大模型处理  
+* **动态提示修改**：在发送前向大模型请求上下文添加及时信息（如来自会话状态的信息）  
+
+**工作原理：**
+
+1. 定义接受`callback_context: CallbackContext`和`llm_request: LlmRequest`的函数  
+   * `callback_context`：提供对智能体信息、会话状态(`callback_context.state`)等的访问  
+   * `llm_request`：包含打算发送给大模型的完整负载(`contents`、`config`)  
+2. 在函数内部：  
+   * **检查**：检查`llm_request.contents`（特别是最后用户消息）  
+   * **修改（谨慎使用）**：你可以更改`llm_request`的部分内容  
+   * **阻止（防护）**：返回`LlmResponse`对象。ADK将立即发送此响应*跳过*该轮次的大模型调用  
+   * **允许**：返回`None`。ADK继续使用（可能修改后的）请求调用大模型  
+
+**在本步骤中，我们将：**
+
+1. 定义`before_model_callback`函数(`block_keyword_guardrail`)，检查用户输入中特定关键词("BLOCK")  
+2. 更新我们的状态感知根智能体(`weather_agent_v4_stateful`来自第4步)使用此回调  
+3. 创建与此更新智能体关联的新runner，但使用*相同的状态感知会话服务*以保持状态连续性  
+4. 通过发送正常和含关键词的请求测试防护  
+
+---
+
+### **1. 定义防护回调函数**
+
+此函数将检查`llm_request`内容中的最后用户消息。如果找到"BLOCK"（不区分大小写），它构建并返回`LlmResponse`以阻止流程；否则返回`None`。
 
 ```py
 # @title 1. Define the before_model_callback Guardrail
@@ -1277,11 +1271,11 @@ print("✅ block_keyword_guardrail function defined.")
 
 ---
 
-### **2\. Update Root Agent to Use the Callback**
+### **2. 更新根智能体使用回调**
 
-We redefine the root agent, adding the `before_model_callback` parameter and pointing it to our new guardrail function. We'll give it a new version name for clarity.
+我们重新定义根智能体，添加`before_model_callback`参数并指向我们的新防护函数。为清晰起见，我们给它一个新版本名称。
 
-*Important:* We need to redefine the sub-agents (`greeting_agent`, `farewell_agent`) and the stateful tool (`get_weather_stateful`) within this context if they are not already available from previous steps, ensuring the root agent definition has access to all its components.
+*重要*：我们需要在此上下文中重新定义子智能体(`greeting_agent`、`farewell_agent`)和状态感知工具(`get_weather_stateful`)（如果它们尚未从之前步骤中获得），确保根智能体定义能访问其所有组件。
 
 ```py
 # @title 2. Update Root Agent with before_model_callback
@@ -1364,13 +1358,13 @@ else:
 
 ---
 
-### **3\. Interact to Test the Guardrail**
+### **3. 交互测试防护**
 
-Let's test the guardrail's behavior. We'll use the *same session* (`SESSION_ID_STATEFUL`) as in Step 4 to show that state persists across these changes.
+让我们测试防护行为。我们将使用与第4步*相同的会话*(`SESSION_ID_STATEFUL`)，以显示状态在这些更改中持续存在。
 
-1. Send a normal weather request (should pass the guardrail and execute).  
-2. Send a request containing "BLOCK" (should be intercepted by the callback).  
-3. Send a greeting (should pass the root agent's guardrail, be delegated, and execute normally).
+1. 发送正常天气请求（应通过防护并执行）  
+2. 发送包含"BLOCK"的请求（应被回调拦截）  
+3. 发送问候（应通过根智能体的防护，被委派并正常执行）  
 
 ```py
 # @title 3. Interact to Test the Model Input Guardrail
@@ -1417,302 +1411,10 @@ else:
 
 ---
 
-Observe the execution flow:
+观察执行流程：
 
-1. **London Weather:** The callback runs for `weather_agent_v5_model_guardrail`, inspects the message, prints "Keyword not found. Allowing LLM call.", and returns `None`. The agent proceeds, calls the `get_weather_stateful` tool (which uses the "Fahrenheit" preference from Step 4's state change), and returns the weather. This response updates `last_weather_report` via `output_key`.  
-2. **BLOCK Request:** The callback runs again for `weather_agent_v5_model_guardrail`, inspects the message, finds "BLOCK", prints "Blocking LLM call\!", sets the state flag, and returns the predefined `LlmResponse`. The agent's underlying LLM is *never called* for this turn. The user sees the callback's blocking message.  
-3. **Hello Again:** The callback runs for `weather_agent_v5_model_guardrail`, allows the request. The root agent then delegates to `greeting_agent`. *Note: The `before_model_callback` defined on the root agent does NOT automatically apply to sub-agents.* The `greeting_agent` proceeds normally, calls its `say_hello` tool, and returns the greeting.
+1. **伦敦天气**：回调为`weather_agent_v5_model_guardrail`运行，检查消息，打印"未找到关键词。允许LLM调用。"并返回`None`。智能体继续，调用`get_weather_stateful`工具（使用第4步状态更改的"华氏度"偏好）并返回天气。此响应通过`output_key`更新`last_weather_report`  
+2. **BLOCK请求**：回调再次为`weather_agent_v5_model_guardrail`运行，检查消息，找到"BLOCK"，打印"阻止LLM调用！"，设置状态标志，并返回预定义的`LlmResponse`。智能体的底层大模型*从未*为此轮次调用。用户看到回调的阻止消息  
+3. **再次问候**：回调为`weather_agent_v5_model_guardrail`运行，允许请求。根智能体然后委派给`greeting_agent`。*注意：定义在根智能体上的`before_model_callback`不会自动应用于子智能体*。`greeting_agent`正常进行，调用其`say_hello`工具并返回问候  
 
-You have successfully implemented an input safety layer\! The `before_model_callback` provides a powerful mechanism to enforce rules and control agent behavior *before* expensive or potentially risky LLM calls are made. Next, we'll apply a similar concept to add guardrails around tool usage itself.
-
----
-
-## Step 6: Adding Safety \- Tool Argument Guardrail (`before_tool_callback`)
-
-In Step 5, we added a guardrail to inspect and potentially block user input *before* it reached the LLM. Now, we'll add another layer of control *after* the LLM has decided to use a tool but *before* that tool actually executes. This is useful for validating the *arguments* the LLM wants to pass to the tool.
-
-ADK provides the `before_tool_callback` for this precise purpose.
-
-**What is `before_tool_callback`?**
-
-* It's a Python function executed just *before* a specific tool function runs, after the LLM has requested its use and decided on the arguments.  
-* **Purpose:** Validate tool arguments, prevent tool execution based on specific inputs, modify arguments dynamically, or enforce resource usage policies.
-
-**Common Use Cases:**
-
-* **Argument Validation:** Check if arguments provided by the LLM are valid, within allowed ranges, or conform to expected formats.  
-* **Resource Protection:** Prevent tools from being called with inputs that might be costly, access restricted data, or cause unwanted side effects (e.g., blocking API calls for certain parameters).  
-* **Dynamic Argument Modification:** Adjust arguments based on session state or other contextual information before the tool runs.
-
-**How it Works:**
-
-1. Define a function accepting `tool: BaseTool`, `args: Dict[str, Any]`, and `tool_context: ToolContext`.  
-   * `tool`: The tool object about to be called (inspect `tool.name`).  
-   * `args`: The dictionary of arguments the LLM generated for the tool.  
-   * `tool_context`: Provides access to session state (`tool_context.state`), agent info, etc.  
-2. Inside the function:  
-   * **Inspect:** Examine the `tool.name` and the `args` dictionary.  
-   * **Modify:** Change values within the `args` dictionary *directly*. If you return `None`, the tool runs with these modified args.  
-   * **Block/Override (Guardrail):** Return a **dictionary**. ADK treats this dictionary as the *result* of the tool call, completely *skipping* the execution of the original tool function. The dictionary should ideally match the expected return format of the tool it's blocking.  
-   * **Allow:** Return `None`. ADK proceeds to execute the actual tool function with the (potentially modified) arguments.
-
-**In this step, we will:**
-
-1. Define a `before_tool_callback` function (`block_paris_tool_guardrail`) that specifically checks if the `get_weather_stateful` tool is called with the city "Paris".  
-2. If "Paris" is detected, the callback will block the tool and return a custom error dictionary.  
-3. Update our root agent (`weather_agent_v6_tool_guardrail`) to include *both* the `before_model_callback` and this new `before_tool_callback`.  
-4. Create a new runner for this agent, using the same stateful session service.  
-5. Test the flow by requesting weather for allowed cities and the blocked city ("Paris").
-
----
-
-### **1\. Define the Tool Guardrail Callback Function**
-
-This function targets the `get_weather_stateful` tool. It checks the `city` argument. If it's "Paris", it returns an error dictionary that looks like the tool's own error response. Otherwise, it allows the tool to run by returning `None`.
-
-```py
-# @title 1. Define the before_tool_callback Guardrail
-
-# Ensure necessary imports are available
-from google.adk.tools.base_tool import BaseTool
-from google.adk.tools.tool_context import ToolContext
-from typing import Optional, Dict, Any # For type hints
-
-def block_paris_tool_guardrail(
-    tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext
-) -> Optional[Dict]:
-    """
-    Checks if 'get_weather_stateful' is called for 'Paris'.
-    If so, blocks the tool execution and returns a specific error dictionary.
-    Otherwise, allows the tool call to proceed by returning None.
-    """
-    tool_name = tool.name
-    agent_name = tool_context.agent_name # Agent attempting the tool call
-    print(f"--- Callback: block_paris_tool_guardrail running for tool '{tool_name}' in agent '{agent_name}' ---")
-    print(f"--- Callback: Inspecting args: {args} ---")
-
-    # --- Guardrail Logic ---
-    target_tool_name = "get_weather_stateful" # Match the function name used by FunctionTool
-    blocked_city = "paris"
-
-    # Check if it's the correct tool and the city argument matches the blocked city
-    if tool_name == target_tool_name:
-        city_argument = args.get("city", "") # Safely get the 'city' argument
-        if city_argument and city_argument.lower() == blocked_city:
-            print(f"--- Callback: Detected blocked city '{city_argument}'. Blocking tool execution! ---")
-            # Optionally update state
-            tool_context.state["guardrail_tool_block_triggered"] = True
-            print(f"--- Callback: Set state 'guardrail_tool_block_triggered': True ---")
-
-            # Return a dictionary matching the tool's expected output format for errors
-            # This dictionary becomes the tool's result, skipping the actual tool run.
-            return {
-                "status": "error",
-                "error_message": f"Policy restriction: Weather checks for '{city_argument.capitalize()}' are currently disabled by a tool guardrail."
-            }
-        else:
-             print(f"--- Callback: City '{city_argument}' is allowed for tool '{tool_name}'. ---")
-    else:
-        print(f"--- Callback: Tool '{tool_name}' is not the target tool. Allowing. ---")
-
-
-    # If the checks above didn't return a dictionary, allow the tool to execute
-    print(f"--- Callback: Allowing tool '{tool_name}' to proceed. ---")
-    return None # Returning None allows the actual tool function to run
-
-print("✅ block_paris_tool_guardrail function defined.")
-
-```
-
----
-
-### **2\. Update Root Agent to Use Both Callbacks**
-
-We redefine the root agent again (`weather_agent_v6_tool_guardrail`), this time adding the `before_tool_callback` parameter alongside the `before_model_callback` from Step 5\.
-
-*Self-Contained Execution Note:* Similar to Step 5, ensure all prerequisites (sub-agents, tools, `before_model_callback`) are defined or available in the execution context before defining this agent.
-
-```py
-# @title 2. Update Root Agent with BOTH Callbacks (Self-Contained)
-
-# --- Ensure Prerequisites are Defined ---
-# (Include or ensure execution of definitions for: Agent, LiteLlm, Runner, ToolContext,
-#  MODEL constants, say_hello, say_goodbye, greeting_agent, farewell_agent,
-#  get_weather_stateful, block_keyword_guardrail, block_paris_tool_guardrail)
-
-# --- Redefine Sub-Agents (Ensures they exist in this context) ---
-greeting_agent = None
-try:
-    # Use a defined model constant like MODEL_GPT_4O
-    greeting_agent = Agent(
-        model=MODEL_GEMINI_2_0_FLASH,
-        name="greeting_agent", # Keep original name for consistency
-        instruction="You are the Greeting Agent. Your ONLY task is to provide a friendly greeting using the 'say_hello' tool. Do nothing else.",
-        description="Handles simple greetings and hellos using the 'say_hello' tool.",
-        tools=[say_hello],
-    )
-    print(f"✅ Sub-Agent '{greeting_agent.name}' redefined.")
-except Exception as e:
-    print(f"❌ Could not redefine Greeting agent. Check Model/API Key ({MODEL_GPT_4O}). Error: {e}")
-
-farewell_agent = None
-try:
-    # Use a defined model constant like MODEL_GPT_4O
-    farewell_agent = Agent(
-        model=MODEL_GEMINI_2_0_FLASH,
-        name="farewell_agent", # Keep original name
-        instruction="You are the Farewell Agent. Your ONLY task is to provide a polite goodbye message using the 'say_goodbye' tool. Do not perform any other actions.",
-        description="Handles simple farewells and goodbyes using the 'say_goodbye' tool.",
-        tools=[say_goodbye],
-    )
-    print(f"✅ Sub-Agent '{farewell_agent.name}' redefined.")
-except Exception as e:
-    print(f"❌ Could not redefine Farewell agent. Check Model/API Key ({MODEL_GPT_4O}). Error: {e}")
-
-# --- Define the Root Agent with Both Callbacks ---
-root_agent_tool_guardrail = None
-runner_root_tool_guardrail = None
-
-if ('greeting_agent' in globals() and greeting_agent and
-    'farewell_agent' in globals() and farewell_agent and
-    'get_weather_stateful' in globals() and
-    'block_keyword_guardrail' in globals() and
-    'block_paris_tool_guardrail' in globals()):
-
-    root_agent_model = MODEL_GEMINI_2_0_FLASH
-
-    root_agent_tool_guardrail = Agent(
-        name="weather_agent_v6_tool_guardrail", # New version name
-        model=root_agent_model,
-        description="Main agent: Handles weather, delegates, includes input AND tool guardrails.",
-        instruction="You are the main Weather Agent. Provide weather using 'get_weather_stateful'. "
-                    "Delegate greetings to 'greeting_agent' and farewells to 'farewell_agent'. "
-                    "Handle only weather, greetings, and farewells.",
-        tools=[get_weather_stateful],
-        sub_agents=[greeting_agent, farewell_agent],
-        output_key="last_weather_report",
-        before_model_callback=block_keyword_guardrail, # Keep model guardrail
-        before_tool_callback=block_paris_tool_guardrail # <<< Add tool guardrail
-    )
-    print(f"✅ Root Agent '{root_agent_tool_guardrail.name}' created with BOTH callbacks.")
-
-    # --- Create Runner, Using SAME Stateful Session Service ---
-    if 'session_service_stateful' in globals():
-        runner_root_tool_guardrail = Runner(
-            agent=root_agent_tool_guardrail,
-            app_name=APP_NAME,
-            session_service=session_service_stateful # <<< Use the service from Step 4/5
-        )
-        print(f"✅ Runner created for tool guardrail agent '{runner_root_tool_guardrail.agent.name}', using stateful session service.")
-    else:
-        print("❌ Cannot create runner. 'session_service_stateful' from Step 4/5 is missing.")
-
-else:
-    print("❌ Cannot create root agent with tool guardrail. Prerequisites missing.")
-
-
-```
-
----
-
-### **3\. Interact to Test the Tool Guardrail**
-
-Let's test the interaction flow, again using the same stateful session (`SESSION_ID_STATEFUL`) from the previous steps.
-
-1. Request weather for "New York": Passes both callbacks, tool executes (using Fahrenheit preference from state).  
-2. Request weather for "Paris": Passes `before_model_callback`. LLM decides to call `get_weather_stateful(city='Paris')`. `before_tool_callback` intercepts, blocks the tool, and returns the error dictionary. Agent relays this error.  
-3. Request weather for "London": Passes both callbacks, tool executes normally.
-
-```py
-# @title 3. Interact to Test the Tool Argument Guardrail
-
-# Ensure the runner for the tool guardrail agent is available
-if runner_root_tool_guardrail:
-  async def run_tool_guardrail_test():
-      print("\n--- Testing Tool Argument Guardrail ('Paris' blocked) ---")
-
-        # Use the runner for the agent with both callbacks and the existing stateful session
-      interaction_func = lambda query: call_agent_async(query,
-      runner_root_tool_guardrail, USER_ID_STATEFUL, SESSION_ID_STATEFUL
-  )
-      # 1. Allowed city (Should pass both callbacks, use Fahrenheit state)
-      await interaction_func("What's the weather in New York?")
-
-      # 2. Blocked city (Should pass model callback, but be blocked by tool callback)
-      await interaction_func("How about Paris?")
-
-      # 3. Another allowed city (Should work normally again)
-      await interaction_func("Tell me the weather in London.")
-
-  # Execute the conversation
-  await run_tool_guardrail_test()
-
-  # Optional: Check state for the tool block trigger flag
-  final_session = session_service_stateful.get_session(app_name=APP_NAME,
-                                                       user_id=USER_ID_STATEFUL,
-                                                       session_id= SESSION_ID_STATEFUL)
-  if final_session:
-      print("\n--- Final Session State (After Tool Guardrail Test) ---")
-      print(f"Tool Guardrail Triggered Flag: {final_session.state.get('guardrail_tool_block_triggered')}")
-      print(f"Last Weather Report: {final_session.state.get('last_weather_report')}") # Should be London weather
-      print(f"Temperature Unit: {final_session.state.get('user_preference_temperature_unit')}") # Should be Fahrenheit
-  else:
-      print("\n❌ Error: Could not retrieve final session state.")
-
-else:
-  print("\n⚠️ Skipping tool guardrail test. Runner ('runner_root_tool_guardrail') is not available.")
-```
-
-(Run the code cell above to generate the output. Keep the output cell here in the markdown)
-
----
-
-Analyze the output:
-
-1. **New York:** The `before_model_callback` allows the request. The LLM requests `get_weather_stateful`. The `before_tool_callback` runs, inspects the args (`{'city': 'New York'}`), sees it's not "Paris", prints "Allowing tool..." and returns `None`. The actual `get_weather_stateful` function executes, reads "Fahrenheit" from state, and returns the weather report. The agent relays this, and it gets saved via `output_key`.  
-2. **Paris:** The `before_model_callback` allows the request. The LLM requests `get_weather_stateful(city='Paris')`. The `before_tool_callback` runs, inspects the args, detects "Paris", prints "Blocking tool execution\!", sets the state flag, and returns the error dictionary `{'status': 'error', 'error_message': 'Policy restriction...'}`. The actual `get_weather_stateful` function is **never executed**. The agent receives the error dictionary *as if it were the tool's output* and formulates a response based on that error message.  
-3. **London:** Behaves like New York, passing both callbacks and executing the tool successfully. The new London weather report overwrites the `last_weather_report` in the state.
-
-You've now added a crucial safety layer controlling not just *what* reaches the LLM, but also *how* the agent's tools can be used based on the specific arguments generated by the LLM. Callbacks like `before_model_callback` and `before_tool_callback` are essential for building robust, safe, and policy-compliant agent applications.
-
-## Conclusion: Your Agent Team is Ready!
-
-Congratulations\! You've successfully journeyed from building a single, basic weather agent to constructing a sophisticated, multi-agent team using ADK.
-
-**Let's recap what you've accomplished:**
-
-* You started with a **fundamental agent** equipped with a single tool (`get_weather`).  
-* You explored ADK's **multi-model flexibility** using LiteLLM, running the same core logic with different LLMs like Gemini, GPT-4o, and Claude.  
-* You embraced **modularity** by creating specialized sub-agents (`greeting_agent`, `farewell_agent`) and enabling **automatic delegation** from a root agent.  
-* You gave your agents **memory** using **Session State**, allowing them to remember user preferences (`temperature_unit`) and past interactions (`output_key`).  
-* You implemented crucial **safety guardrails** using both `before_model_callback` (blocking specific input keywords) and `before_tool_callback` (blocking tool execution based on arguments like the city "Paris").
-
-Through building this progressive Weather Bot team, you've gained hands-on experience with core ADK concepts essential for developing complex, intelligent applications.
-
-**Key Takeaways:**
-
-* **Agents & Tools:** The fundamental building blocks for defining capabilities and reasoning. Clear instructions and docstrings are paramount.  
-* **Runners & Session Services:** The engine and memory management system that orchestrate agent execution and maintain conversational context.  
-* **Delegation:** Designing multi-agent teams allows for specialization, modularity, and better management of complex tasks. Agent `description` is key for auto-flow.  
-* **Session State (`ToolContext`, `output_key`):** Essential for creating context-aware, personalized, and multi-turn conversational agents.  
-* **Callbacks (`before_model`, `before_tool`):** Powerful hooks for implementing safety, validation, policy enforcement, and dynamic modifications *before* critical operations (LLM calls or tool execution).  
-* **Flexibility (`LiteLlm`):** ADK empowers you to choose the best LLM for the job, balancing performance, cost, and features.
-
-**Where to Go Next?**
-
-Your Weather Bot team is a great starting point. Here are some ideas to further explore ADK and enhance your application:
-
-1. **Real Weather API:** Replace the `mock_weather_db` in your `get_weather` tool with a call to a real weather API (like OpenWeatherMap, WeatherAPI).  
-2. **More Complex State:** Store more user preferences (e.g., preferred location, notification settings) or conversation summaries in the session state.  
-3. **Refine Delegation:** Experiment with different root agent instructions or sub-agent descriptions to fine-tune the delegation logic. Could you add a "forecast" agent?  
-4. **Advanced Callbacks:**  
-   * Use `after_model_callback` to potentially reformat or sanitize the LLM's response *after* it's generated.  
-   * Use `after_tool_callback` to process or log the results returned by a tool.  
-   * Implement `before_agent_callback` or `after_agent_callback` for agent-level entry/exit logic.  
-5. **Error Handling:** Improve how the agent handles tool errors or unexpected API responses. Maybe add retry logic within a tool.  
-6. **Persistent Session Storage:** Explore alternatives to `InMemorySessionService` for storing session state persistently (e.g., using databases like Firestore or Cloud SQL – requires custom implementation or future ADK integrations).  
-7. **Streaming UI:** Integrate your agent team with a web framework (like FastAPI, as shown in the ADK Streaming Quickstart) to create a real-time chat interface.
-
-ADK provides a robust foundation for building sophisticated LLM-powered applications. By mastering the concepts covered in this tutorial – tools, state, delegation, and callbacks – you are well-equipped to tackle increasingly complex agentic systems.
-
-Happy building!
+你已成功实现输入安全层！`before_model_callback`提供强大机制在昂贵或潜在风险的大模型调用前执行规则和控制智能体行为。接下来，我们将应用类似概念为工具使用本身添加防护

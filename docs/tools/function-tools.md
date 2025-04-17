@@ -1,80 +1,80 @@
-# Function tools
+# 函数工具
 
-## What are function tools?
+## 什么是函数工具？
 
-When out-of-the-box tools don't fully meet specific requirements, developers can create custom function tools. This allows for **tailored functionality**, such as connecting to proprietary databases or implementing unique algorithms.
+当开箱即用的工具无法完全满足特定需求时，开发者可以创建自定义函数工具。这允许实现**定制化功能**，例如连接专有数据库或实现独特算法。
 
-*For example,* a function tool, "myfinancetool", might be a function that calculates a specific financial metric. ADK also supports long running functions, so if that calculation takes a while, the agent can continue working on other tasks.
+*例如*，一个名为"myfinancetool"的函数工具可能是计算特定财务指标的函数。ADK还支持长时间运行的函数，因此如果计算耗时较长，智能体可以继续处理其他任务。
 
-ADK offers several ways to create functions tools, each suited to different levels of complexity and control:
+ADK提供多种创建函数工具的方式，分别适用于不同复杂度和控制需求：
 
-1. Function Tool
-2. Long Running Function Tool
-3. Agents-as-a-Tool
+1. 函数工具
+2. 长时间运行函数工具
+3. 智能体即工具
 
-## 1. Function Tool
+## 1. 函数工具
 
-Transforming a function into a tool is a straightforward way to integrate custom logic into your agents. This approach offers flexibility and quick integration.
+将函数转化为工具是将自定义逻辑集成到智能体中的直接方式。这种方法提供了灵活性和快速集成能力。
 
-### Parameters
+### 参数
 
-Define your function parameters using standard **JSON-serializable types** (e.g., string, integer, list, dictionary). It's important to avoid setting default values for parameters, as the language model (LLM) does not currently support interpreting them.
+使用标准的**JSON可序列化类型**（如字符串、整数、列表、字典）定义函数参数。注意避免为参数设置默认值，因为大模型目前不支持解析默认值。
 
-### Return Type
+### 返回类型
 
-The preferred return type for a Python Function Tool is a **dictionary**. This allows you to structure the response with key-value pairs, providing context and clarity to the LLM. If your function returns a type other than a dictionary, the framework automatically wraps it into a dictionary with a single key named **"result"**.
+Python函数工具的首选返回类型是**字典**。这允许通过键值对结构化响应，为大模型提供上下文和清晰度。如果函数返回非字典类型，框架会自动将其包装为包含单个键**"result"**的字典。
 
-Strive to make your return values as descriptive as possible. *For example,* instead of returning a numeric error code, return a dictionary with an "error\_message" key containing a human-readable explanation. **Remember that the LLM**, not a piece of code, needs to understand the result. As a best practice, include a "status" key in your return dictionary to indicate the overall outcome (e.g., "success", "error", "pending"), providing the LLM with a clear signal about the operation's state.
+尽量使返回值具有描述性。*例如*，与其返回数字错误代码，不如返回包含"error_message"键的字典，其中包含人类可读的解释。**请记住**需要理解结果的是大模型而非代码。最佳实践是在返回字典中包含"status"键来指示整体结果（如"success"、"error"、"pending"），为大模型提供操作状态的明确信号。
 
-### Docstring
+### 文档字符串
 
-The docstring of your function serves as the tool's description and is sent to the LLM. Therefore, a well-written and comprehensive docstring is crucial for the LLM to understand how to use the tool effectively. Clearly explain the purpose of the function, the meaning of its parameters, and the expected return values.
+函数的文档字符串作为工具描述发送给大模型。因此，编写完善全面的文档字符串对于大模型理解如何有效使用工具至关重要。需清晰说明函数用途、参数含义和预期返回值。
 
-??? "Example"
+??? "示例"
 
-    This tool is a python function which obtains the Stock price of a given Stock ticker/ symbol.
+    该工具是一个获取给定股票代码/符号股价的Python函数。
 
-    <u>Note</u>: You need to `pip install yfinance` library before using this tool.
+    <u>注意</u>：使用此工具前需要`pip install yfinance`库。
 
     ```py
     --8<-- "examples/python/snippets/tools/function-tools/func_tool.py"
     ```
 
-    The return value from this tool will be wrapped into a dictionary.
+    该工具的返回值将被包装成字典。
 
     ```json
     {"result": "$123"}
     ```
 
-### Best Practices
+### 最佳实践
 
-While you have considerable flexibility in defining your function, remember that simplicity enhances usability for the LLM. Consider these guidelines:
+虽然定义函数时有很大灵活性，但请记住简单性可提升大模型的可用性。考虑以下准则：
 
-* **Fewer Parameters are Better:** Minimize the number of parameters to reduce complexity.  
-* **Simple Data Types:** Favor primitive data types like `str` and `int` over custom classes whenever possible.  
-* **Meaningful Names:** The function's name and parameter names significantly influence how the LLM interprets and utilizes the tool. Choose names that clearly reflect the function's purpose and the meaning of its inputs. Avoid generic names like `do_stuff()`.  
+* **参数越少越好**：减少参数数量以降低复杂度  
+* **简单数据类型**：尽可能使用`str`和`int`等基本类型而非自定义类  
+* **有意义的命名**：函数名和参数名显著影响大模型对工具的理解和使用。选择能清晰反映函数用途和输入含义的名称。避免使用`do_stuff()`等通用名称  
 
-## 2. Long Running Function Tool
+## 2. 长时间运行函数工具
 
-Designed for tasks that require a significant amount of processing time without blocking the agent's execution. This tool is a subclass of `FunctionTool`.
+专为需要大量处理时间但不会阻塞智能体执行的任务设计。该工具是`FunctionTool`的子类。
 
-When using a `LongRunningFunctionTool`, your Python function can initiate the long-running operation and optionally return an **intermediate result** to keep the model and user informed about the progress. The agent can then continue with other tasks. An example is the human-in-the-loop scenario where the agent needs human approval before proceeding with a task.
+使用`LongRunningFunctionTool`时，Python函数可以启动长时间运行操作，并可选择返回**中间结果**以保持模型和用户了解进度。智能体可以继续处理其他任务。典型场景是需要人工审批才能继续执行的人机交互流程。
 
-### How it Works
+### 工作原理
 
-You wrap a Python *generator* function (a function using `yield`) with `LongRunningFunctionTool`.
+使用`LongRunningFunctionTool`包装Python*生成器*函数（使用`yield`的函数）。
 
-1. **Initiation:** When the LLM calls the tool, your generator function starts executing.
+1. **初始化**：当大模型调用工具时，生成器函数开始执行
 
-2. **Intermediate Updates (`yield`):** Your function should yield intermediate Python objects (typically dictionaries) periodically to report progress. The ADK framework takes each yielded value and sends it back to the LLM packaged within a `FunctionResponse`. This allows the LLM to inform the user (e.g., status, percentage complete, messages).
+2. **中间更新(`yield`)**：函数应定期生成中间Python对象（通常是字典）报告进度。ADK框架获取每个生成值并将其包装在`FunctionResponse`中发回大模型，使大模型能通知用户（如状态、完成百分比、消息）
 
-3. **Completion (`return`):** When the task is finished, the generator function uses `return` to provide the final Python object result.
+3. **完成(`return`)**：任务结束时，生成器函数使用`return`提供最终Python对象结果
 
-4. **Framework Handling:** The ADK framework manages the execution. It sends each yielded value back as an intermediate `FunctionResponse`. When the generator completes, the framework sends the returned value as the content of the final `FunctionResponse`, signaling the end of the long-running operation to the LLM.
+4. **框架处理**：ADK框架管理执行过程。将每个生成值作为中间`FunctionResponse`发回。当生成器完成时，框架将返回值作为最终`FunctionResponse`的内容发送，向大模型标记长时间运行操作结束
 
-### Creating the Tool
+### 创建工具
 
-Define your generator function and wrap it using the `LongRunningFunctionTool` class:
+定义生成器函数并用`LongRunningFunctionTool`类包装：
 
 ```py
 from google.adk.tools import LongRunningFunctionTool
@@ -92,77 +92,77 @@ def my_long_task_generator(*args, **kwargs):
 my_tool = LongRunningFunctionTool(func=my_long_task_generator)
 ```
 
-### Intermediate Updates
+### 中间更新
 
-Yielding structured Python objects (like dictionaries) is crucial for providing meaningful updates. Include keys like:
+生成结构化Python对象（如字典）对提供有意义的更新至关重要。应包含以下键：
 
-* status: e.g., "pending", "running", "waiting_for_input"
+* status：如"pending"、"running"、"waiting_for_input"
 
-* progress: e.g., percentage, steps completed
+* progress：如百分比、已完成步骤数
 
-* message: Descriptive text for the user/LLM
+* message：面向用户/大模型的描述性文本
 
-* estimated_completion_time: If calculable
+* estimated_completion_time：如可计算
 
-Each value you yield is packaged into a FunctionResponse by the framework and sent to the LLM.
+框架将每个生成值打包成FunctionResponse发送给大模型。
 
-### Final Result
+### 最终结果
 
-The Python object your generator function returns is considered the final result of the tool execution. The framework packages this value (even if it's None) into the content of the final `FunctionResponse` sent back to the LLM, indicating the tool execution is complete.
+生成器函数返回的Python对象被视为工具执行的最终结果。框架将该值（即使为None）打包到发送给大模型的最终`FunctionResponse`内容中，标记工具执行完成。
 
-??? "Example: File Processing Simulation"
+??? "示例：文件处理模拟"
 
     ```py
     --8<-- "examples/python/snippets/tools/function-tools/file_processor.py"
     ```
 
-#### Key aspects of this example
+#### 示例关键点
 
-* **process_large_file**: This generator simulates a lengthy operation, yielding intermediate status/progress dictionaries.
+* **process_large_file**：该生成器模拟耗时操作，生成中间状态/进度字典
 
-* **`LongRunningFunctionTool`**: Wraps the generator; the framework handles sending yielded updates and the final return value as sequential FunctionResponses.
+* **`LongRunningFunctionTool`**：包装生成器；框架处理发送生成的更新和最终返回值作为连续的FunctionResponse
 
-* **Agent instruction**: Directs the LLM to use the tool and understand the incoming FunctionResponse stream (progress vs. completion) for user updates.
+* **智能体指令**：指导大模型使用工具并理解传入的FunctionResponse流（进度与完成）以更新用户
 
-* **Final return**: The function returns the final result dictionary, which is sent in the concluding FunctionResponse to indicate completion.
+* **最终返回**：函数返回最终结果字典，该字典在结束FunctionResponse中发送以标记完成
 
-## 3. Agent-as-a-Tool
+## 3. 智能体即工具
 
-This powerful feature allows you to leverage the capabilities of other agents within your system by calling them as tools. The Agent-as-a-Tool enables you to invoke another agent to perform a specific task, effectively **delegating responsibility**. This is conceptually similar to creating a Python function that calls another agent and uses the agent's response as the function's return value.
+这一强大功能允许通过将其他智能体作为工具调用来利用系统中的智能体能力。智能体即工具使您可以调用其他智能体执行特定任务，实现**责任委托**。概念上类似于创建调用其他智能体并将智能体响应作为函数返回值的Python函数。
 
-### Key difference from sub-agents
+### 与子智能体的关键区别
 
-It's important to distinguish an Agent-as-a-Tool from a Sub-Agent.
+需区分智能体即工具与子智能体：
 
-* **Agent-as-a-Tool:** When Agent A calls Agent B as a tool (using Agent-as-a-Tool), Agent B's answer is **passed back** to Agent A, which then summarizes the answer and generates a response to the user. Agent A retains control and continues to handle future user input.  
+* **智能体即工具**：当智能体A将智能体B作为工具调用（使用智能体即工具）时，智能体B的答案**传回**智能体A，智能体A汇总答案并生成对用户的响应。智能体A保持控制权并继续处理后续用户输入  
 
-* **Sub-agent:** When Agent A calls Agent B as a sub-agent, the responsibility of answering the user is completely **transferred to Agent B**. Agent A is effectively out of the loop. All subsequent user input will be answered by Agent B.
+* **子智能体**：当智能体A将智能体B作为子智能体调用时，应答用户的职责完全**转移给智能体B**。智能体A实际上退出交互循环。所有后续用户输入将由智能体B应答
 
-### Usage
+### 使用方法
 
-To use an agent as a tool, wrap the agent with the AgentTool class.
+要将智能体作为工具使用，需用AgentTool类包装智能体。
 
 ```py
 tools=[AgentTool(agent=agent_b)]
 ```
 
-### Customization
+### 自定义
 
-The `AgentTool` class provides the following attributes for customizing its behavior:
+`AgentTool`类提供以下属性用于自定义行为：
 
-* **skip\_summarization: bool:** If set to True, the framework will **bypass the LLM-based summarization** of the tool agent's response. This can be useful when the tool's response is already well-formatted and requires no further processing.
+* **skip_summarization: bool**：如设为True，框架将**跳过基于大模型的工具智能体响应摘要**。当工具响应已格式良好且无需进一步处理时很有用
 
-??? "Example"
+??? "示例"
 
     ```py
     --8<-- "examples/python/snippets/tools/function-tools/summarizer.py"
     ```
 
-### How it works
+### 工作原理
 
-1. When the `main_agent` receives the long text, its instruction tells it to use the 'summarize' tool for long texts.  
-2. The framework recognizes 'summarize' as an `AgentTool` that wraps the `summary_agent`.  
-3. Behind the scenes, the `main_agent` will call the `summary_agent` with the long text as input.  
-4. The `summary_agent` will process the text according to its instruction and generate a summary.  
-5. **The response from the `summary_agent` is then passed back to the `main_agent`.**  
-6. The `main_agent` can then take the summary and formulate its final response to the user (e.g., "Here's a summary of the text: ...")
+1. 当`main_agent`收到长文本时，其指令告知其对长文本使用'summarize'工具  
+2. 框架识别'summarize'为包装`summary_agent`的`AgentTool`  
+3. 后台中，`main_agent`将以长文本作为输入调用`summary_agent`  
+4. `summary_agent`将根据其指令处理文本并生成摘要  
+5. **`summary_agent`的响应随后传回`main_agent`**  
+6. `main_agent`可获取摘要并形成对用户的最终响应（如"以下是文本摘要：..."）
